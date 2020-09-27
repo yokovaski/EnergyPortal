@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnergyPortal", "EnergyPortal\EnergyPortal.csproj", "{D44BDE94-B2E0-49D7-A779-764F84BD9B16}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseInterface", "DatabaseInterface\DatabaseInterface.csproj", "{3DCDE81E-B0A6-4642-98BF-B906D1E625BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnergyWorker", "EnergyWorker\EnergyWorker.csproj", "{7F547F82-8F17-466C-8E0C-B6A1EC6D1DE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigrateDatabase", "MigrateDatabase\MigrateDatabase.csproj", "{3BDC8313-705A-4F01-BC22-4437ECAEA701}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D44BDE94-B2E0-49D7-A779-764F84BD9B16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D44BDE94-B2E0-49D7-A779-764F84BD9B16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D44BDE94-B2E0-49D7-A779-764F84BD9B16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D44BDE94-B2E0-49D7-A779-764F84BD9B16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DCDE81E-B0A6-4642-98BF-B906D1E625BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DCDE81E-B0A6-4642-98BF-B906D1E625BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DCDE81E-B0A6-4642-98BF-B906D1E625BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DCDE81E-B0A6-4642-98BF-B906D1E625BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F547F82-8F17-466C-8E0C-B6A1EC6D1DE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F547F82-8F17-466C-8E0C-B6A1EC6D1DE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F547F82-8F17-466C-8E0C-B6A1EC6D1DE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F547F82-8F17-466C-8E0C-B6A1EC6D1DE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BDC8313-705A-4F01-BC22-4437ECAEA701}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BDC8313-705A-4F01-BC22-4437ECAEA701}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BDC8313-705A-4F01-BC22-4437ECAEA701}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BDC8313-705A-4F01-BC22-4437ECAEA701}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
