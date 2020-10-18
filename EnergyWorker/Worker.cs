@@ -31,13 +31,13 @@ namespace EnergyWorker
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.WhenAll(WriteMinuteData(), WriteHourData());
+                await Task.WhenAll(WriteNewMinuteData(), WriteNewHourData());
                 
                 await Task.Delay(10000, stoppingToken);
             }
         }
 
-        private Task WriteMinuteData()
+        private Task WriteNewMinuteData()
         {
             return Task.Run(() =>
             {
@@ -117,7 +117,7 @@ namespace EnergyWorker
             });
         }
         
-        private Task WriteHourData()
+        private Task WriteNewHourData()
         {
             return Task.Run(() => 
             {
@@ -191,6 +191,30 @@ namespace EnergyWorker
                 
                 dbContext.SaveChanges();
                 logger.LogInformation("Wrote hours");
+            });
+        }
+
+        private Task WriteMissingHourData()
+        {
+            return Task.Run(async () =>
+            {
+                using var scope = serviceScopeFactory.CreateScope();
+                var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
+
+                var discardTimestamp = DateTime.UtcNow.AddDays(-7).Date;
+
+                var missingHours = await dbContext.TenSecondMetrics
+                    .Where(t => t.Created < discardTimestamp)
+                    .Where(t => !t.IncludedInHour)
+                    .GroupBy(t => new
+                    {
+                        Date = t.Created.Date,
+                        Hour = t.Created.Hour
+                    })
+                    .Select(g => 
+                        new DateTime(g.Key.Date.Year, g.Key.Date.Month, g.Key.Date.Day, g.Key.Hour, 0, 0,
+                        DateTimeKind.Utc))
+                    .ToListAsync();
             });
         }
     }

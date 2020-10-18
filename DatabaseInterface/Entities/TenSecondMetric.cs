@@ -25,6 +25,8 @@ namespace DatabaseInterface.Entities
         public long SolarTotal { get; set; }
         public int UsageGasNow { get; set; }
         public long UsageGasTotal { get; set; }
+        public bool IncludedInMinute { get; set; }
+        public bool IncludedInHour { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
     }

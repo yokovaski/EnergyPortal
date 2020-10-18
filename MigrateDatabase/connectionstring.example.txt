@@ -1,1 +1,0 @@
-server=localhost;database=energycloud;user=energiezicht;password=energiezicht

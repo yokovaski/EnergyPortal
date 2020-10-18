@@ -42,8 +42,7 @@ mono_crash.mem.*
 .vs/
 
 # Project specific
-/EnergyPortal/wwwroot/css/bundle.css
-/EnergyPortal/wwwroot/js/bundle.js
+/EnergyPortal/wwwroot/
 /EnergyPortal/logs/
 /EnergyWorker/logs/
 /MigrateDatabase/connectionstring.txt
