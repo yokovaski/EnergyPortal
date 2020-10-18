@@ -3,25 +3,21 @@
     <h1>This is an about page</h1>
     <div v-if="oidcUser">
       Signed in as {{ oidcUser.email }}
-      <button @click="signOutOidc">Sign out</button>
+      <v-btn color="primary" @click="signOutOidc">Sign out</v-btn>
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "About",
   computed: {
-    ...mapGetters([
-      "oidcUser"
-    ])
+    ...mapGetters(["oidcUser"])
   },
   methods: {
-    ...mapActions([
-      "signOutOidc"
-    ])
+    ...mapActions(["signOutOidc"])
   }
-}
+};
 </script>

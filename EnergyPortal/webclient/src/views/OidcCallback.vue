@@ -8,23 +8,19 @@ import { mapActions } from "vuex";
 export default {
   name: "OidcCallback",
   methods: {
-    ...mapActions([
-      "oidcSignInCallback"
-    ])
+    ...mapActions(["oidcSignInCallback"])
   },
-  mounted () {
+  mounted() {
     this.oidcSignInCallback()
-        .then(redirectPath => {
-          this.$router.push(redirectPath)
-        })
-        .catch((err) => {
-          console.error(err)
-          this.$router.push('/oidc-callback-error');
-        })
+      .then(redirectPath => {
+        this.$router.push(redirectPath);
+      })
+      .catch(err => {
+        console.error(err);
+        this.$router.push("/oidc-callback-error");
+      });
   }
-}
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
