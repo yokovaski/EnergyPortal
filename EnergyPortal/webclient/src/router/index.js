@@ -1,6 +1,9 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
+import OidcCallback from "../views/OidcCallback";
+import { vuexOidcCreateRouterMiddleware } from "vuex-oidc";
+import store from "../store";
 
 Vue.use(VueRouter);
 
@@ -19,7 +22,13 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ "../views/About.vue")
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/About.vue")
+  },
+  {
+    path: "/callback",
+    name: "oidcCallback",
+    component: OidcCallback
   }
 ];
 
@@ -29,21 +38,6 @@ const router = new VueRouter({
   routes
 });
 
-router.beforeEach(async (to, from, next) => {
-  let app = router.app.$data || {isAuthenticated: false} ;
-  if (app.isAuthenticated) {
-    // already signed in, we can navigate anywhere
-    next();
-  } else if (to.matched.some(record => record.meta.requiresAuth)) {
-    // authentication is required. Trigger the sign in process, including the return URI
-    router.app.authenticate(to.path).then(() => {
-      console.log('authenticating a protected url:' + to.path);
-      next();
-    });
-  } else {
-    // No auth required. We can navigate
-    next();
-  }
-});
+router.beforeEach(vuexOidcCreateRouterMiddleware(store));
 
 export default router;
