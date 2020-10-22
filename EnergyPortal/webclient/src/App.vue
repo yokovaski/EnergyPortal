@@ -6,19 +6,37 @@
         color="blue-grey darken-3" 
         dark>
       <v-container class="py-0 fill-height">
-        <v-btn text to="/">Home</v-btn>
-        <v-btn text to="/about">About</v-btn>
-
+        <v-btn text to="/">Actueel</v-btn>
+        <v-btn text to="/about">Verleden</v-btn>
         <v-spacer></v-spacer>
-
-        <v-btn
-            href="https://github.com/vuetifyjs/vuetify/releases/latest"
-            target="_blank"
-            text
+        <v-menu
+            bottom
+            left
+            offset-y
         >
-          <span class="mr-2">Latest Release</span>
-          <v-icon>mdi-open-in-new</v-icon>
-        </v-btn>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+                icon
+                v-bind="attrs"
+                v-on="on"
+            >
+              <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item>
+              <v-list-item-title>
+                <v-btn to="/" text style="text-transform: none !important;">Tijdzone</v-btn>
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Test</v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Test</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-container>
     </v-app-bar>
 
