@@ -108,8 +108,8 @@ namespace EnergyPortal.Controllers.WebApi
             
             if (end.HasValue && end.Value < start)
                 return BadRequest("Time range is negative (To is smaller than From)");
-            
-            var user = await userManager.GetUserAsync(User);
+
+            var user = await userManager.FindByIdAsync(User.GetUserId());
             var raspberryPiId = await GetRaspberryPiId(user);
 
             if (!raspberryPiId.HasValue)

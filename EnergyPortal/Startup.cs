@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using DatabaseInterface;
@@ -91,6 +92,7 @@ namespace EnergyPortal
             });
 
             app.UseIdentityServer();
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             app.UseAuthorization();
             
             app.MapWhen(context => context.Request.Path.StartsWithSegments("/api/v3/energy"), builder =>

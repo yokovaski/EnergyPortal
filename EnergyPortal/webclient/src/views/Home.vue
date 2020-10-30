@@ -46,7 +46,7 @@
               >
                 <electricity-chart
                     ref="electricityChart"
-                    :chart-name="electricityCharts[chartName].chartNames"
+                    :chart-name="electricityCharts[chartName].chartName"
                     :chart-data="electricityCharts[chartName].chartData"
                     :active-range="chartRange"
                     v-on:change-range="setGraphRange($event)"
@@ -100,6 +100,8 @@
 
 import ElectricityChart from "@/components/ElectricityChart";
 import Axios from "axios";
+import store from '@/store'
+import { mapGetters } from 'vuex'
 
 let initialElectricityCharts = {
   usage: {
@@ -183,14 +185,16 @@ export default {
     lastRefresh: null
   }),
   async mounted () {
+    console.log(this.oidcUser);
+    
     this.initCharts();
 
-    // await Promise.all([
-    //   this.fetchChartData()
-    //   // this.fetchTotalsToday(),
-    //   // this.fetchTotals(),
-    //   // this.fetchUserSettings()
-    // ]);
+    await Promise.all([
+      this.fetchChartData()
+      // this.fetchTotalsToday(),
+      // this.fetchTotals(),
+      // this.fetchUserSettings()
+    ]);
     //
     // let self = this;
     //
@@ -238,7 +242,7 @@ export default {
         let data = response.data;
 
         for (const chartName of this.chartNames) {
-          let backEndName = this.energyCharts[chartName].backEndName;
+          let backEndName = this.electricityCharts[chartName].backEndName;
           let chartData = data[backEndName];
 
           if (chartData === undefined)
@@ -247,13 +251,13 @@ export default {
           if (chartData.length > 0 && this.lastRefresh === null)
             this.latestEnergyValues[backEndName].value = chartData[chartData.length -1];
 
-          this.energyCharts[chartName].chartData.datasets[0].data = chartData;
-          this.energyCharts[chartName].chartData.labels = data.timestamps;
+          this.electricityCharts[chartName].chartData.datasets[0].data = chartData;
+          this.electricityCharts[chartName].chartData.labels = data.timestamps;
         }
 
         this.lastRefresh = data.queryTimestamp;
 
-        for (let i = 0; i < this.$refs.energyChart.length; i++){
+        for (let i = 0; i < this.$refs.electricityChart.length; i++){
           this.$refs.electricityChart[i].refresh();
         }
 
@@ -291,6 +295,9 @@ export default {
         now.setMinutes(now.getMinutes() - 10);
 
       return {
+        headers: {
+          Authorization: `Bearer ${store.state.oidcStore.access_token}`
+        },
         params: {
           from: now.toISOString()
         }
@@ -307,7 +314,10 @@ export default {
         return "webapi/v3/metrics/minutes";
 
       return "webapi/v3/metrics/tenseconds";
-    }
+    },
+    ...mapGetters([
+        "oidcUser"
+    ])
   }
 };
 </script>

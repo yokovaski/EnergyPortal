@@ -14,26 +14,10 @@
         group
         class="align-center"
     >
-      <v-btn
-          @click="emitNewRange"
-      >
-        Nu
-      </v-btn>
-      <v-btn
-          @click="emitNewRange"
-      >
-        Uur
-      </v-btn>
-      <v-btn
-          @click="emitNewRange"
-      >
-        Dag
-      </v-btn>
-      <v-btn
-          @click="emitNewRange"
-      >
-        Week
-      </v-btn>
+      <v-btn>Nu</v-btn>
+      <v-btn>Uur</v-btn>
+      <v-btn>Dag</v-btn>
+      <v-btn>Week</v-btn>
     </v-btn-toggle>
   </v-card>
 </template>
@@ -62,7 +46,7 @@ export default {
           }]
         }
       },
-      sendingNewRange: false
+      settingNewRange: false
     }
   },
   methods: {
@@ -98,10 +82,12 @@ export default {
       }
     },
     activeRange() {
-      if (this.sendingNewRange) {
-        this.sendingNewRange = false;
+      if (this.settingNewRange) {
+        this.settingNewRange = false;
         return;
       }
+      
+      console.log(`Received updated chart range ${this.activeRange} in ${this.chartName}`);
       
       switch (this.activeRange) {
         case "now":
@@ -115,6 +101,24 @@ export default {
           break;
         case "week":
           this.selectedRange = 4;
+          break;
+      }
+    },
+    selectedRange() {
+      this.settingNewRange = true;
+
+      switch (this.selectedRange) {
+        case 1:
+          this.$emit('change-range', 'now')
+          break;
+        case 2:
+          this.$emit('change-range', 'hour')
+          break;
+        case 3:
+          this.$emit('change-range', 'day')
+          break;
+        case 4:
+          this.$emit('change-range', 'week')
           break;
       }
     }
