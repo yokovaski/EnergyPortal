@@ -15,7 +15,7 @@ namespace EnergyPortal
                 {
                     ClientId = "EnergyPortalWebApp",
                     ClientName = "Vue web app",
-                    ClientUri = "https://localhost:5001",
+                    ClientUri = "http://localhost:5000",
 
                     AllowedGrantTypes = GrantTypes.Code,
                     RequirePkce = true,
@@ -24,13 +24,13 @@ namespace EnergyPortal
 
                     RedirectUris =
                     {
-                        "https://localhost:5001",
-                        "https://localhost:5001/callback",
-                        "https://localhost:5001/silent",
-                        "https://localhost:5001/popup",
+                        "http://localhost:5000",
+                        "http://localhost:5000/callback",
+                        "http://localhost:5000/silent",
+                        "http://localhost:5000/popup",
                     },
 
-                    PostLogoutRedirectUris = { "https://localhost:5001" },
+                    PostLogoutRedirectUris = { "http://localhost:5000" },
 
                     AllowedScopes = { "openid", "profile", "EnergyPortalAPI" }
                 }

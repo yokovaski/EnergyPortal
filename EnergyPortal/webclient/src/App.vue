@@ -40,10 +40,16 @@
       </v-container>
     </v-app-bar>
 
-    <v-main class="blue-grey lighten-5">
+    <v-main class="main-background">
       <v-container>
         <router-view></router-view>
       </v-container>
     </v-main>
   </v-app>
 </template>
+
+<style type="text/css">
+.main-background {
+  background: #ebeef5;
+}
+</style>

@@ -72,8 +72,7 @@
                             <div class="card-body">
                                 <h5 class="card-text text-center text-muted">
                                     <small>
-                                        Opwekking vandaag
-                                    </small>
+                                        Opwekking vandaag</small>
                                 </h5>
                                 <h2 class="text-center font-weight-bold text-secondary">
                                     {{ (energyToday.totalSolar) }}

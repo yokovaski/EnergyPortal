@@ -1,7 +1,7 @@
 <template>
   <v-card class="pa-2">
     <div
-        class="text-subtitle-1 text-center font-weight-light grey--text darken-2"
+        class="text-subtitle-1 text-center grey--text"
         v-text="chartName"
     ></div>
     <line-chart class="energy-chart" ref="lineChart"
@@ -9,6 +9,7 @@
                 :options="options">
     </line-chart>
     <v-btn-toggle
+        mandatory
         v-model="selectedRange"
         tile
         group
@@ -31,7 +32,7 @@ export default {
   props: ['chartName', 'chartData', 'activeRange'],
   data: function() {
     return {
-      selectedRange: 0,
+      selectedRange: 1,
       options: {
         legend: {
           display: false
@@ -53,19 +54,17 @@ export default {
     emitNewRange() {
       this.sendingNewRange = true;
       
-      console.log("Buttons is clicked!");
-      
       switch (this.selectedRange) {
-        case 1:
+        case 0:
           this.$emit('change-range', 'now')
           break;
-        case 2:
+        case 1:
           this.$emit('change-range', 'hour')
           break;
-        case 3:
+        case 2:
           this.$emit('change-range', 'day')
           break;
-        case 4:
+        case 3:
           this.$emit('change-range', 'week')
           break;
       }
@@ -78,7 +77,7 @@ export default {
     chartData: {
       deep: true,
       handler () {
-        console.log('detected change in EnergyChart');
+        // console.log('detected change in EnergyChart');
       }
     },
     activeRange() {
@@ -86,38 +85,43 @@ export default {
         this.settingNewRange = false;
         return;
       }
-      
-      console.log(`Received updated chart range ${this.activeRange} in ${this.chartName}`);
+
+      this.settingNewRange = true;
       
       switch (this.activeRange) {
         case "now":
-          this.selectedRange = 1;
+          this.selectedRange = 0;
           break;
         case "hour":
-          this.selectedRange = 2;
+          this.selectedRange = 1;
           break;
         case "day":
-          this.selectedRange = 3;
+          this.selectedRange = 2;
           break;
         case "week":
-          this.selectedRange = 4;
+          this.selectedRange = 3;
           break;
       }
     },
     selectedRange() {
+      if (this.settingNewRange) {
+        this.settingNewRange = false;
+        return;
+      }
+      
       this.settingNewRange = true;
 
       switch (this.selectedRange) {
-        case 1:
+        case 0:
           this.$emit('change-range', 'now')
           break;
-        case 2:
+        case 1:
           this.$emit('change-range', 'hour')
           break;
-        case 3:
+        case 2:
           this.$emit('change-range', 'day')
           break;
-        case 4:
+        case 3:
           this.$emit('change-range', 'week')
           break;
       }

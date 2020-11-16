@@ -95,18 +95,17 @@ namespace EnergyPortal
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             app.UseAuthorization();
             
-            app.MapWhen(context => context.Request.Path.StartsWithSegments("/api/v3/energy"), builder =>
-            {
-                builder.UseAuthenticateByPiKey();
-                
-            });
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
+            });
+            
+            app.MapWhen(context => context.Request.Path.StartsWithSegments("/api/v3/energy"), builder =>
+            {
+                builder.UseAuthenticateByPiKey();
             });
             
             app.UseSpa(spa =>

@@ -72,24 +72,139 @@
       <v-col
           cols="12"
           md="4"
-          class="pt-3 pb-3 pl-3"
       >
-        <v-card
-            class="pa-5"
+        <v-row
+            no-gutters
         >
-          Testing
-        </v-card>
-<!--        <v-row>-->
-<!--          <v-col -->
-<!--              cols="12"-->
-<!--          >-->
-<!--            <v-card-->
-<!--                class="pa-5"-->
-<!--            >-->
-<!--              Testing-->
-<!--            </v-card>-->
-<!--          </v-col>-->
-<!--        </v-row>-->
+          <v-col
+              cols="12"
+              class="pt-3 pb-3 pl-3"
+          >
+            <v-card
+                class="pa-5"
+            >
+              <div
+                  class="text-subtitle-2 text-center grey--text"
+                  v-text="'Opname vandaag'"
+              ></div>
+              <div
+                  class="text-h4 text-center text--secondary mt-2 mb-2"
+                  v-text="round(energyToday.usageTotalHigh + energyToday.usageTotalLow)"
+              ></div>
+              <div class="text-subtitle-1 text-center grey--text">
+                kW
+              </div>
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-row
+            no-gutters
+        >
+          <v-col
+              cols="12"
+              class="pt-3 pb-3 pl-3"
+          >
+            <v-card
+                class="pa-5"
+            >
+              <div
+                  class="text-subtitle-2 text-center grey--text"
+                  v-text="'Teruglevering vandaag'"
+              ></div>
+              <div
+                  class="text-h4 text-center text--secondary mt-2 mb-2"
+                  v-text="round(energyToday.redeliveryTotalHigh + energyToday.redeliveryTotalLow)"
+              ></div>
+              <div class="text-subtitle-1 text-center grey--text">
+                kW
+              </div>
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-row
+            no-gutters
+        >
+          <v-col
+              cols="12"
+              class="pt-3 pb-3 pl-3"
+          >
+            <v-card
+                class="pa-5"
+            >
+              <div
+                  class="text-subtitle-2 text-center grey--text"
+                  v-text="'Opwekking vandaag'"
+              ></div>
+              <div
+                  class="text-h4 text-center text--secondary mt-2 mb-2"
+                  v-text="energyToday.totalSolar"
+              ></div>
+              <div class="text-subtitle-1 text-center grey--text">
+                kW
+              </div>
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-row
+            no-gutters
+        >
+          <v-col
+              cols="12"
+              class="pt-3 pb-3 pl-3"
+          >
+            <v-card
+                class="pa-5"
+            >
+              <div
+                  class="text-subtitle-2 text-center grey--text"
+                  v-text="'Gasverbruik vandaag'"
+              ></div>
+              <div
+                  class="text-h4 text-center text--secondary mt-2 mb-2"
+                  v-text="energyToday.totalGas"
+              ></div>
+              <div class="text-subtitle-1 text-center grey--text">
+                M³
+              </div>
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-row
+            no-gutters
+        >
+          <v-col
+              cols="12"
+              class="pt-3 pb-3 pl-3"
+          >
+            <v-card
+                class="pa-5"
+            >
+              <div
+                  class="text-subtitle-2 text-center grey--text"
+                  v-text="'Meterstanden'"
+              ></div>
+              <v-simple-table>
+                <template v-slot:default>
+                  <tbody>
+                  <tr
+                      v-for="total in totals"
+                      :key="total.title"
+                  >
+                    <td 
+                        class="text--secondary font-weight-bold"
+                        v-text="total.title"
+                    ></td>
+                    <td
+                        class="text--secondary"
+                        v-text="total.value"
+                    ></td>
+                  </tr>
+                  </tbody>
+                </template>
+              </v-simple-table>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
   </div>
@@ -181,30 +296,58 @@ export default {
         value: "N/A"
       },
     },
+    energyToday:{
+      usageTotalHigh: 0,
+      usageTotalLow: 0,
+      redeliveryTotalHigh: 0,
+      redeliveryTotalLow: 0,
+      totalSolar: 0,
+      totalGas: 0
+    },
+    totals: {
+      usageTotalHigh: {
+        title: "Opname hoog",
+        value: 0
+      },
+      redeliveryTotalHigh: {
+        title: "Opname laag",
+        value: 0
+      },
+      usageTotalLow: {
+        title: "Levering hoog",
+        value: 0
+      },
+      redeliveryTotalLow: {
+        title: "Levering laag",
+        value: 0
+      },
+      usageGasTotal: {
+        title: "Gas",
+        value: 0
+      },
+    },
     chartRange: "hour",
     lastRefresh: null
   }),
-  async mounted () {
-    console.log(this.oidcUser);
-    
+  async mounted () {    
     this.initCharts();
 
     await Promise.all([
-      this.fetchChartData()
-      // this.fetchTotalsToday(),
-      // this.fetchTotals(),
+      this.fetchChartData(),
+      this.fetchTotalsToday(),
+      this.fetchTotals(),
       // this.fetchUserSettings()
     ]);
     //
-    // let self = this;
-    //
-    // setInterval(function () {
-    //   if (self.chartRange === "now"){
-    //     self.fetchChartData().then();
-    //   }
-    //
-    //   // self.fetchLast().then();
-    // }, 10000)
+    let self = this;
+
+    setInterval(function () {
+      if (self.chartRange === "now"){
+        self.fetchChartData().then();
+      }
+
+      self.fetchLast().then();
+    }, 10000)
   },
   methods: {
     initCharts() {
@@ -232,7 +375,6 @@ export default {
       }
     },
     async setGraphRange(range) {
-      console.log(`Received new chart range [${range}]!`);
       this.chartRange = range;
       await this.fetchChartData();
     },
@@ -264,6 +406,78 @@ export default {
       } catch (e) {
         console.error(e);
       }
+    },
+    async fetchLast() {
+      if (this.lastRefresh === null)
+        return;
+
+      try {
+        let config = {
+          headers: {
+            Authorization: `Bearer ${store.state.oidcStore.access_token}`
+          },
+          params: {
+            from: this.lastRefresh
+          }
+        };
+
+        let response = await Axios.get('webapi/v3/metrics/tenseconds', config);
+        let data = response.data;
+
+        this.lastRefresh = data.queryTimestamp;
+
+        if (data.timestamps.length > 0) {
+          let index = data.timestamps.length - 1;
+
+          for (let energyType of Object.keys(this.latestEnergyValues)) {
+            this.latestEnergyValues[energyType].value = data[energyType][index];
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    async fetchTotals() {
+      try {
+        let config = {
+          headers: {
+            Authorization: `Bearer ${store.state.oidcStore.access_token}`
+          }
+        };
+        let response = await Axios.get('/webapi/v3/energy/totals', config)
+
+        for (const [key, value] of Object.entries(response.data)) {
+          if (key in this.totals)
+            this.totals[key].value = value;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    async fetchTotalsToday() {
+      try {
+        let config = {
+          headers: {
+            Authorization: `Bearer ${store.state.oidcStore.access_token}`
+          }
+        };
+        let response = await Axios.get('webapi/v3/energy/total-today', config);
+
+        this.energyToday.usageTotalHigh = response.data.usageTotalHigh;
+        this.energyToday.usageTotalLow = response.data.usageTotalLow;
+        this.energyToday.redeliveryTotalHigh = response.data.redeliveryTotalHigh;
+        this.energyToday.redeliveryTotalLow = response.data.redeliveryTotalLow;
+        this.energyToday.totalSolar = response.data.totalSolar;
+        this.energyToday.totalGas = response.data.totalGas;
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    round(value, digits = 3) {
+      let ePlus = `e+${digits}`;
+      let eMinus = `e-${digits}`;
+
+      return +(Math.round(value + ePlus) + eMinus);
     },
   },
   computed: {
