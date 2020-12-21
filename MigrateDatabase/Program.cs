@@ -21,7 +21,7 @@ namespace MigrateDatabase
                 Console.WriteLine("Starting migration...");
 
                 var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-                optionsBuilder.UseMySql(connectionString);
+                optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
                 using (var context = new ApplicationDbContext(optionsBuilder.Options))
                 {

@@ -31,9 +31,12 @@ namespace EnergyPortal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDatabaseDeveloperPageExceptionFilter();
+            
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"), 
+                var connectionString = Configuration.GetConnectionString("DefaultConnection");
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), 
                     assembly => assembly.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
             });
 
@@ -56,7 +59,7 @@ namespace EnergyPortal
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
+                app.UseMigrationsEndPoint();
             }
             else
             {
