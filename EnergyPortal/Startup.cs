@@ -1,17 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using DatabaseInterface;
 using DatabaseInterface.Entities;
 using DatabaseInterface.Repositories;
 using EnergyPortal.Controllers.Middleware;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,9 +24,12 @@ namespace EnergyPortal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDatabaseDeveloperPageExceptionFilter();
+            
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseMySql(Configuration.GetConnectionString("DefaultConnection"), 
+                var connectionString = Configuration.GetConnectionString("DefaultConnection");
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), 
                     assembly => assembly.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
             });
 
@@ -56,7 +52,7 @@ namespace EnergyPortal
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
+                app.UseMigrationsEndPoint();
             }
             else
             {
