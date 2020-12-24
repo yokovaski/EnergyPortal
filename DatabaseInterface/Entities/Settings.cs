@@ -16,7 +16,11 @@ namespace DatabaseInterface.Entities
         public bool ShowDayName { get; set; }
         public string UserId { get; set; }
         
-        [JsonIgnore]
+        public long ElectricityPrice { get; set; }
+        
+        public long GasPrice { get; set; }
+
+            [JsonIgnore]
         public virtual ApplicationUser User { get; set; }
     }
 }
