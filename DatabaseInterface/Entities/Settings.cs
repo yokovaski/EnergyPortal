@@ -16,11 +16,15 @@ namespace DatabaseInterface.Entities
         public bool ShowDayName { get; set; }
         public string UserId { get; set; }
         
-        public long ElectricityPrice { get; set; }
-        
-        public long GasPrice { get; set; }
+        public double GasPrice { get; set; }
+        public double HighUsagePricePerKwh { get; set; }
+        public double LowUsagePricePerKwh { get; set; }
+        public double HighRedeliveryPricePerKwh { get; set; }
+        public double LowRedeliveryPricePerKwh { get; set; }
+        public double ElectricityDeliveryPricePerYear { get; set; }
+        public double GasDeliveryPricePerYear { get; set; }
 
-            [JsonIgnore]
+        [JsonIgnore]
         public virtual ApplicationUser User { get; set; }
     }
 }

@@ -227,11 +227,26 @@ namespace DatabaseInterface.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ElectricityPrice")
-                        .HasColumnType("bigint");
+                    b.Property<double>("ElectricityDeliveryPricePerYear")
+                        .HasColumnType("double");
 
-                    b.Property<long>("GasPrice")
-                        .HasColumnType("bigint");
+                    b.Property<double>("GasDeliveryPricePerYear")
+                        .HasColumnType("double");
+
+                    b.Property<double>("GasPrice")
+                        .HasColumnType("double");
+
+                    b.Property<double>("HighRedeliveryPricePerKwh")
+                        .HasColumnType("double");
+
+                    b.Property<double>("HighUsagePricePerKwh")
+                        .HasColumnType("double");
+
+                    b.Property<double>("LowRedeliveryPricePerKwh")
+                        .HasColumnType("double");
+
+                    b.Property<double>("LowUsagePricePerKwh")
+                        .HasColumnType("double");
 
                     b.Property<bool>("ShowDayName")
                         .HasColumnType("tinyint(1)");
