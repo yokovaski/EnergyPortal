@@ -227,10 +227,10 @@ namespace DatabaseInterface.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    b.Property<double>("ElectricityDeliveryPricePerYear")
+                    b.Property<double>("ElectricityDeliveryPricePerMonth")
                         .HasColumnType("double");
 
-                    b.Property<double>("GasDeliveryPricePerYear")
+                    b.Property<double>("GasDeliveryPricePerMonth")
                         .HasColumnType("double");
 
                     b.Property<double>("GasPrice")

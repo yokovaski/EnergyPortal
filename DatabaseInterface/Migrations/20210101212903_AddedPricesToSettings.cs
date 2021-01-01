@@ -7,14 +7,14 @@ namespace DatabaseInterface.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<double>(
-                name: "ElectricityDeliveryPricePerYear",
+                name: "ElectricityDeliveryPricePerMonth",
                 table: "Settings",
                 type: "double",
                 nullable: false,
                 defaultValue: 0.0);
 
             migrationBuilder.AddColumn<double>(
-                name: "GasDeliveryPricePerYear",
+                name: "GasDeliveryPricePerMonth",
                 table: "Settings",
                 type: "double",
                 nullable: false,
@@ -59,11 +59,11 @@ namespace DatabaseInterface.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "ElectricityDeliveryPricePerYear",
+                name: "ElectricityDeliveryPricePerMonth",
                 table: "Settings");
 
             migrationBuilder.DropColumn(
-                name: "GasDeliveryPricePerYear",
+                name: "GasDeliveryPricePerMonth",
                 table: "Settings");
 
             migrationBuilder.DropColumn(

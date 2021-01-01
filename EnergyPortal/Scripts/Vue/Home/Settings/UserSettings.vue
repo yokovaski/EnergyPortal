@@ -1,11 +1,11 @@
 <template>
   <div v-if="!loading">
-    <h2>Dashboard settings</h2>
+    <h2>Instellingen</h2>
     <hr>
     <b-form-group>
       <b-row class="my-1" align-v="center">
         <b-col sm="3">
-          <label>Solar system</label>
+          <label>Systeem met zonnepanelen</label>
         </b-col>
         <b-col sm="9">
           <b-form-checkbox
@@ -18,7 +18,7 @@
       
       <b-row class="my-1">
         <b-col sm="3">
-          <label>Show day name in history view</label>
+          <label>Toon dagnaam in grafiek</label>
         </b-col>
         <b-col sm="9">
           <b-form-checkbox
@@ -29,63 +29,63 @@
         </b-col>
       </b-row>
 
-      <b-row class="my-1">
-        <b-col sm="3">
-          <label>Text</label>
-        </b-col>
-        <b-col sm="9">
-          <set-time-zone
-              id="time-zone-input"
-              :time-zone-id="timeZoneId"
-              v-on:time-zone-selected="timeZoneSelected"
-              class="mb-3"
-          ></set-time-zone>
-        </b-col>
-      </b-row>
-      
-      <h2>Rate settings</h2>
-      <hr>
-      
-      <b-row class="my-1" align-v="center">
-        <b-col sm="3">
-          <label>Price Electricity</label>
-        </b-col>
-        <b-col sm="9">
-          <b-form-input></b-form-input>
-        </b-col>
-      </b-row>
-
-      <b-row class="my-1">
-        <b-col sm="3">
-          <label>Text</label>
-        </b-col>
-        <b-col sm="9">
-          <b-form-input></b-form-input>
-        </b-col>
-      </b-row>
-      
-      <b-form-group class="my-1" label-cols="3" label="Price Electricity" label-for="input-electricity">
-        <b-form-input id="input-electricity" :value="electricityPrice" type="number" step="0.01"></b-form-input>
+      <b-form-group class="my-1" label-cols="3" label="Tijdszone" label-for="time-zone-input">
+        <set-time-zone
+            id="time-zone-input"
+            :time-zone-id="timeZoneId"
+            v-on:time-zone-selected="timeZoneSelected"
+            class="mb-3"
+        ></set-time-zone>
       </b-form-group>
       
-      <hr class="my-5-3">
+      <h2>Tarieven</h2>
+      <hr>
+      
+      <b-form-group class="my-1" label-cols="3" label="Opname normaaltarief" label-for="input-electricity">
+        <b-form-input id="input-electricity" :value="highUsagePricePerKwh" type="number" step="0.01"></b-form-input>
+      </b-form-group>
+      
+      <b-form-group class="my-1" label-cols="3" label="Opname daltarief" label-for="input-electricity">
+        <b-form-input id="input-electricity" :value="lowUsagePricePerKwh" type="number" step="0.01"></b-form-input>
+      </b-form-group>
+      
+      <b-form-group class="my-1" label-cols="3" label="Teruglevering normaaltarief" label-for="input-electricity">
+        <b-form-input id="input-electricity" :value="highRedeliveryPricePerKwh" type="number" step="0.01"></b-form-input>
+      </b-form-group>
+      
+      <b-form-group class="my-1" label-cols="3" label="Teruglevering daltarief" label-for="input-electricity">
+        <b-form-input id="input-electricity" :value="lowRedeliveryPricePerKwh" type="number" step="0.01"></b-form-input>
+      </b-form-group>
+      
+      <b-form-group class="my-1" label-cols="3" label="Gastarief" label-for="input-electricity">
+        <b-form-input id="input-electricity" :value="gasPrice" type="number" step="0.01"></b-form-input>
+      </b-form-group>
+      
+      <b-form-group class="my-1" label-cols="3" label="Vaste kosten electriciteit / maand" label-for="input-electricity">
+        <b-form-input id="input-electricity" :value="electricityDeliveryPricePerMonth" type="number" step="0.01"></b-form-input>
+      </b-form-group>
+      
+      <b-form-group class="my-1" label-cols="3" label="Vaste kosten gas / maand" label-for="input-electricity">
+        <b-form-input id="input-electricity" :value="gasDeliveryPricePerMonth" type="number" step="0.01"></b-form-input>
+      </b-form-group>
+      
 
       <b-button
           v-show="!saving"
           variant="primary"
           onclick="this.blur()"
           @click="saveSettings"
-          class="float-right"
+          class="float-right mt-3"
       >
-        Save
+        Opslaan
       </b-button>
       <b-button
           v-show="saving"
           variant="primary"
           disabled
-          class="float-right"
+          class="float-right mt-3"
       >
-        <b-spinner v-show="saving" small type="grow"></b-spinner> Save
+        <b-spinner v-show="saving" small type="grow"></b-spinner> Opslaan
       </b-button>
     </b-form-group>
 
@@ -105,7 +105,13 @@ export default {
     timeZoneId: '',
     loading: true,
     saving: false,
-    electricityPrice: ''
+    highUsagePricePerKwh: 0.00,
+    lowUsagePricePerKwh: 0.00,
+    highRedeliveryPricePerKwh: 0.00,
+    lowRedeliveryPricePerKwh: 0.00,
+    gasPrice: 0.00,
+    electricityDeliveryPricePerMonth: 0.00,
+    gasDeliveryPricePerMonth: 0.00,
   }),
   async mounted() {
     await this.fetchSettings();
@@ -123,7 +129,13 @@ export default {
         this.solarSystem = response.data.solarSystem;
         this.showDayName = response.data.showDayName;
         this.timeZoneId = response.data.timeZoneId;
-        this.electricityPrice = response.data.electricityPrice;
+        this.highUsagePricePerKwh = response.data.highUsagePricePerKwh;
+        this.lowUsagePricePerKwh = response.data.lowUsagePricePerKwh;
+        this.highRedeliveryPricePerKwh = response.data.highRedeliveryPricePerKwh;
+        this.lowRedeliveryPricePerKwh = response.data.lowRedeliveryPricePerKwh;
+        this.gasPrice = response.data.gasPrice;
+        this.electricityDeliveryPricePerMonth = response.data.electricityDeliveryPricePerMonth;
+        this.gasDeliveryPricePerMonth = response.data.gasDeliveryPricePerMonth;
       } catch (e) {
         console.error(e);
       } finally {
@@ -137,7 +149,14 @@ export default {
         let settings = {
           solarSystem: this.solarSystem,
           showDayName: this.showDayName,
-          timeZoneId: this.timeZoneId
+          timeZoneId: this.timeZoneId,
+          highUsagePricePerKwh: this.highUsagePricePerKwh,
+          lowUsagePricePerKwh: this.lowUsagePricePerKwh,
+          highRedeliveryPricePerKwh: this.highRedeliveryPricePerKwh,
+          lowRedeliveryPricePerKwh: this.lowRedeliveryPricePerKwh,
+          gasPrice: this.gasPrice,
+          electricityDeliveryPricePerMonth: this.electricityDeliveryPricePerMonth,
+          gasDeliveryPricePerMonth: this.gasDeliveryPricePerMonth,
         }
 
         await Axios.put('/webapi/v3/settings', settings);

@@ -21,8 +21,8 @@ namespace DatabaseInterface.Entities
         public double LowUsagePricePerKwh { get; set; }
         public double HighRedeliveryPricePerKwh { get; set; }
         public double LowRedeliveryPricePerKwh { get; set; }
-        public double ElectricityDeliveryPricePerYear { get; set; }
-        public double GasDeliveryPricePerYear { get; set; }
+        public double ElectricityDeliveryPricePerMonth { get; set; }
+        public double GasDeliveryPricePerMonth { get; set; }
 
         [JsonIgnore]
         public virtual ApplicationUser User { get; set; }

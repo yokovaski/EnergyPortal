@@ -276,8 +276,9 @@ namespace EnergyPortal.Controllers.WebApi
                 default:
                     throw new ArgumentOutOfRangeException(nameof(timeGroup), timeGroup, null);
             }
-
-            var timestamps = metrics.Select(m => m.DateTime.ToString(format)).ToList();
+            
+            var cultureInfo = new System.Globalization.CultureInfo("nl-NL");
+            var timestamps = metrics.Select(m => m.DateTime.ToString(format, cultureInfo)).ToList();
             var usageList = metrics.Select(m => m.Usage.DivideByThousand()).ToList();
             var intakeList = metrics.Select(m => m.Intake.DivideByThousand()).ToList();
             var solarList = metrics.Select(m => m.Solar.DivideByThousand()).ToList();
