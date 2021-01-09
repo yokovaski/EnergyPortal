@@ -42,31 +42,31 @@
       <hr>
       
       <b-form-group class="my-1" label-cols="3" label="Opname normaaltarief" label-for="input-electricity">
-        <b-form-input id="input-electricity" :value="highUsagePricePerKwh" type="number" step="0.01"></b-form-input>
+        <b-form-input id="input-electricity" v-model="highUsagePricePerKwh" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
       
       <b-form-group class="my-1" label-cols="3" label="Opname daltarief" label-for="input-electricity">
-        <b-form-input id="input-electricity" :value="lowUsagePricePerKwh" type="number" step="0.01"></b-form-input>
+        <b-form-input id="input-electricity" v-model="lowUsagePricePerKwh" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
       
       <b-form-group class="my-1" label-cols="3" label="Teruglevering normaaltarief" label-for="input-electricity">
-        <b-form-input id="input-electricity" :value="highRedeliveryPricePerKwh" type="number" step="0.01"></b-form-input>
+        <b-form-input id="input-electricity" v-model="highRedeliveryPricePerKwh" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
       
       <b-form-group class="my-1" label-cols="3" label="Teruglevering daltarief" label-for="input-electricity">
-        <b-form-input id="input-electricity" :value="lowRedeliveryPricePerKwh" type="number" step="0.01"></b-form-input>
+        <b-form-input id="input-electricity" v-model="lowRedeliveryPricePerKwh" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
       
       <b-form-group class="my-1" label-cols="3" label="Gastarief" label-for="input-electricity">
-        <b-form-input id="input-electricity" :value="gasPrice" type="number" step="0.01"></b-form-input>
+        <b-form-input id="input-electricity" v-model="gasPrice" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
       
       <b-form-group class="my-1" label-cols="3" label="Vaste kosten electriciteit / maand" label-for="input-electricity">
-        <b-form-input id="input-electricity" :value="electricityDeliveryPricePerMonth" type="number" step="0.01"></b-form-input>
+        <b-form-input id="input-electricity" v-model="electricityDeliveryPricePerMonth" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
       
       <b-form-group class="my-1" label-cols="3" label="Vaste kosten gas / maand" label-for="input-electricity">
-        <b-form-input id="input-electricity" :value="gasDeliveryPricePerMonth" type="number" step="0.01"></b-form-input>
+        <b-form-input id="input-electricity" v-model="gasDeliveryPricePerMonth" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
       
 

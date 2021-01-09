@@ -10,6 +10,9 @@ namespace EnergyPortal.Models
         public long Redelivery { get; set; }
         public long Solar { get; set; }
         public long Gas { get; set; }
+        public double IntakeCost { get; set; }
+        public double RedeliveryCost { get; set; }
+        public double GasCost { get; set; }
         public DateTime DateTime { get; set; }
     }
 }
