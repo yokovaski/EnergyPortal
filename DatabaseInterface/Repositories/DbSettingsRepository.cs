@@ -33,6 +33,14 @@ namespace DatabaseInterface.Repositories
             dbSettings.SolarSystem = settings.SolarSystem;
             dbSettings.ShowDayName = settings.ShowDayName;
             dbSettings.TimeZoneId = settings.TimeZoneId;
+            dbSettings.HighUsagePricePerKwh = settings.HighUsagePricePerKwh;
+            dbSettings.LowUsagePricePerKwh = settings.LowUsagePricePerKwh;
+            dbSettings.HighRedeliveryPricePerKwh = settings.HighRedeliveryPricePerKwh;
+            dbSettings.LowRedeliveryPricePerKwh = settings.LowRedeliveryPricePerKwh;
+            dbSettings.GasPrice = settings.GasPrice;
+            dbSettings.ElectricityDeliveryPricePerMonth = settings.ElectricityDeliveryPricePerMonth;
+            dbSettings.GasDeliveryPricePerMonth = settings.GasDeliveryPricePerMonth;
+            
             await dbContext.SaveChangesAsync();
         } 
     }

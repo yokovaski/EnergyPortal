@@ -132,7 +132,7 @@ namespace EnergyPortal.Controllers.WebApi
                 });
 
             var format = "";
-            var metrics = new List<OutMetricModel>();
+            List<OutMetricModel> metrics;
 
             switch (timeGroup)
             {
@@ -184,17 +184,7 @@ namespace EnergyPortal.Controllers.WebApi
                             current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
                             next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
                             
-                            return new OutMetricModel
-                            {
-                                DateTime = current.Created,
-                                Usage = CalculateUsage(current, next, out var intake, out var redelivery,
-                                    out var solar),
-                                Intake = intake,
-                                Redelivery = redelivery,
-                                // Sometimes it happens that only 0 is available
-                                Solar = solar,
-                                Gas = next.UsageGasTotal - current.UsageGasTotal
-                            };
+                            return current.ToOutMetricModel(next, settings);
                         })
                         .ToList();
                     
@@ -223,16 +213,7 @@ namespace EnergyPortal.Controllers.WebApi
                             current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
                             next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
                             
-                            return new OutMetricModel
-                            {
-                                DateTime = current.Created,
-                                Usage = CalculateUsage(current, next, out var intake, out var redelivery,
-                                    out var solar),
-                                Intake = intake,
-                                Redelivery = redelivery,
-                                Solar = solar,
-                                Gas = next.UsageGasTotal - current.UsageGasTotal
-                            };
+                            return current.ToOutMetricModel(next, settings);
                         })
                         .ToList();
 
@@ -258,16 +239,7 @@ namespace EnergyPortal.Controllers.WebApi
                             current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
                             next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
                             
-                            return new OutMetricModel
-                            {
-                                DateTime = current.Created,
-                                Usage = CalculateUsage(current, next, out var intake, out var redelivery,
-                                    out var solar),
-                                Intake = intake,
-                                Redelivery = redelivery,
-                                Solar = solar,
-                                Gas = next.UsageGasTotal - current.UsageGasTotal
-                            };
+                            return current.ToOutMetricModel(next, settings);
                         })
                         .ToList();
 
@@ -276,13 +248,18 @@ namespace EnergyPortal.Controllers.WebApi
                 default:
                     throw new ArgumentOutOfRangeException(nameof(timeGroup), timeGroup, null);
             }
-
-            var timestamps = metrics.Select(m => m.DateTime.ToString(format)).ToList();
+            
+            var cultureInfo = new System.Globalization.CultureInfo("nl-NL");
+            var timestamps = metrics.Select(m => m.DateTime.ToString(format, cultureInfo)).ToList();
             var usageList = metrics.Select(m => m.Usage.DivideByThousand()).ToList();
             var intakeList = metrics.Select(m => m.Intake.DivideByThousand()).ToList();
             var solarList = metrics.Select(m => m.Solar.DivideByThousand()).ToList();
             var redeliveryList = metrics.Select(m => m.Redelivery.DivideByThousand()).ToList();
             var gasList = metrics.Select(m => m.Gas.DivideByThousand()).ToList();
+            var usageCosts = metrics.Select(m => m.UsageCost).ToList();
+            var intakeCosts = metrics.Select(m => m.IntakeCost).ToList();
+            var redeliveryCosts = metrics.Select(m => m.RedeliveryCost).ToList();
+            var gasCosts = metrics.Select(m => m.GasCost).ToList();
 
             var lastDateTime = metrics
                 .OrderBy(m => m.DateTime)
@@ -299,28 +276,12 @@ namespace EnergyPortal.Controllers.WebApi
                 Solar = solarList,
                 Redelivery = redeliveryList,
                 Intake = intakeList,
-                Gas = gasList
+                Gas = gasList,
+                UsageCosts = usageCosts,
+                IntakeCosts = intakeCosts,
+                RedeliveryCosts = redeliveryCosts,
+                GasCosts = gasCosts
             });
-        }
-
-        private long CalculateUsage(
-            IMetric current, 
-            IMetric next, 
-            out long intake, 
-            out long redelivery,
-            out long solar)
-        {
-            intake = next.UsageTotalHigh - current.UsageTotalHigh + next.UsageTotalLow - current.UsageTotalLow;
-            redelivery = next.RedeliveryTotalHigh - current.RedeliveryTotalHigh + next.RedeliveryTotalLow - current.RedeliveryTotalLow;
-            solar = next.SolarTotal - current.SolarTotal;
-
-            var solarUsage = solar - redelivery;
-
-            // solar value can't be trusted
-            if (solarUsage < 0)
-                return intake;
-
-            return intake + solarUsage;
         }
         
         private async Task<long?> GetRaspberryPiId(ApplicationUser user = null)

@@ -46,4 +46,4 @@ mono_crash.mem.*
 /EnergyPortal/wwwroot/js/bundle.js
 /EnergyPortal/logs/
 /EnergyWorker/logs/
-/MigrateDatabase/connectionstring.txt
+MigrateDatabase/connectionstring.txt
