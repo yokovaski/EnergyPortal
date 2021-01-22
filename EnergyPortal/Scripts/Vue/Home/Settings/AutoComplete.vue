@@ -33,7 +33,7 @@
                 <a 
                         ref="suggestions"
                         v-for="(suggestion, index) in matches"
-                        :key="suggestion"
+                        :key="index"
                         v-bind:class="{'active': isActive(index)}"
                         @click="suggestionClick(suggestion)"
                         href="#"

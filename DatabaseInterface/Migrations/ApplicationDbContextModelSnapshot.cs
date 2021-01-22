@@ -227,26 +227,26 @@ namespace DatabaseInterface.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    b.Property<double>("ElectricityDeliveryPricePerMonth")
-                        .HasColumnType("double");
+                    b.Property<decimal>("ElectricityDeliveryPricePerMonth")
+                        .HasColumnType("decimal(65,30)");
 
-                    b.Property<double>("GasDeliveryPricePerMonth")
-                        .HasColumnType("double");
+                    b.Property<decimal>("GasDeliveryPricePerMonth")
+                        .HasColumnType("decimal(65,30)");
 
-                    b.Property<double>("GasPrice")
-                        .HasColumnType("double");
+                    b.Property<decimal>("GasPrice")
+                        .HasColumnType("decimal(65,30)");
 
-                    b.Property<double>("HighRedeliveryPricePerKwh")
-                        .HasColumnType("double");
+                    b.Property<decimal>("HighRedeliveryPricePerKwh")
+                        .HasColumnType("decimal(65,30)");
 
-                    b.Property<double>("HighUsagePricePerKwh")
-                        .HasColumnType("double");
+                    b.Property<decimal>("HighUsagePricePerKwh")
+                        .HasColumnType("decimal(65,30)");
 
-                    b.Property<double>("LowRedeliveryPricePerKwh")
-                        .HasColumnType("double");
+                    b.Property<decimal>("LowRedeliveryPricePerKwh")
+                        .HasColumnType("decimal(65,30)");
 
-                    b.Property<double>("LowUsagePricePerKwh")
-                        .HasColumnType("double");
+                    b.Property<decimal>("LowUsagePricePerKwh")
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<bool>("ShowDayName")
                         .HasColumnType("tinyint(1)");

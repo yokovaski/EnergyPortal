@@ -6,54 +6,54 @@ namespace DatabaseInterface.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<decimal>(
                 name: "ElectricityDeliveryPricePerMonth",
                 table: "Settings",
-                type: "double",
+                type: "decimal(65,30)",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0m);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<decimal>(
                 name: "GasDeliveryPricePerMonth",
                 table: "Settings",
-                type: "double",
+                type: "decimal(65,30)",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0m);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<decimal>(
                 name: "GasPrice",
                 table: "Settings",
-                type: "double",
+                type: "decimal(65,30)",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0m);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<decimal>(
                 name: "HighRedeliveryPricePerKwh",
                 table: "Settings",
-                type: "double",
+                type: "decimal(65,30)",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0m);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<decimal>(
                 name: "HighUsagePricePerKwh",
                 table: "Settings",
-                type: "double",
+                type: "decimal(65,30)",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0m);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<decimal>(
                 name: "LowRedeliveryPricePerKwh",
                 table: "Settings",
-                type: "double",
+                type: "decimal(65,30)",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0m);
 
-            migrationBuilder.AddColumn<double>(
+            migrationBuilder.AddColumn<decimal>(
                 name: "LowUsagePricePerKwh",
                 table: "Settings",
-                type: "double",
+                type: "decimal(65,30)",
                 nullable: false,
-                defaultValue: 0.0);
+                defaultValue: 0m);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

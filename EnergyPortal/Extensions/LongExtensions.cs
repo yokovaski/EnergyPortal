@@ -4,6 +4,6 @@ namespace EnergyPortal.Extensions
 {
     public static class LongExtensions
     {
-        public static double DivideByThousand(this long value) => Math.Round(value / 1000.0, 3);
+        public static decimal DivideByThousand(this long value) => decimal.Round(value / 1000.0M, 3);
     }
 }
