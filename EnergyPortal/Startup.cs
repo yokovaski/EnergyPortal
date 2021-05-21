@@ -2,6 +2,7 @@ using DatabaseInterface;
 using DatabaseInterface.Entities;
 using DatabaseInterface.Repositories;
 using EnergyPortal.Controllers.Middleware;
+using EnergyPortal.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -38,12 +39,7 @@ namespace EnergyPortal
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
-            
-            services.AddScoped<DbTenSecondMetricRepository, DbTenSecondMetricRepository>();
-            services.AddScoped<DbMinuteMetricRepository, DbMinuteMetricRepository>();
-            services.AddScoped<DbHourMetricRepository, DbHourMetricRepository>();
-            services.AddScoped<DbSettingsRepository, DbSettingsRepository>();
-            services.AddScoped<DbDeviceRepository, DbDeviceRepository>();
+            services.AddDbRepositories();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
