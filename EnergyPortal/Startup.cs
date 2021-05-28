@@ -15,6 +15,8 @@ namespace EnergyPortal
 {
     public class Startup
     {
+        private readonly string developmentCors = "DevelopmentCors";
+        
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -33,13 +35,25 @@ namespace EnergyPortal
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), 
                     assembly => assembly.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
             });
-
             
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddDbRepositories();
+            
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "wwwroot/app";
+            });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: developmentCors, builder =>
+                {
+                    builder.WithOrigins("http://localhost", "http://localhost:8080");
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -61,6 +75,7 @@ namespace EnergyPortal
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseCors(developmentCors);
             
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
@@ -80,8 +95,18 @@ namespace EnergyPortal
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
+            });
+            
+            app.UseOnlyPassAuthenticatedUsers();
+            app.UseSpaStaticFiles();
+            app.UseSpa(spa =>
+            {
+                if (env.IsDevelopment())
+                {
+                    spa.UseProxyToSpaDevelopmentServer("http://localhost:8080");
+                }
             });
         }
     }
