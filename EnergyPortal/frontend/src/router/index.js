@@ -7,8 +7,24 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'Home',
+    name: 'Actueel',
     component: Home
+  },
+  {
+    path: '/history',
+    name: 'Historie',
+    // route level code-splitting
+    // this generates a separate chunk (history.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/History.vue')
+  },
+  {
+    path: '/settings',
+    name: 'Instellingen',
+    // route level code-splitting
+    // this generates a separate chunk (settings.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Settings.vue'),
   },
   {
     path: '/about',

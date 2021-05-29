@@ -1,3 +1,7 @@
 module.exports = {
-    outputDir: "..\\wwwroot\\app"
+    outputDir: "..\\wwwroot\\app",
+
+    transpileDependencies: [
+      'vuetify'
+    ]
 }
