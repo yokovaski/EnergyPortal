@@ -97,9 +97,7 @@
         </v-navigation-drawer>
 
         <v-main class="main-background">
-            <v-container fluid>
-                <router-view/>
-            </v-container>
+            <router-view/>
         </v-main>
         <v-bottom-navigation 
             v-if="onMobile"

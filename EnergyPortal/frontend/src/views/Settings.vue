@@ -1,12 +1,14 @@
 <template>
-    <div>
-        <h1>Settings</h1>
-    </div>
+    <v-container>
+        <app-settings></app-settings>
+    </v-container>
 </template>
 
 <script>
+import AppSettings from "@/components/settings/AppSettings";
 export default {
-    name: "Settings"
+    name: "Settings",
+    components: {AppSettings}
 }
 </script>
 

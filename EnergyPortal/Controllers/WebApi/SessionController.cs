@@ -20,13 +20,11 @@ namespace EnergyPortal.Controllers.WebApi
         }
         
         [Authorize]
-        [HttpGet]
-        [Route("logout")]
-        private async Task<IActionResult> Logout()
+        [HttpGet("logout")]
+        public async Task<IActionResult> Logout()
         {
-            logger.LogInformation("User is trying to logout");
-            
             await signInManager.SignOutAsync();
+            logger.LogInformation("User logged out");
             return Ok();
         }
     }
