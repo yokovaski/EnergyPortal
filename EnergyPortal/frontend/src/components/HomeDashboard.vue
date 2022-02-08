@@ -360,6 +360,7 @@ export default {
                     chartData: this.buildChartData([], [], chart.backgroundColor, chart.borderColor),
                     backEndName: chart.backEndName
                 };
+                
                 this.chartNames.push(chart.chartName);
                 this.energyNameMapping[chart.backEndName] = chart.chartName;
             }

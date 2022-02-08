@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-row>
+        <v-row no-gutters class="pb-3">
             <v-col cols="12">
                 <v-card elevation="3">
                     <v-card-title>Instellingen</v-card-title>
@@ -49,8 +49,8 @@
                 
             </v-col>
         </v-row>
-        <v-row>
-            <v-col cols="12">
+        <v-row no-gutters>
+            <v-col cols="12" class="pt-3 pb-3">
                 <v-card elevation="3">
                     <v-card-title>Tarieven</v-card-title>
                     <v-card-text>

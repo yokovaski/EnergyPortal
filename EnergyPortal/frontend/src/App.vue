@@ -42,7 +42,7 @@
                     nav
                     dense
                 >
-                    <v-list-item link to="/">
+                    <v-list-item link to="/profile">
                         <v-list-item-icon>
                             <v-icon>mdi-account-cog</v-icon>
                         </v-list-item-icon>
@@ -79,6 +79,12 @@
                     </v-list-item-icon>
                     <v-list-item-title>Historie</v-list-item-title>
                 </v-list-item>
+                <v-list-item link to="/dashboards">
+                    <v-list-item-icon>
+                        <v-icon>mdi-view-dashboard</v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-title>Dashboard</v-list-item-title>
+                </v-list-item>
             </v-list>
             <template v-slot:append>
                 <v-divider></v-divider>
@@ -98,13 +104,14 @@
 
         <v-main class="main-background">
             <router-view/>
+            <div v-if="onMobile" style="height: 60px"></div>
         </v-main>
+        
         <v-bottom-navigation 
             v-if="onMobile"
             grow
             shift
             fixed
-            hide-on-scroll
             color="primary"
         >
             <v-btn link to="/">
@@ -177,8 +184,23 @@ export default {
 };
 </script>
 
-<style type="text/css">
+<style lang="scss">
 .main-background {
     background: #ebeef5;
+}
+body.native {
+    .v-navigation-drawer {
+        top: env(safe-area-inset-top) !important;
+        left: env(safe-area-inset-left) !important;
+    }
+    
+    .v-app-bar {
+        top: env(safe-area-inset-top) !important;
+        left: env(safe-area-inset-left) !important;
+    }
+    
+    main.v-content {
+        margin: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) !important;
+    }
 }
 </style>

@@ -16,24 +16,28 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (history.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/History.vue')
+    component: () => import('../views/History.vue')
   },
   {
     path: '/settings',
     name: 'Instellingen',
-    // route level code-splitting
-    // this generates a separate chunk (settings.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/Settings.vue'),
+    component: () => import('../views/Settings.vue'),
   },
   {
     path: '/about',
     name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
+    component: () => import('../views/About.vue')
+  },
+  {
+    path: '/profile',
+    name: 'Profiel',
+    component: () => import('../views/Profile.vue'),
+  },
+  {
+    path: '/dashboards',
+    name: 'Dashboards',
+    component: () => import('../views/CustomDashboard.vue'),
+  },
 ]
 
 const router = new VueRouter({
