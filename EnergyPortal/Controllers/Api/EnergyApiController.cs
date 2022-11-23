@@ -33,7 +33,7 @@ namespace EnergyPortal.Controllers.Api
             var raspberryPi = await dbContext.RaspberryPis.FirstOrDefaultAsync(r => r.RpiKey.Equals(rpiKey));
 
             if (raspberryPi == null)
-                return BadRequest();
+                return BadRequest("No device could be found with the given key");
 
             var tenSecondMetrics = inMetricsCollection.Metrics
                 .Select(metric => new TenSecondMetric
