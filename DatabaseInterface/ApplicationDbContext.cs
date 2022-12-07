@@ -11,8 +11,6 @@ namespace DatabaseInterface
         {
         }
 
-//        public DbSet<ApplicationUser> Users { get; set; }
-
         public DbSet<Settings> Settings { get; set; }
         public DbSet<RaspberryPi> RaspberryPis { get; set; }
         public DbSet<TenSecondMetric> TenSecondMetrics { get; set; }

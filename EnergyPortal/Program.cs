@@ -13,10 +13,11 @@ namespace EnergyPortal
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.Hosting", LogEventLevel.Information)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.RollingFile("logs/portal-{Date}.log", LogEventLevel.Information, fileSizeLimitBytes: 10000000)
@@ -25,7 +26,8 @@ namespace EnergyPortal
             try
             {
                 Log.Information("Starting up");
-                CreateHostBuilder(args).Build().Run();
+                var hostBuilder = CreateHostBuilder(args);
+                await hostBuilder.Build().RunAsync();
             }
             catch (Exception ex)
             {
@@ -37,9 +39,12 @@ namespace EnergyPortal
             }
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }
