@@ -24,7 +24,13 @@ namespace EnergyPortal
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            
+            services.AddOpenIddict()
+                .AddCore(options =>
+                {
+                    options
+                        .UseEntityFrameworkCore()
+                        .UseDbContext<ApplicationDbContext>();
+                });
             
             services.AddDatabaseDeveloperPageExceptionFilter();
             
@@ -34,7 +40,8 @@ namespace EnergyPortal
                 options
                     .UseNpgsql(connectionString,
                         assembly => assembly.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
-                    .UseSnakeCaseNamingConvention();
+                    .UseSnakeCaseNamingConvention()
+                    .UseOpenIddict();
             });
 
             services.AddDatabaseDeveloperPageExceptionFilter();
