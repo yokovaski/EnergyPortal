@@ -10,19 +10,101 @@
     }
 </style>
 <PageTitle>Index</PageTitle>
-
-<MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
-<MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
-
-<MudGrid>
+<MudGrid Class="pt-3">
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <MudText Align="Align.Center" Color="Color.Primary" Typo="Typo.h5">Verbruik</MudText>
+                <MudText Align="Align.Center" Typo="Typo.h2">3.093</MudText>
+                <MudText Align="Align.Center" Typo="Typo.h5">kWh</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <MudText Align="Align.Center" Color="Color.Primary" Typo="Typo.h5">Opwekking</MudText>
+                <MudText Align="Align.Center" Typo="Typo.h2">1.783</MudText>
+                <MudText Align="Align.Center" Typo="Typo.h5">kWh</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <MudText Align="Align.Center" Color="Color.Primary" Typo="Typo.h5">Teruglevering</MudText>
+                <MudText Align="Align.Center" Typo="Typo.h2">4.021</MudText>
+                <MudText Align="Align.Center" Typo="Typo.h5">kWh</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="3">
+        <MudCard>
+            <MudCardContent>
+                <MudText Align="Align.Center" Color="Color.Primary" Typo="Typo.h5">Opname</MudText>
+                <MudText Align="Align.Center" Typo="Typo.h2">2.453</MudText>
+                <MudText Align="Align.Center" Typo="Typo.h5">kWh</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
     <MudItem xs="12">
-        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
-            <div style="width: 100%; height: 100%">
-                <CartesianChart
-                    Series="series">
-                </CartesianChart>
-            </div>
-        </MudPaper>
+        <MudGrid>
+            <MudItem sm="12" md="8">
+                <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
+                    <div style="width: 100%; height: 100%">
+                        <CartesianChart
+                            Series="series">
+                        </CartesianChart>
+                    </div>
+                </MudPaper>
+            </MudItem>
+            <MudItem sm="12" md="4">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudCard>
+                            <MudCardContent>
+                                <MudText Align="Align.Center" Color="Color.Primary" Typo="Typo.h5">
+                                    Opname vandaag
+                                </MudText>
+                                <MudText Align="Align.Center" Typo="Typo.h2">1.874</MudText>
+                                <MudText Align="Align.Center" Typo="Typo.h5">kW</MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudCard>
+                            <MudCardContent>
+                                <MudText Align="Align.Center" Color="Color.Primary" Typo="Typo.h5">
+                                    Teruglevering vandaag
+                                </MudText>
+                                <MudText Align="Align.Center" Typo="Typo.h2">5.793</MudText>
+                                <MudText Align="Align.Center" Typo="Typo.h5">kW</MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudCard>
+                            <MudCardContent>
+                                <MudText Align="Align.Center" Color="Color.Primary" Typo="Typo.h5">
+                                    Gasverbruik vandaag
+                                </MudText>
+                                <MudText Align="Align.Center" Typo="Typo.h2">1.253</MudText>
+                                <MudText Align="Align.Center" Typo="Typo.h5">kW</MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudCard>
+                            <MudCardContent>
+                                <MudText Align="Align.Center" Color="Color.Default" Typo="Typo.h5">
+                                    Meterstanden
+                                </MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
     </MudItem>
     <MudItem xs="12">
 
