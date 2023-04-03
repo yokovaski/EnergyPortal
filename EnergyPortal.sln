@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnergyWorker", "EnergyWorke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigrateDatabase", "MigrateDatabase\MigrateDatabase.csproj", "{3BDC8313-705A-4F01-BC22-4437ECAEA701}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorWasm", "BlazorWasm\BlazorWasm.csproj", "{6188F0A5-0EB1-46F8-ADED-B4277EC06AA4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{3BDC8313-705A-4F01-BC22-4437ECAEA701}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BDC8313-705A-4F01-BC22-4437ECAEA701}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BDC8313-705A-4F01-BC22-4437ECAEA701}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6188F0A5-0EB1-46F8-ADED-B4277EC06AA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6188F0A5-0EB1-46F8-ADED-B4277EC06AA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6188F0A5-0EB1-46F8-ADED-B4277EC06AA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6188F0A5-0EB1-46F8-ADED-B4277EC06AA4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,0 +1,58 @@
+﻿@page "/"
+@using LiveChartsCore
+@using LiveChartsCore.SkiaSharpView
+@using LiveChartsCore.SkiaSharpView.Blazor
+
+<style>
+    canvas {
+        width: 100% !important;
+        height: 100% !important;
+    }
+</style>
+<PageTitle>Index</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
+<MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
+
+<MudGrid>
+    <MudItem xs="12">
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
+            <div style="width: 100%; height: 100%">
+                <CartesianChart
+                    Series="series">
+                </CartesianChart>
+            </div>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12">
+
+    </MudItem>
+</MudGrid>
+
+@code {
+    private readonly ISeries[] series =
+    {
+        new LineSeries<double>
+        {
+            Name = "Test",
+            Values = new double[] { 2, 1, 3, 5, 3, 4, 6 },
+            Fill = null
+        }
+    };
+}
+
+<style>
+    canvas {
+        width: 100%;
+        height: 100%;
+    }
+    .mud-paper {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .lvc-canvas-container {
+        width: 100%;
+        height: 100%;
+    }
+</style>
