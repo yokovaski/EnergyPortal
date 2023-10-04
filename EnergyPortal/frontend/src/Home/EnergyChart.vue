@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import LineChart from '../Charts/LineChart';
+import LineChart from '../Charts/LineChart.vue';
 
 export default {
   name: 'EnergyChart',

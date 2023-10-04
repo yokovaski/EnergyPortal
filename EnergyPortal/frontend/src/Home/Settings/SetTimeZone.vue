@@ -11,7 +11,7 @@
 
 <script>    
     import Axios from 'axios';
-    import AutoComplete from "./AutoComplete";
+    import AutoComplete from "./AutoComplete.vue";
 
     export default {
         name: "SetTimeZone",

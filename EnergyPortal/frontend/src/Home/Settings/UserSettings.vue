@@ -94,7 +94,7 @@
 </template>
 
 <script>
-import SetTimeZone from "./SetTimeZone";
+import SetTimeZone from "./SetTimeZone.vue";
 import Axios from "axios";
 export default {
   name: "UserSettings",

@@ -89,9 +89,9 @@
 
 <script>
 import Axios from "axios"
-import BarChart from "../Charts/BarChart"
+import BarChart from "../Charts/BarChart.vue"
 import moment from "moment-timezone";
-import deepCopy from "../deepCopy";
+import deepCopy from "../deepCopy.js";
 
 export default {
   name: "",

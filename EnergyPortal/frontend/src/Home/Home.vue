@@ -157,7 +157,7 @@
 </template>
 
 <script>
-import EnergyChart from "./EnergyChart";
+import EnergyChart from "./EnergyChart.vue";
 import Axios from "axios"
 
 let initialEnergyCharts = {

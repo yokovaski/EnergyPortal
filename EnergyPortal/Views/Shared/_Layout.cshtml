@@ -35,11 +35,30 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-    @RenderSection("Scripts", required: false)
+<div class="container">
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+</div>
+    <environment exclude="Development">
+        <script type="module" src="~/js/bundle.js" asp-append-version="true"></script>
+    </environment>
+    <environment include="Development">
+        <!-- Vite development server script -->
+        <script type="module" src="https://localhost:5173/@@vite/client"></script>
+        <script type="module" src="https://localhost:5173/main.js"></script>
+    </environment>
+@*     <environment exclude="Development"> *@
+@*         <script type="module" src="~/js/bundle.js" asp-append-version="true"></script> *@
+@*     </environment> *@
+@*     <environment include="Development"> *@
+@*         <!-- This also includes the css --> *@
+@*         <script type="module" src="https://localhost:5173/@@vite/client"></script> *@
+@*         <script type="module" src="https://localhost:5173/src/main.js"></script> *@
+@*     </environment> *@
+@*      *@
+
+    <!-- This needs to be after the loading of jQuery, because the ValidationScriptsPartial depend on JQuery being loaded -->
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
