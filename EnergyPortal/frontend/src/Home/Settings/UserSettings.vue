@@ -15,7 +15,7 @@
           ></b-form-checkbox>
         </b-col>
       </b-row>
-      
+
       <b-row class="my-1">
         <b-col sm="3">
           <label>Toon dagnaam in grafiek</label>
@@ -37,38 +37,38 @@
             class="mb-3"
         ></set-time-zone>
       </b-form-group>
-      
+
       <h2>Tarieven</h2>
       <hr>
-      
+
       <b-form-group class="my-1" label-cols="3" label="Opname normaaltarief" label-for="input-electricity">
         <b-form-input id="input-electricity" v-model="highUsagePricePerKwh" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
-      
+
       <b-form-group class="my-1" label-cols="3" label="Opname daltarief" label-for="input-electricity">
         <b-form-input id="input-electricity" v-model="lowUsagePricePerKwh" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
-      
+
       <b-form-group class="my-1" label-cols="3" label="Teruglevering normaaltarief" label-for="input-electricity">
         <b-form-input id="input-electricity" v-model="highRedeliveryPricePerKwh" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
-      
+
       <b-form-group class="my-1" label-cols="3" label="Teruglevering daltarief" label-for="input-electricity">
         <b-form-input id="input-electricity" v-model="lowRedeliveryPricePerKwh" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
-      
+
       <b-form-group class="my-1" label-cols="3" label="Gastarief" label-for="input-electricity">
         <b-form-input id="input-electricity" v-model="gasPrice" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
-      
+
       <b-form-group class="my-1" label-cols="3" label="Vaste kosten electriciteit / maand" label-for="input-electricity">
         <b-form-input id="input-electricity" v-model="electricityDeliveryPricePerMonth" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
-      
+
       <b-form-group class="my-1" label-cols="3" label="Vaste kosten gas / maand" label-for="input-electricity">
         <b-form-input id="input-electricity" v-model="gasDeliveryPricePerMonth" type="number" step="0.0000000001"></b-form-input>
       </b-form-group>
-      
+
 
       <b-button
           v-show="!saving"
@@ -123,8 +123,6 @@ export default {
     async fetchSettings() {
       try {
         let response = await Axios.get('/webapi/v3/settings');
-
-        console.log(response);
 
         this.solarSystem = response.data.solarSystem;
         this.showDayName = response.data.showDayName;

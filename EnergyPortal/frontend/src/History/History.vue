@@ -6,12 +6,12 @@
           Toon kosten
         </b-form-checkbox>
       </div>
-      <div v-if="selectedRange !== null" class="col-6">        
+      <div v-if="selectedRange !== null" class="col-6">
         <b-dropdown :text="selectedRange.text" right class="float-right mb-3">
-          <b-dropdown-item 
+          <b-dropdown-item
               v-for="range in defaultRangeOptions"
               :key="range.text"
-              @click="setSelectedRange(range)" 
+              @click="setSelectedRange(range)"
               href="#"
           >
             {{ range.text }}
@@ -19,10 +19,10 @@
         </b-dropdown>
 
         <b-dropdown variant="outline-secondary" v-if="customEnabled" :text="groupByOptions[oldGroupBy]" right class="float-right mb-3 mr-2">
-          <b-dropdown-item 
+          <b-dropdown-item
               v-for="(text, groupBy) in groupByOptions"
               :key="text"
-              @click="selectedRange.groupBy = groupBy" 
+              @click="selectedRange.groupBy = groupBy"
               href="#"
           >
             {{ text }}
@@ -225,7 +225,7 @@ export default {
     // );
 
     await this.getUserSettings();
-    
+
     // This will eventually trigger fetchHistory by the watcher
     this.selectedRange = this.defaultRangeOptions.find(r => r.text === 'Last week');
   },
@@ -249,7 +249,7 @@ export default {
         }
 
         let response = await Axios.get(`/webapi/v3/metrics/${this.selectedRange.groupBy}`, config);
-        
+
         this.chartData.labels = response.data.timestamps;
         this.gasChartData.labels = response.data.timestamps;
         this.datasets.usage.data = response.data.usage;
@@ -332,7 +332,7 @@ export default {
     },
     offset() {
       let timeZoneId = this.settings.timeZoneId || "Europe/Amsterdam";
-      
+
       let nowString = moment().tz(timeZoneId).format().split('T')[1];
       return nowString.substring(8);
     },
@@ -400,7 +400,7 @@ export default {
         // if (this.loading) {
         //   return;
         // }
-        
+
         if (range !== null)
           console.log(`Range selection changed! new (${range.groupBy}), old (${this.oldGroupBy})`);
 
@@ -442,11 +442,11 @@ export default {
           this.settings.gasPrice === 0 ||
           this.settings.electricityDeliveryPricePerMonth === 0 ||
           this.settings.gasDeliveryPricePerMonth === 0;
-      
+
       if (value && costsSettingsNotFullySet) {
         this.makeToast('Niet alle prijzen zijn bekend. Stel deze in onder Instellingen', 'warning');
       }
-      
+
       this.populateChartsWithCorrectDatasets();
     }
   }
