@@ -1,28 +1,28 @@
-import 'vite/modulepreload-polyfill'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-
-import Vue from 'vue'
+import { createApp } from 'vue'
 import App from './src/App.vue'
 
-/* import the fontawesome core */
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+// Vuetify
 
-Vue.use(BootstrapVue)
-Vue.use(IconsPlugin)
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+import { aliases, mdi } from 'vuetify/iconsets/mdi'
+import VueApexCharts from "vue3-apexcharts";
 
-/* import specific icons */
-import { faSortDown } from '@fortawesome/free-solid-svg-icons'
+const vuetify = createVuetify({
+    components,
+    directives,
+    icons: {
+        defaultSet: 'mdi',
+        aliases,
+        sets: {
+            mdi,
+        },
+    },
+})
 
-/* add icons to the library */
-library.add(faSortDown)
-
-Vue.component('font-awesome-icon', FontAwesomeIcon);
-
-import './src/style.css'
-
-new Vue({
-    render: (h) => h(App)
-}).$mount('#app')
+const app = createApp(App);
+app.use(vuetify);
+app.use(VueApexCharts);
+app.mount('#app');

@@ -5,7 +5,7 @@ import {spawn} from "child_process";
 import fs from "fs";
 import path from "path";
 import {UserConfig, defineConfig} from 'vite';
-import vue2 from '@vitejs/plugin-vue2'
+import vue from '@vitejs/plugin-vue';
 import {PreRenderedAsset} from "rollup";
 
 // @ts-ignore
@@ -87,7 +87,7 @@ export default defineConfig(async () => {
         appType: 'mpa',
         root: 'frontend',
         publicDir: 'public',
-        plugins: [vue2()],
+        plugins: [vue()],
         build: {
             manifest: appsettings.Vite.Manifest,
             emptyOutDir: false,

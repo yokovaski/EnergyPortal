@@ -1,24 +1,24 @@
 <template>
   <div>
-    <home v-if="url === ''"></home>
-    <history v-else-if="url === 'history'"></history>
-    <user-settings v-else-if="url === 'home/settings'"></user-settings>
+    <home-dashboard v-if="url === ''"></home-dashboard>
   </div>
 </template>
 
 <script>
 
 
-import Home from "./Home/Home.vue";
-import History from "./History/History.vue";
-import UserSettings from "./Home/Settings/UserSettings.vue";
+// import Home from "./Home/Home.vue";
+// import History from "./History/History.vue";
+// import UserSettings from "./Home/Settings/UserSettings.vue";
+import HomeDashboard from "./Home/HomeDashboard.vue";
 
 export default {
   name: 'app',
   components: {
-    Home,
-    History,
-    UserSettings
+    HomeDashboard,
+    // Home,
+    // History,
+    // UserSettings
   },
   data() {
     return {

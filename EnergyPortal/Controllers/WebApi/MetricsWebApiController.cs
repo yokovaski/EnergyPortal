@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EnergyPortal.Controllers.WebApi
 {
@@ -251,11 +252,11 @@ namespace EnergyPortal.Controllers.WebApi
             
             var cultureInfo = new System.Globalization.CultureInfo("nl-NL");
             var timestamps = metrics.Select(m => m.DateTime.ToString(format, cultureInfo)).ToList();
-            var usageList = metrics.Select(m => m.Usage.DivideByThousand()).ToList();
-            var intakeList = metrics.Select(m => m.Intake.DivideByThousand()).ToList();
-            var solarList = metrics.Select(m => m.Solar.DivideByThousand()).ToList();
-            var redeliveryList = metrics.Select(m => m.Redelivery.DivideByThousand()).ToList();
-            var gasList = metrics.Select(m => m.Gas.DivideByThousand()).ToList();
+            var usageList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Usage.DivideByThousand() }).ToList();
+            var intakeList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Intake.DivideByThousand() }).ToList();
+            var solarList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Solar.DivideByThousand() }).ToList();
+            var redeliveryList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Redelivery.DivideByThousand() }).ToList();
+            var gasList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Gas.DivideByThousand() }).ToList();
             var usageCosts = metrics.Select(m => m.UsageCost).ToList();
             var intakeCosts = metrics.Select(m => m.IntakeCost).ToList();
             var redeliveryCosts = metrics.Select(m => m.RedeliveryCost).ToList();
@@ -280,7 +281,8 @@ namespace EnergyPortal.Controllers.WebApi
                 UsageCosts = usageCosts,
                 IntakeCosts = intakeCosts,
                 RedeliveryCosts = redeliveryCosts,
-                GasCosts = gasCosts
+                GasCosts = gasCosts,
+                Format = format
             });
         }
         
