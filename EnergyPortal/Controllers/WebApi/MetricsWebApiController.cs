@@ -282,7 +282,8 @@ namespace EnergyPortal.Controllers.WebApi
                 IntakeCosts = intakeCosts,
                 RedeliveryCosts = redeliveryCosts,
                 GasCosts = gasCosts,
-                Format = format
+                Format = format,
+                UserTimeZone = settings.TimeZoneId
             });
         }
         

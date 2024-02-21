@@ -1,102 +1,126 @@
 <template>
   <div>
-    <div class="row">
-      <div class="col-6">
-        <b-form-checkbox v-model="showCosts" name="check-button-costs" switch>
-          Toon kosten
-        </b-form-checkbox>
-      </div>
-      <div v-if="selectedRange !== null" class="col-6">
-        <b-dropdown :text="selectedRange.text" right class="float-right mb-3">
-          <b-dropdown-item
-              v-for="range in defaultRangeOptions"
-              :key="range.text"
-              @click="setSelectedRange(range)"
-              href="#"
-          >
-            {{ range.text }}
-          </b-dropdown-item>
-        </b-dropdown>
+    <v-row>
+      <v-col cols="6">
+        <v-switch
+            color="primary"
+            v-model="showCosts"
+            label="Toon kosten"
+        ></v-switch>
+      </v-col>
+      <v-col v-if="selectedRange !== null" cols="6">
+        <v-select
+            variant="outlined"
+            class="float-right"
+            v-model="selectedRange"
+            :items="defaultRangeOptions.map(d => d.text)"
+            label="Bereik"
+            style="width: 15rem;"
+        ></v-select>
+      </v-col>
+<!--      <div v-if="selectedRange !== null" class="col-6">-->
+<!--        <b-dropdown :text="selectedRange.text" right class="float-right mb-3">-->
+<!--          <b-dropdown-item-->
+<!--              v-for="range in defaultRangeOptions"-->
+<!--              :key="range.text"-->
+<!--              @click="setSelectedRange(range)"-->
+<!--              href="#"-->
+<!--          >-->
+<!--            {{ range.text }}-->
+<!--          </b-dropdown-item>-->
+<!--        </b-dropdown>-->
 
-        <b-dropdown variant="outline-secondary" v-if="customEnabled" :text="groupByOptions[oldGroupBy]" right class="float-right mb-3 mr-2">
-          <b-dropdown-item
-              v-for="(text, groupBy) in groupByOptions"
-              :key="text"
-              @click="selectedRange.groupBy = groupBy"
-              href="#"
-          >
-            {{ text }}
-          </b-dropdown-item>
-        </b-dropdown>
-      </div>
-      <div v-if="customEnabled" class="col-12">
-        <div class="row">
-          <div class="col-12 col-sm-6">
-            <b-form-group
-                id="from"
-                label="From"
-                label-for="from-datepicker"
-            >
-              <b-form-datepicker
-                  id="from-datepicker"
-                  class="mb-1"
-                  v-model="fromDate"
-              ></b-form-datepicker>
-              <b-form-timepicker
-                  hourCycle="h23"
-                  reset-button
-                  v-model="fromTime"
-              ></b-form-timepicker>
-            </b-form-group>
-          </div>
-          <div class="col-12 col-sm-6">
-            <b-form-group
-                id="to"
-                label="To"
-                label-for="from-datepicker"
-            >
-              <b-form-datepicker
-                  id="to-datepicker"
-                  class="mb-1"
-                  v-model="toDate"
-              ></b-form-datepicker>
-              <b-form-timepicker
-                  now-button
-                  reset-button
-                  v-model="toTime"
-              ></b-form-timepicker>
-            </b-form-group>
-          </div>
-        </div>
-      </div>
-      <div class="col-12">
-        <div class="card shadow-sm mb-3">
-          <div class="card-body">
-            <bar-chart ref="electricityChart" :chart-data="chartData" :options="options"></bar-chart>
-          </div>
-        </div>
-      </div>
-      <div class="col-12">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <bar-chart ref="gasChart" :chart-data="gasChartData" :options="options"></bar-chart>
-          </div>
-        </div>
-      </div>
-    </div>
+<!--        <b-dropdown variant="outline-secondary" v-if="customEnabled" :text="groupByOptions[oldGroupBy]" right class="float-right mb-3 mr-2">-->
+<!--          <b-dropdown-item-->
+<!--              v-for="(text, groupBy) in groupByOptions"-->
+<!--              :key="text"-->
+<!--              @click="selectedRange.groupBy = groupBy"-->
+<!--              href="#"-->
+<!--          >-->
+<!--            {{ text }}-->
+<!--          </b-dropdown-item>-->
+<!--        </b-dropdown>-->
+<!--      </div>-->
+      
+<!--      <div v-if="customEnabled" class="col-12">-->
+<!--        <div class="row">-->
+<!--          <div class="col-12 col-sm-6">-->
+<!--            <b-form-group-->
+<!--                id="from"-->
+<!--                label="From"-->
+<!--                label-for="from-datepicker"-->
+<!--            >-->
+<!--              <b-form-datepicker-->
+<!--                  id="from-datepicker"-->
+<!--                  class="mb-1"-->
+<!--                  v-model="fromDate"-->
+<!--              ></b-form-datepicker>-->
+<!--              <b-form-timepicker-->
+<!--                  hourCycle="h23"-->
+<!--                  reset-button-->
+<!--                  v-model="fromTime"-->
+<!--              ></b-form-timepicker>-->
+<!--            </b-form-group>-->
+<!--          </div>-->
+<!--          <div class="col-12 col-sm-6">-->
+<!--            <b-form-group-->
+<!--                id="to"-->
+<!--                label="To"-->
+<!--                label-for="from-datepicker"-->
+<!--            >-->
+<!--              <b-form-datepicker-->
+<!--                  id="to-datepicker"-->
+<!--                  class="mb-1"-->
+<!--                  v-model="toDate"-->
+<!--              ></b-form-datepicker>-->
+<!--              <b-form-timepicker-->
+<!--                  now-button-->
+<!--                  reset-button-->
+<!--                  v-model="toTime"-->
+<!--              ></b-form-timepicker>-->
+<!--            </b-form-group>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="col-12">-->
+<!--        <div class="card shadow-sm mb-3">-->
+<!--          <div class="card-body">-->
+<!--            <bar-chart ref="electricityChart" :chart-data="chartData" :options="options"></bar-chart>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="col-12">-->
+<!--        <div class="card shadow-sm">-->
+<!--          <div class="card-body">-->
+<!--            <bar-chart ref="gasChart" :chart-data="gasChartData" :options="options"></bar-chart>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+      <v-col cols="12">
+        <v-card class="pa-2">
+          <apexchart :series="chartData.series" :options="chartData.chartOptions"></apexchart>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-sonner position="bottom-right" />
   </div>
 </template>
 
 <script>
 import Axios from "axios"
-import BarChart from "../Charts/BarChart.vue"
 import moment from "moment-timezone";
 import deepCopy from "../deepCopy.js";
+import {VSonner, toast } from "vuetify-sonner";
 
 export default {
   name: "",
-  components: { BarChart},
+  components: {VSonner},
   data: () => ({
+    messageText: '',
+    messageVariant: 'info',
+    showMessage: false,
+    timeout: 5000,
     showCosts: false,
     defaultRangeOptions: [
       {
@@ -141,8 +165,58 @@ export default {
       years: 'Per year',
     },
     chartData: {
-      labels: [],
-      datasets: []
+      chartOptions: {
+        colors: ['#007bff', '#ffc107', '#28a745', '#dc3545'],
+        chart: {
+          type: 'bar',
+          height: 350
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            endingShape: 'rounded'
+          },
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          show: true,
+          width: 2,
+          colors: ['transparent']
+        },
+        xaxis: {
+          type: 'datetime',
+          labels: {
+            formatter: null
+          }
+        },
+        fill: {
+          opacity: 1
+        },
+        tooltip: {
+          x: {
+            format: 'yyyy-MM-dd',
+            timeZone: 'UTC'
+          }
+        },
+        // fill: {
+        //   type: "gradient",
+        //   gradient: {
+        //     shadeIntensity: 1,
+        //     opacityFrom: 0.5,
+        //     opacityTo: 0.8,
+        //     stops: [0, 100, 100]
+        //   }
+        // }
+      },
+      series: [
+        {
+          data: [],
+          name: ''
+        }
+      ]
     },
     gasChartData: {
       labels: [],
@@ -224,12 +298,42 @@ export default {
     //   this.fetchHistory()]
     // );
 
+    this.chartData.chartOptions.xaxis.labels.formatter = v => this.formatEpoch(v, this.chartData.chartOptions);
+    
     await this.getUserSettings();
 
     // This will eventually trigger fetchHistory by the watcher
     this.selectedRange = this.defaultRangeOptions.find(r => r.text === 'Last week');
   },
   methods: {
+    formatEpoch(epoch, chartData) {
+      const d = new Date(epoch);
+      let year = d.toLocaleString([], { year: 'numeric', timeZone: chartData.tooltip.x.timeZone});
+      let month = d.toLocaleString([], { month: '2-digit', timeZone: chartData.tooltip.x.timeZone});
+      let day = d.toLocaleString([], { day: '2-digit', timeZone: chartData.tooltip.x.timeZone});
+      let hours = d.toLocaleString([], { hour: '2-digit', hour12: false, timeZone: chartData.tooltip.x.timeZone});
+      let minutes = d.toLocaleString([], { minute: '2-digit', timeZone: chartData.tooltip.x.timeZone});
+      let seconds = d.toLocaleString([], { second: '2-digit', timeZone: chartData.tooltip.x.timeZone});
+      const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+      switch(chartData.tooltip.x.format) {
+        case 'HH:mm':
+          return `${hours}:${minutes}`;
+        case 'HH:mm:ss':
+          return `${hours}:${minutes}:${seconds}`;
+        case 'MM-dd HH:mm':
+          return `${month}-${day} ${hours}:${minutes}`;
+        case 'yyyy-MM-dd (dddd)':
+          const dayName = daysOfWeek[d.getUTCDay()]; // Get the day name
+          return `${year}-${month}-${day} (${dayName})`;
+        case 'yyyy-MM-dd':
+          return `${year}-${month}-${day}`;
+        case 'yyyy-MM':
+          return `${year}-${month}`;
+        case 'yyyy':
+          return `${year}`;
+      }
+    },
     async getUserSettings() {
       try {
         let response = await Axios.get('webapi/v3/settings');
@@ -250,8 +354,12 @@ export default {
 
         let response = await Axios.get(`/webapi/v3/metrics/${this.selectedRange.groupBy}`, config);
 
-        this.chartData.labels = response.data.timestamps;
-        this.gasChartData.labels = response.data.timestamps;
+        this.chartData.chartOptions.xaxis.categories = response.data.timestamps;
+        this.chartData.chartOptions.tooltip.x.format = response.data.format;
+        this.chartData.chartOptions.tooltip.x.timeZone = response.data.userTimeZone;
+        
+        // this.chartData.labels = response.data.timestamps;
+        // this.gasChartData.labels = response.data.timestamps;
         this.datasets.usage.data = response.data.usage;
         this.datasets.solar.data = response.data.solar;
         this.datasets.redelivery.data = response.data.redelivery;
@@ -279,36 +387,68 @@ export default {
       this.selectedRange = deepCopy(range);
     },
     makeToast(message, variant = null) {
-      this.$bvToast.toast(message, {
-        variant: variant,
-        solid: true
-      })
+      toast(message, {
+        cardProps: {
+          outlined: true,
+          color: variant
+        }
+      });
+      this.messageText = message;
+      this.showMessage = true;
     },
     populateChartsWithCorrectDatasets() {
-      this.chartData.datasets = [];
-      this.gasChartData.datasets = [];
+      this.chartData.series = [];
 
       if (this.showCosts) {
-        this.chartData.datasets.push(this.datasets.usageCosts);
-        this.gasChartData.datasets.push(this.datasets.gasCosts);
+        let usageSeries = {
+          data: this.datasets.usageCosts.data,
+          name: this.datasets.usageCosts.label
+        }
+        
+        this.gasChartData.series.push(usageSeries);
 
         if (this.settings.solarSystem) {
-          this.chartData.datasets.push(this.datasets.intakeCosts);
-          this.chartData.datasets.push(this.datasets.redeliveryCosts);
+          let intakeSeries = {
+            data: this.datasets.intakeCosts.data,
+            name: this.datasets.intakeCosts.label
+          }
+          let redeliverySeries = {
+            data: this.datasets.redeliveryCosts.data,
+            name: this.datasets.redeliveryCosts.label
+          }
+          
+          this.chartData.series.push(intakeSeries);
+          this.chartData.series.push(redeliverySeries);
         }
       } else {
-        this.chartData.datasets.push(this.datasets.usage);
-        this.gasChartData.datasets.push(this.datasets.gas);
+        let usageSeries = {
+          data: this.datasets.usage.data,
+          name: this.datasets.usage.label
+        }
+        
+        this.chartData.series.push(usageSeries);
+        
+        // this.gasChartData.datasets.push(this.datasets.gas);
 
         if (this.settings.solarSystem) {
-          this.chartData.datasets.push(this.datasets.solar);
-          this.chartData.datasets.push(this.datasets.redelivery);
-          this.chartData.datasets.push(this.datasets.intake);
+          let solarSeries = {
+            data: this.datasets.solar.data,
+            name: this.datasets.solar.label
+          }
+          let redeliverySeries = {
+            data: this.datasets.redelivery.data,
+            name: this.datasets.redelivery.label
+          }
+          let intakeSeries = {
+            data: this.datasets.intake.data,
+            name: this.datasets.intake.label
+          }
+          
+          this.chartData.series.push(solarSeries);
+          this.chartData.series.push(redeliverySeries);
+          this.chartData.series.push(intakeSeries);
         }
       }
-
-      this.$refs.electricityChart.update();
-      this.$refs.gasChart.update();
     }
   },
   computed:{

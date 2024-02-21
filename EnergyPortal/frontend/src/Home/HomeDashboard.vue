@@ -241,29 +241,6 @@ export default {
   name: "HomeDashboard",
   components: { ElectricityChart },
   data: () => ({
-    series: [{
-      name: "Verbruik",
-      data: [2, 4, 3, 5, 4, 3, 4, 5]
-    }],
-    chartOptions: {
-      chart: {
-        height: 350,
-        type: 'line',
-        zoom: {
-          enabled: false
-        }
-      },
-      dataLabels: {
-        enabled: false
-      },
-      stroke: {
-        curve: 'smooth'
-      },
-      xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        convertedCatToNumeric: false
-      }
-    },
     chartNames: [],
     electricityCharts: {},
     energyNameMapping: {},
@@ -339,7 +316,8 @@ export default {
     },
     chartRange: "day",
     lastRefresh: null,
-    timer: null
+    timer: null,
+    timeLookup: {}
   }),
   async mounted () {
     this.initCharts();
@@ -374,54 +352,31 @@ export default {
         this.energyNameMapping[chart.backEndName] = chart.chartName;
       }
     },
-    formatEpoch(epoch, chartData) {
+    formatEpoch(epoch, chartData) {      
       const d = new Date(epoch);
-      let year = 0;
-      let month = 0;
-      let day = 0;
-      let hours = 0;
-      let minutes = 0;
-      let seconds = 0;
+      let year = d.toLocaleString([], { year: 'numeric', timeZone: chartData.tooltip.x.timeZone});
+      let month = d.toLocaleString([], { month: '2-digit', timeZone: chartData.tooltip.x.timeZone});
+      let day = d.toLocaleString([], { day: '2-digit', timeZone: chartData.tooltip.x.timeZone});
+      let hours = d.toLocaleString([], { hour: '2-digit', hour12: false, timeZone: chartData.tooltip.x.timeZone});
+      let minutes = d.toLocaleString([], { minute: '2-digit', timeZone: chartData.tooltip.x.timeZone});
+      let seconds = d.toLocaleString([], { second: '2-digit', timeZone: chartData.tooltip.x.timeZone});
       const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       
       switch(chartData.tooltip.x.format) {
         case 'HH:mm':
-          hours = d.getUTCHours().toString().padStart(2, '0');
-          minutes = d.getUTCMinutes().toString().padStart(2, '0');
           return `${hours}:${minutes}`;
         case 'HH:mm:ss':
-          hours = d.getUTCHours().toString().padStart(2, '0');
-          minutes = d.getUTCMinutes().toString().padStart(2, '0');
-          seconds = d.getUTCSeconds().toString().padStart(2, '0');
           return `${hours}:${minutes}:${seconds}`;
         case 'MM-dd HH:mm':
-
-          month = (d.getUTCMonth() + 1).toString().padStart(2, '0'); // Get the month name
-          day = d.getUTCDate().toString().padStart(2, '0');
-          hours = d.getUTCHours().toString().padStart(2, '0');
-          minutes = d.getUTCMinutes().toString().padStart(2, '0');
-
           return `${month}-${day} ${hours}:${minutes}`;
         case 'yyyy-MM-dd (dddd)':
-          year = d.getUTCFullYear();
-          month = (d.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
-          day = d.getUTCDate().toString().padStart(2, '0');
           const dayName = daysOfWeek[d.getUTCDay()]; // Get the day name
-
           return `${year}-${month}-${day} (${dayName})`;
         case 'yyyy-MM-dd':
-          year = d.getUTCFullYear();
-          month = (d.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
-          day = d.getUTCDate().toString().padStart(2, '0');
-
           return `${year}-${month}-${day}`;
         case 'yyyy-MM':
-          year = d.getUTCFullYear();
-          month = (d.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-based
-
           return `${year}-${month}`;
         case 'yyyy':
-          year = d.getUTCFullYear();
           return `${year}`;
       }
     },
@@ -450,7 +405,8 @@ export default {
           },
           tooltip: {
             x: {
-              format: format
+              format: format,
+              timeZone: 'UTC'
             }
           },
           fill: {
@@ -491,11 +447,20 @@ export default {
           this.electricityCharts[chartName].chartData.series[0].data = chartData;
           this.electricityCharts[chartName].chartData.chartOptions.xaxis.categories = data.timestamps;
           this.electricityCharts[chartName].chartData.chartOptions.tooltip.x.format = data.format;
+          this.electricityCharts[chartName].chartData.chartOptions.tooltip.x.timeZone = data.userTimeZone;
+          
+          console.log(`Fetched data for ${chartName} with format ${data.format}`);
+          this.timeLookup[data.format] = chartData
+              .map((epochAndValue, index) => ({
+                epoch: epochAndValue[0],
+                value: data.timestamps[index]
+              }))
+              .reduce((dict, current) => {
+                dict[current.epoch] = current.value;
+                return dict;
+              }, {});
         }
         this.lastRefresh = data.queryTimestamp;
-        for (let i = 0; i < this.$refs.electricityChart.length; i++){
-          this.$refs.electricityChart[i].refresh();
-        }
       } catch (e) {
         console.error(e);
       }
@@ -509,7 +474,7 @@ export default {
             from: this.lastRefresh
           }
         };
-        let response = await Axios.get('webapi/v3/metrics/tenseconds', config);
+        let response = await Axios.get('/webapi/v3/metrics/tenseconds', config);
         let data = response.data;
         this.lastRefresh = data.queryTimestamp;
         if (data.timestamps.length > 0) {
@@ -535,7 +500,7 @@ export default {
     },
     async fetchTotalsToday() {
       try {
-        let response = await Axios.get('webapi/v3/energy/total-today');
+        let response = await Axios.get('/webapi/v3/energy/total-today');
         this.energyToday.usageTotalHigh = response.data.usageTotalHigh;
         this.energyToday.usageTotalLow = response.data.usageTotalLow;
         this.energyToday.redeliveryTotalHigh = response.data.redeliveryTotalHigh;
@@ -583,12 +548,12 @@ export default {
     },
     chartUri() {
       if (this.weekActive)
-        return "webapi/v3/metrics/hours";
+        return "/webapi/v3/metrics/hours";
       if (this.dayActive)
-        return "webapi/v3/metrics/hours";
+        return "/webapi/v3/metrics/hours";
       if (this.hourActive)
-        return "webapi/v3/metrics/minutes";
-      return "webapi/v3/metrics/tenseconds";
+        return "/webapi/v3/metrics/minutes";
+      return "/webapi/v3/metrics/tenseconds";
     }
   }
 };

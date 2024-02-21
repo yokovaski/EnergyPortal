@@ -58,15 +58,15 @@ namespace EnergyPortal.Controllers.WebApi
         [Route("time-zones")]
         public IActionResult GetTimeZones()
         {
-            var timeZones = TimeZoneInfo.GetSystemTimeZones();
+            var timeZones = TimeZoneConverter.TZConvert.KnownIanaTimeZoneNames;
             var timeZoneList = new List<object>();
 
             foreach (var timeZone in timeZones)
             {
                 timeZoneList.Add(new
                 {
-                    timeZone.Id,
-                    timeZone.DisplayName
+                    Id = timeZone,
+                    DisplayName = timeZone
                 });
             }
             

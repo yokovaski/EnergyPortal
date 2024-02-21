@@ -16,7 +16,8 @@
     "moment-timezone": "^0.5.43",
     "vue": "^3.3.7",
     "vue3-apexcharts": "^1.5.2",
-    "vuetify": "^3.3.23"
+    "vuetify": "^3.3.23",
+    "vuetify-sonner": "^0.3.13"
   },
   "devDependencies": {
     "@types/node": "^20.3.2",

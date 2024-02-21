@@ -1,6 +1,8 @@
 <template>
   <div>
-    <home-dashboard v-if="url === ''"></home-dashboard>
+    <home-dashboard v-if="matchesUrl('')"></home-dashboard>
+    <history v-else-if="matchesUrl('history')"></history>
+    <user-settings v-else-if="matchesUrl('home/settings')"></user-settings>
   </div>
 </template>
 
@@ -8,8 +10,8 @@
 
 
 // import Home from "./Home/Home.vue";
-// import History from "./History/History.vue";
-// import UserSettings from "./Home/Settings/UserSettings.vue";
+import History from "./History/History.vue";
+import UserSettings from "./Home/Settings/UserSettings.vue";
 import HomeDashboard from "./Home/HomeDashboard.vue";
 
 export default {
@@ -17,20 +19,18 @@ export default {
   components: {
     HomeDashboard,
     // Home,
-    // History,
-    // UserSettings
+    History,
+    UserSettings
   },
-  data() {
-    return {
-      url: ''
+  computed: {
+    url() {
+      return window.location.pathname.slice(1);
+    },
+  },
+  methods: {
+    matchesUrl(urlToMatch) {
+      return (this.url.localeCompare(urlToMatch, 'en', {sensitivity: 'accent'}) === 0);
     }
-  },
-  /**
-   * Get the current URL in the browser, which determines which Vue component is shown.
-   * @returns {Promise<void>}
-   */
-  async mounted() {
-    this.url = window.location.pathname.slice(1);
   }
 }
 </script>
