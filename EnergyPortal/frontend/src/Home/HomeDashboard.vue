@@ -77,6 +77,7 @@
           >
             <v-card
                 class="pa-5"
+                elevation="3"
             >
               <div
                   class="text-subtitle-2 text-center text-grey-darken-2"
@@ -101,6 +102,7 @@
           >
             <v-card
                 class="pa-5"
+                elevation="3"
             >
               <div
                   class="text-subtitle-2 text-center text-grey-darken-2"
@@ -125,6 +127,7 @@
           >
             <v-card
                 class="pa-5"
+                elevation="3"
             >
               <div
                   class="text-subtitle-2 text-center text-grey-darken-2"
@@ -149,6 +152,7 @@
           >
             <v-card
                 class="pa-5"
+                elevation="3"
             >
               <div
                   class="text-subtitle-2 text-center text-grey-darken-2"
@@ -173,6 +177,7 @@
           >
             <v-card
                 class="pa-5"
+                elevation="3"
             >
               <div
                   class="text-subtitle-2 text-center text-grey-darken-2"
@@ -324,16 +329,14 @@ export default {
     await Promise.all([
       this.fetchChartData(),
       this.fetchTotalsToday(),
-      this.fetchTotals(),
-      // this.fetchUserSettings()
+      this.fetchTotals()
     ]);
-    //
+    
+    await this.fetchLast();
+
     let self = this;
     this.timer = setInterval(function () {
-      if (self.chartRange === "now"){
-        self.fetchChartData().then();
-      }
-      self.fetchLast().then();
+      self.fetchLast()
     }, 10000)
   },
   beforeDestroy() {
@@ -442,8 +445,7 @@ export default {
           let chartData = data[backEndName];
           if (chartData === undefined)
             continue;
-          if (chartData.length > 0 && this.lastRefresh === null)
-            this.latestEnergyValues[backEndName].value = chartData[chartData.length -1][1];
+          
           this.electricityCharts[chartName].chartData.series[0].data = chartData;
           this.electricityCharts[chartName].chartData.chartOptions.xaxis.categories = data.timestamps;
           this.electricityCharts[chartName].chartData.chartOptions.tooltip.x.format = data.format;
@@ -471,7 +473,8 @@ export default {
       try {
         let config = {
           params: {
-            from: this.lastRefresh
+            from: this.lastRefresh,
+            showRealLast: true
           }
         };
         let response = await Axios.get('/webapi/v3/metrics/tenseconds', config);
@@ -532,6 +535,7 @@ export default {
     },
     chartConfig() {
       let now = new Date();
+
       if (this.weekActive)
         now.setHours(now.getHours() - 168);
       if (this.dayActive)
@@ -542,7 +546,8 @@ export default {
         now.setMinutes(now.getMinutes() - 10);
       return {
         params: {
-          from: now.toISOString()
+          from: now.toISOString(),
+          showRealLast: true
         }
       };
     },

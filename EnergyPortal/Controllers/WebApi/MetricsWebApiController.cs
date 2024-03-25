@@ -51,7 +51,9 @@ namespace EnergyPortal.Controllers.WebApi
         public Task<IActionResult> GetMetrics(
             [FromQuery] DateTime from, 
             [FromQuery] DateTime? to = null,
-            [FromRoute] TimeGroup timeGroup = TimeGroup.None)
+            [FromRoute] TimeGroup timeGroup = TimeGroup.None,
+            [FromQuery] bool showRealLast = false,
+            [FromQuery] bool skipTimeSpanCheck = false)
         {
             from = from.ToUniversalTime();
             to = to?.ToUniversalTime();
@@ -60,15 +62,15 @@ namespace EnergyPortal.Controllers.WebApi
             {
                 case TimeGroup.None:
                 case TimeGroup.TenSeconds:
-                    return GetMetrics(tenSecondMetricRepository, from, to, timeGroup);
+                    return GetMetrics(tenSecondMetricRepository, from, to, timeGroup, showRealLast, skipTimeSpanCheck);
                 case TimeGroup.Minutes:
-                    return GetMetrics(minuteMetricRepository, from, to, timeGroup);
+                    return GetMetrics(minuteMetricRepository, from, to, timeGroup, showRealLast, skipTimeSpanCheck);
                 case TimeGroup.Hours:
                 case TimeGroup.Days:
                 case TimeGroup.Weeks:
                 case TimeGroup.Months:
                 case TimeGroup.Years:
-                    return GetMetrics(hourMetricRepository, from, to, timeGroup);
+                    return GetMetrics(hourMetricRepository, from, to, timeGroup, showRealLast, skipTimeSpanCheck);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(timeGroup), timeGroup, null);
             }
@@ -102,9 +104,11 @@ namespace EnergyPortal.Controllers.WebApi
             IMetricRepository metricRepository, 
             DateTime start, 
             DateTime? end = null,
-            TimeGroup timeGroup = TimeGroup.None)
+            TimeGroup timeGroup = TimeGroup.None,
+            bool showRealLast = false,
+            bool skipTimeSpanCheck = false)
         {
-            if (TimeSpanTooLarge(start, end, timeGroup))
+            if (!skipTimeSpanCheck && TimeSpanTooLarge(start, end, timeGroup))
                 return BadRequest("Time range is too large for the current resolution");
             
             if (end.HasValue && end.Value < start)
@@ -121,16 +125,16 @@ namespace EnergyPortal.Controllers.WebApi
             var dbMetrics = (await metricRepository.GetMetrics(raspberryPiId.Value, start, end, settings.TimeZoneId))
                 .ToList();
 
-            if (!dbMetrics.Any())
-                return Ok(new
-                {
-                    QueryTimestamp = DateTime.UtcNow.AddSeconds(1).ToString("o"),
-                    Timestamps = new string[0],
-                    Usage = new int[0],
-                    Solar = new int[0],
-                    Redelivery = new int[0],
-                    Intake = new int[0],
-                });
+            // if (!dbMetrics.Any())
+            //     return Ok(new
+            //     {
+            //         QueryTimestamp = DateTime.UtcNow.AddSeconds(1).ToString("o"),
+            //         Timestamps = Array.Empty<string>(),
+            //         Usage = Array.Empty<int>(),
+            //         Solar = Array.Empty<int>(),
+            //         Redelivery = Array.Empty<int>(),
+            //         Intake = Array.Empty<int>(),
+            //     });
 
             var format = "";
             List<OutMetricModel> metrics;
@@ -249,7 +253,9 @@ namespace EnergyPortal.Controllers.WebApi
                 default:
                     throw new ArgumentOutOfRangeException(nameof(timeGroup), timeGroup, null);
             }
-            
+
+            metrics = metrics.FillMissing(timeGroup, start.ConvertToTimeZone(settings.TimeZoneId),
+                end?.ConvertToTimeZone(settings.TimeZoneId) ?? DateTime.UtcNow.ConvertToTimeZone(settings.TimeZoneId), showRealLast);
             var cultureInfo = new System.Globalization.CultureInfo("nl-NL");
             var timestamps = metrics.Select(m => m.DateTime.ToString(format, cultureInfo)).ToList();
             var usageList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Usage.DivideByThousand() }).ToList();
@@ -257,10 +263,10 @@ namespace EnergyPortal.Controllers.WebApi
             var solarList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Solar.DivideByThousand() }).ToList();
             var redeliveryList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Redelivery.DivideByThousand() }).ToList();
             var gasList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Gas.DivideByThousand() }).ToList();
-            var usageCosts = metrics.Select(m => m.UsageCost).ToList();
-            var intakeCosts = metrics.Select(m => m.IntakeCost).ToList();
-            var redeliveryCosts = metrics.Select(m => m.RedeliveryCost).ToList();
-            var gasCosts = metrics.Select(m => m.GasCost).ToList();
+            var usageCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000,  m.UsageCost }).ToList();
+            var intakeCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.IntakeCost }).ToList();
+            var redeliveryCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.RedeliveryCost }).ToList();
+            var gasCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.GasCost }).ToList();
 
             var lastDateTime = metrics
                 .OrderBy(m => m.DateTime)

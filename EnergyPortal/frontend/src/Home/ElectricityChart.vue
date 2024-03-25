@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-2">
+  <v-card class="pa-2" elevation="3">
     <div
         class="text-subtitle-1 text-center text-grey-darken-2"
         v-text="chartName"

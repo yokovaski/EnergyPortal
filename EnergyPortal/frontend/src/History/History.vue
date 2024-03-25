@@ -8,97 +8,79 @@
             label="Toon kosten"
         ></v-switch>
       </v-col>
-      <v-col v-if="selectedRange !== null" cols="6">
+      <v-col v-if="selectedRangeText !== null" cols="6">
         <v-select
             variant="outlined"
             class="float-right"
-            v-model="selectedRange"
+            v-model="selectedRangeText"
             :items="defaultRangeOptions.map(d => d.text)"
             label="Bereik"
             style="width: 15rem;"
         ></v-select>
       </v-col>
-<!--      <div v-if="selectedRange !== null" class="col-6">-->
-<!--        <b-dropdown :text="selectedRange.text" right class="float-right mb-3">-->
-<!--          <b-dropdown-item-->
-<!--              v-for="range in defaultRangeOptions"-->
-<!--              :key="range.text"-->
-<!--              @click="setSelectedRange(range)"-->
-<!--              href="#"-->
-<!--          >-->
-<!--            {{ range.text }}-->
-<!--          </b-dropdown-item>-->
-<!--        </b-dropdown>-->
-
-<!--        <b-dropdown variant="outline-secondary" v-if="customEnabled" :text="groupByOptions[oldGroupBy]" right class="float-right mb-3 mr-2">-->
-<!--          <b-dropdown-item-->
-<!--              v-for="(text, groupBy) in groupByOptions"-->
-<!--              :key="text"-->
-<!--              @click="selectedRange.groupBy = groupBy"-->
-<!--              href="#"-->
-<!--          >-->
-<!--            {{ text }}-->
-<!--          </b-dropdown-item>-->
-<!--        </b-dropdown>-->
-<!--      </div>-->
-      
-<!--      <div v-if="customEnabled" class="col-12">-->
-<!--        <div class="row">-->
-<!--          <div class="col-12 col-sm-6">-->
-<!--            <b-form-group-->
-<!--                id="from"-->
-<!--                label="From"-->
-<!--                label-for="from-datepicker"-->
-<!--            >-->
-<!--              <b-form-datepicker-->
-<!--                  id="from-datepicker"-->
-<!--                  class="mb-1"-->
-<!--                  v-model="fromDate"-->
-<!--              ></b-form-datepicker>-->
-<!--              <b-form-timepicker-->
-<!--                  hourCycle="h23"-->
-<!--                  reset-button-->
-<!--                  v-model="fromTime"-->
-<!--              ></b-form-timepicker>-->
-<!--            </b-form-group>-->
-<!--          </div>-->
-<!--          <div class="col-12 col-sm-6">-->
-<!--            <b-form-group-->
-<!--                id="to"-->
-<!--                label="To"-->
-<!--                label-for="from-datepicker"-->
-<!--            >-->
-<!--              <b-form-datepicker-->
-<!--                  id="to-datepicker"-->
-<!--                  class="mb-1"-->
-<!--                  v-model="toDate"-->
-<!--              ></b-form-datepicker>-->
-<!--              <b-form-timepicker-->
-<!--                  now-button-->
-<!--                  reset-button-->
-<!--                  v-model="toTime"-->
-<!--              ></b-form-timepicker>-->
-<!--            </b-form-group>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--      <div class="col-12">-->
-<!--        <div class="card shadow-sm mb-3">-->
-<!--          <div class="card-body">-->
-<!--            <bar-chart ref="electricityChart" :chart-data="chartData" :options="options"></bar-chart>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--      <div class="col-12">-->
-<!--        <div class="card shadow-sm">-->
-<!--          <div class="card-body">-->
-<!--            <bar-chart ref="gasChart" :chart-data="gasChartData" :options="options"></bar-chart>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      </div>-->
+    </v-row>
+    <v-row v-if="customEnabled">
+      <v-col cols="6">
+        <v-date-picker 
+            width="100%"
+            color="primary"
+            v-model="customFromDate"
+            :max="customToDate"
+        ></v-date-picker>
+      </v-col>
+      <v-col cols="6">
+        <v-date-picker 
+            width="100%"
+            color="primary"
+            v-model="customToDate"
+            :min="customFromDate"
+        ></v-date-picker>
+      </v-col>
+    </v-row>
+    <v-row v-if="customEnabled">
+      <v-col cols="6">
+        <v-switch
+            color="primary"
+            v-model="skipTimeSpanCheck"
+            label="Negeer waarschuwing"
+        ></v-switch>
+      </v-col>
+      <v-col v-if="selectedRangeText !== null" cols="6">
+        <v-select
+            variant="outlined"
+            class="float-right"
+            v-model="customGroupBy"
+            :items="Object.values(groupByOptions)"
+            label="Bereik"
+            style="width: 15rem;"
+        ></v-select>
+          <!--        <b-dropdown variant="outline-secondary" v-if="customEnabled" :text="groupByOptions[oldGroupBy]" right class="float-right mb-3 mr-2">-->
+          <!--          <b-dropdown-item-->
+          <!--              v-for="(text, groupBy) in groupByOptions"-->
+          <!--              :key="text"-->
+          <!--              @click="selectedRange.groupBy = groupBy"-->
+          <!--              href="#"-->
+          <!--          >-->
+          <!--            {{ text }}-->
+          <!--          </b-dropdown-item>-->
+          <!--        </b-dropdown>-->
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12">
-        <v-card class="pa-2">
-          <apexchart :series="chartData.series" :options="chartData.chartOptions"></apexchart>
+        <v-card elevation="3" class="pa-2">
+          <div class="text-subtitle-1 text-center text-grey-darken-2">
+            Elektriciteit
+          </div>
+          <apexchart width="100%" height="400" :series="chartData.series" :options="chartData.chartOptions"></apexchart>
+        </v-card>
+      </v-col>
+      <v-col cols="12">
+        <v-card elevation="3" class="pa-2">
+          <div class="text-subtitle-1 text-center text-grey-darken-2">
+            Gas
+          </div>
+          <apexchart width="100%" height="400" :series="gasChartData.series" :options="gasChartData.chartOptions"></apexchart>
         </v-card>
       </v-col>
     </v-row>
@@ -122,59 +104,67 @@ export default {
     showMessage: false,
     timeout: 5000,
     showCosts: false,
+    skipTimeSpanCheck: false,
     defaultRangeOptions: [
       {
-        text: 'Last day',
+        text: 'Afgelopen 24 uur',
         groupBy: 'hours',
         amount: 24
       },
       {
-        text: 'Last week',
+        text: 'Laatste 7 dagen',
         groupBy: 'days',
         amount: 6
       },
       {
-        text: 'Last month',
+        text: 'Afgelopen maand',
         groupBy: 'days',
         amount: 30
       },
       {
-        text: 'Last year',
+        text: 'Afgelopen jaar',
         groupBy: 'months',
         amount: 12
       },
       {
-        text: 'Last 5 years',
+        text: 'Afgelopen 5 jaar',
         groupBy: 'years',
         amount: 5
       },
       {
-        text: 'Select range',
+        text: 'Selecteer bereik',
         groupBy: null
       }
     ],
+    selectedRangeText: 'Afgelopen 24 uur',
     selectedRange: null,
     oldGroupBy: null,
     groupByOptions: {
-      tenseconds: 'Per ten seconds',
-      minutes: 'Per minute',
-      hours: 'Per hour',
-      days: 'Per day',
+      tenseconds: 'Per ten seconden',
+      minutes: 'Per minuut',
+      hours: 'Per uur',
+      days: 'Per dag',
       weeks: 'Per week',
-      months: 'Per month',
-      years: 'Per year',
+      months: 'Per maand',
+      years: 'Per jaar',
     },
     chartData: {
       chartOptions: {
         colors: ['#007bff', '#ffc107', '#28a745', '#dc3545'],
         chart: {
           type: 'bar',
-          height: 350
+          stacked: false,
+          toolbar: {
+            show: true
+          },
+          zoom: {
+            enabled: true
+          }
         },
         plotOptions: {
           bar: {
             horizontal: false,
-            columnWidth: '55%',
+            columnWidth: '80%',
             endingShape: 'rounded'
           },
         },
@@ -183,7 +173,7 @@ export default {
         },
         stroke: {
           show: true,
-          width: 2,
+          width: 5,
           colors: ['transparent']
         },
         xaxis: {
@@ -219,8 +209,55 @@ export default {
       ]
     },
     gasChartData: {
-      labels: [],
-      datasets: []
+      chartOptions: {
+        colors: ['#dc3545'],
+        chart: {
+          type: 'bar',
+          stacked: false,
+          toolbar: {
+            show: true
+          },
+          zoom: {
+            enabled: true
+          }
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '80%',
+            endingShape: 'rounded'
+          },
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          show: true,
+          width: 5,
+          colors: ['transparent']
+        },
+        xaxis: {
+          type: 'datetime',
+          labels: {
+            formatter: null
+          }
+        },
+        fill: {
+          opacity: 1
+        },
+        tooltip: {
+          x: {
+            format: 'yyyy-MM-dd',
+            timeZone: 'UTC'
+          }
+        },
+      },
+      series: [
+        {
+          data: [],
+          name: ''
+        }
+      ]
     },
     datasets: {
       usage: {
@@ -282,28 +319,26 @@ export default {
         }]
       }
     },
+    customFromDate: '',
+    customToDate: '',
+    customGroupBy: 'Per dag',
     fromDate: '',
     fromTime: '00:00:00',
     toDate: '',
-    toTime: '',
+    toTime: '00:00:00',
     settings: {
       solarSystem: false
     },
     loading: true
   }),
   async mounted () {
-    // Can't fetch history directly here because moment() does not yet exist somehow..
-    // await Promise.all([
-    //   this.getUserSettings(), 
-    //   this.fetchHistory()]
-    // );
-
     this.chartData.chartOptions.xaxis.labels.formatter = v => this.formatEpoch(v, this.chartData.chartOptions);
+    this.gasChartData.chartOptions.xaxis.labels.formatter = v => this.formatEpoch(v, this.chartData.chartOptions);
     
     await this.getUserSettings();
 
     // This will eventually trigger fetchHistory by the watcher
-    this.selectedRange = this.defaultRangeOptions.find(r => r.text === 'Last week');
+    this.selectedRange = this.defaultRangeOptions.find(r => r.text === 'Laatste 7 dagen');
   },
   methods: {
     formatEpoch(epoch, chartData) {
@@ -348,7 +383,9 @@ export default {
         let config = {
           params: {
             from: this.from ? this.from : moment().substract(30, 'days').format(),
-            to: this.to ? this.to : moment().format()
+            to: this.to ? this.to : moment().format(),
+            showRealLast: true,
+            skipTimeSpanCheck: this.skipTimeSpanCheck
           }
         }
 
@@ -357,9 +394,10 @@ export default {
         this.chartData.chartOptions.xaxis.categories = response.data.timestamps;
         this.chartData.chartOptions.tooltip.x.format = response.data.format;
         this.chartData.chartOptions.tooltip.x.timeZone = response.data.userTimeZone;
+        this.gasChartData.chartOptions.xaxis.categories = response.data.timestamps;
+        this.gasChartData.chartOptions.tooltip.x.format = response.data.format;
+        this.gasChartData.chartOptions.tooltip.x.timeZone = response.data.userTimeZone;
         
-        // this.chartData.labels = response.data.timestamps;
-        // this.gasChartData.labels = response.data.timestamps;
         this.datasets.usage.data = response.data.usage;
         this.datasets.solar.data = response.data.solar;
         this.datasets.redelivery.data = response.data.redelivery;
@@ -397,15 +435,21 @@ export default {
       this.showMessage = true;
     },
     populateChartsWithCorrectDatasets() {
+      this.gasChartData.series = [];
       this.chartData.series = [];
 
       if (this.showCosts) {
+        let gasSeries = {
+          data: this.datasets.gasCosts.data,
+          name: this.datasets.gasCosts.label
+        }
+        this.gasChartData.series.push(gasSeries);
+
         let usageSeries = {
           data: this.datasets.usageCosts.data,
           name: this.datasets.usageCosts.label
         }
-        
-        this.gasChartData.series.push(usageSeries);
+        this.chartData.series.push(usageSeries);
 
         if (this.settings.solarSystem) {
           let intakeSeries = {
@@ -421,14 +465,18 @@ export default {
           this.chartData.series.push(redeliverySeries);
         }
       } else {
+        let gasSeries = {
+          data: this.datasets.gas.data,
+          name: this.datasets.gas.label
+        }
+        this.gasChartData.series.push(gasSeries);
+        
         let usageSeries = {
           data: this.datasets.usage.data,
           name: this.datasets.usage.label
         }
         
         this.chartData.series.push(usageSeries);
-        
-        // this.gasChartData.datasets.push(this.datasets.gas);
 
         if (this.settings.solarSystem) {
           let solarSeries = {
@@ -477,7 +525,7 @@ export default {
       return nowString.substring(8);
     },
     customEnabled() {
-      return (this.selectedRange && this.selectedRange.text === 'Select range') || false;
+      return (this.selectedRange && this.selectedRange.text === 'Selecteer bereik') || false;
     },
     getFromMoment() {
       let from = moment();
@@ -507,39 +555,50 @@ export default {
     }
   },
   watch: {
-    fromDate() {
+    customFromDate() {
       if (!this.customEnabled)
         return;
 
-      if (this.fromTime.length > 0)
-        this.fetchHistory();
+      let year = this.customFromDate.toLocaleString([], { year: 'numeric' });
+      let month = this.customFromDate.toLocaleString([], { month: '2-digit' });
+      let day = this.customFromDate.toLocaleString([], { day: '2-digit' });
+      
+      this.selectedRange.groupBy = Object.keys(this.groupByOptions).find(key => this.groupByOptions[key] === this.customGroupBy)
+      
+      this.fromDate = `${year}-${month}-${day}`;
+      this.fromTime = '00:00:00';
+
+      this.fetchHistory();
     },
-    fromTime() {
+    customToDate() {
       if (!this.customEnabled)
         return;
 
-      if (this.fromDate.length > 0)
-        this.fetchHistory();
+      let year = this.customToDate.toLocaleString([], { year: 'numeric' });
+      let month = this.customToDate.toLocaleString([], { month: '2-digit' });
+      let day = this.customToDate.toLocaleString([], { day: '2-digit' });
+
+      this.toDate = `${year}-${month}-${day}`;
+      this.toTime = '23:59:59';
+      this.selectedRange.groupBy = Object.keys(this.groupByOptions).find(key => this.groupByOptions[key] === this.customGroupBy)
+
+      this.fetchHistory();
     },
-    toDate() {
+    customGroupBy() {
       if (!this.customEnabled)
         return;
 
-      if (this.toTime.length > 0)
-        this.fetchHistory();
+      this.selectedRange.groupBy = Object.keys(this.groupByOptions).find(key => this.groupByOptions[key] === this.customGroupBy)
+      this.fetchHistory();
     },
-    toTime() {
-      if (!this.customEnabled)
-        return;
-
-      if (this.toDate.length > 0)
-        this.fetchHistory();
+    skipTimeSpanCheck() {
+      this.fetchHistory();
+    },
+    selectedRangeText(value) {
+      this.selectedRange = this.defaultRangeOptions.find(r => r.text === value);
     },
     selectedRange: {
       async handler(range) {
-        // if (this.loading) {
-        //   return;
-        // }
 
         if (range !== null)
           console.log(`Range selection changed! new (${range.groupBy}), old (${this.oldGroupBy})`);
@@ -563,11 +622,6 @@ export default {
         let from = this.getFromMoment.format().split('T');
         this.fromDate = from[0];
         this.fromTime = from[1].split('+')[0];
-
-        // if (subtractFormat === 'hours' || subtractFormat === 'minutes')
-        //     this.fromTime = from[1].split('+')[0];
-        // else
-        //     this.fromTime = '00:00:00';
 
         await this.fetchHistory();
         this.oldGroupBy = range.groupBy;

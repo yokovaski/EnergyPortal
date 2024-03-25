@@ -9,7 +9,6 @@
 <script>
 
 
-// import Home from "./Home/Home.vue";
 import History from "./History/History.vue";
 import UserSettings from "./Home/Settings/UserSettings.vue";
 import HomeDashboard from "./Home/HomeDashboard.vue";
@@ -18,7 +17,6 @@ export default {
   name: 'app',
   components: {
     HomeDashboard,
-    // Home,
     History,
     UserSettings
   },
