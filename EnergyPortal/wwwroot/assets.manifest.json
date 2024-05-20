@@ -1,0 +1,11 @@
+{
+  "index.html": {
+    "file": "js/bundle.js",
+    "isEntry": true,
+    "src": "index.html"
+  },
+  "style.css": {
+    "file": "css/bundle.css",
+    "src": "style.css"
+  }
+}

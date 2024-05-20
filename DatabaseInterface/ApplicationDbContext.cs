@@ -4,15 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatabaseInterface
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : IdentityDbContext<ApplicationUser, ApplicationRole, string>(options)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
-
-//        public DbSet<ApplicationUser> Users { get; set; }
-
         public DbSet<Settings> Settings { get; set; }
         public DbSet<RaspberryPi> RaspberryPis { get; set; }
         public DbSet<TenSecondMetric> TenSecondMetrics { get; set; }

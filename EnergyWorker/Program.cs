@@ -46,7 +46,10 @@ namespace EnergyWorker
                     services.AddDbContext<ApplicationDbContext>(options =>
                     {
                         var connectionString = hostContext.Configuration.GetConnectionString("DefaultConnection");
-                        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                        options
+                            .UseNpgsql(connectionString,
+                                assembly => assembly.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
+                            .UseSnakeCaseNamingConvention();
                     });
                     services.AddHostedService<Worker>();
                 });

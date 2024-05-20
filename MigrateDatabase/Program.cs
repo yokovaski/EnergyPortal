@@ -21,7 +21,10 @@ namespace MigrateDatabase
                 Console.WriteLine("Starting migration...");
 
                 var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-                optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                optionsBuilder
+                    .UseNpgsql(connectionString,
+                        assembly => assembly.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
+                    .UseSnakeCaseNamingConvention();
 
                 using (var context = new ApplicationDbContext(optionsBuilder.Options))
                 {

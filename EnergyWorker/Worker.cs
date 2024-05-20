@@ -33,11 +33,11 @@ namespace EnergyWorker
             
             while (!stoppingToken.IsCancellationRequested)
             {
-                logger.LogInformation($"Running at {DateTime.Now}");
+                logger.LogInformation("Running at {Time}", DateTime.Now);
                 
                 try
                 {
-                    var raspberryPiIds = new List<long>();
+                    List<long> raspberryPiIds;
 
                     using (var scope = serviceProvider.CreateScope())
                     {
@@ -180,13 +180,13 @@ namespace EnergyWorker
                 if (lastMinuteMetric != null)
                 {
                     var last = lastMinuteMetric.Created;
-                    var timestamp = new DateTime(last.Year, last.Month, last.Day, last.Hour, last.Minute, 0);
+                    var timestamp = new DateTime(last.Year, last.Month, last.Day, last.Hour, last.Minute, 0, DateTimeKind.Utc);
                     timestamp = timestamp.AddMinutes(1);
                     metricsQuery = metricsQuery.Where(t => t.Created >= timestamp);
                 }
 
                 var utcNow = DateTime.UtcNow;
-                var to = new DateTime(utcNow.Year, utcNow.Month, utcNow.Day, utcNow.Hour, utcNow.Minute, 0);
+                var to = new DateTime(utcNow.Year, utcNow.Month, utcNow.Day, utcNow.Hour, utcNow.Minute, 0, DateTimeKind.Utc);
 
                 var metrics = await metricsQuery
                     .Where(t => t.Created < to)
@@ -255,13 +255,13 @@ namespace EnergyWorker
                 if (lastHourData != null)
                 {
                     var last = lastHourData.Created;
-                    var timestamp = new DateTime(last.Year, last.Month, last.Day, last.Hour, 0, 0);
+                    var timestamp = new DateTime(last.Year, last.Month, last.Day, last.Hour, 0, 0, DateTimeKind.Utc);
                     timestamp = timestamp.AddHours(1);
                     metricsQuery = metricsQuery.Where(t => t.Created >= timestamp);
                 }
 
                 var utcNow = DateTime.UtcNow;
-                var to = new DateTime(utcNow.Year, utcNow.Month, utcNow.Day, utcNow.Hour, 0, 0);
+                var to = new DateTime(utcNow.Year, utcNow.Month, utcNow.Day, utcNow.Hour, 0, 0, DateTimeKind.Utc);
 
                 var metrics = await metricsQuery
                     .Where(t => t.Created < to)

@@ -1,12 +1,12 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnergyPortal", "EnergyPortal\EnergyPortal.csproj", "{D44BDE94-B2E0-49D7-A779-764F84BD9B16}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EnergyPortal", "EnergyPortal\EnergyPortal.csproj", "{D44BDE94-B2E0-49D7-A779-764F84BD9B16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseInterface", "DatabaseInterface\DatabaseInterface.csproj", "{3DCDE81E-B0A6-4642-98BF-B906D1E625BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatabaseInterface", "DatabaseInterface\DatabaseInterface.csproj", "{3DCDE81E-B0A6-4642-98BF-B906D1E625BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnergyWorker", "EnergyWorker\EnergyWorker.csproj", "{7F547F82-8F17-466C-8E0C-B6A1EC6D1DE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EnergyWorker", "EnergyWorker\EnergyWorker.csproj", "{7F547F82-8F17-466C-8E0C-B6A1EC6D1DE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MigrateDatabase", "MigrateDatabase\MigrateDatabase.csproj", "{3BDC8313-705A-4F01-BC22-4437ECAEA701}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigrateDatabase", "MigrateDatabase\MigrateDatabase.csproj", "{3BDC8313-705A-4F01-BC22-4437ECAEA701}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
