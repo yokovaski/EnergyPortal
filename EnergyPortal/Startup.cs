@@ -3,6 +3,7 @@ using DatabaseInterface.Entities;
 using DatabaseInterface.Repositories;
 using EnergyPortal.Controllers.Middleware;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -77,6 +78,10 @@ namespace EnergyPortal
                         .AllowAnyMethod();
                 });
             });
+            
+            services.AddDataProtection()
+                .SetApplicationName("EnergyPortal")
+                .PersistKeysToFileSystem(new System.IO.DirectoryInfo(@"/var/dpkeys/"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

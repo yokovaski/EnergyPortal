@@ -4,6 +4,7 @@
     <UserSecretsId>dotnet-EnergyWorker-074031A0-A66F-43BC-9469-F748A75BF753</UserSecretsId>
     <LangVersion>default</LangVersion>
     <PublishSingleFile>true</PublishSingleFile>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
@@ -12,5 +13,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DatabaseInterface\DatabaseInterface.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
   </ItemGroup>
 </Project>
