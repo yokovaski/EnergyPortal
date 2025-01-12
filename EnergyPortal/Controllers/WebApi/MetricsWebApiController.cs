@@ -46,6 +46,13 @@ namespace EnergyPortal.Controllers.WebApi
             this.dbSettingsRepository = dbSettingsRepository;
             this.logger = logger;
         }
+
+        [HttpGet("last-reading")]
+        public async Task<IActionResult> GetLastReading()
+        {
+            var oneMinuteAgo = DateTime.UtcNow.AddMinutes(-1);
+            return await this.GetMetrics(oneMinuteAgo, timeGroup: TimeGroup.TenSeconds);
+        }
         
         [HttpGet("{timeGroup}")]
         public Task<IActionResult> GetMetrics(

@@ -471,13 +471,7 @@ export default {
       if (this.lastRefresh === null)
         return;
       try {
-        let config = {
-          params: {
-            from: this.lastRefresh,
-            showRealLast: true
-          }
-        };
-        let response = await Axios.get('/webapi/v3/metrics/tenseconds', config);
+        let response = await Axios.get('/webapi/v3/metrics/last-reading');
         let data = response.data;
         this.lastRefresh = data.queryTimestamp;
         if (data.timestamps.length > 0) {
@@ -547,7 +541,7 @@ export default {
       return {
         params: {
           from: now.toISOString(),
-          showRealLast: true
+          showRealLast: false
         }
       };
     },

@@ -24,6 +24,10 @@ namespace DatabaseInterface
                 .HasOne(a => a.Settings)
                 .WithOne(r => r.User)
                 .HasForeignKey<Settings>(r => r.UserId);
+
+            builder.Entity<RaspberryPi>()
+                .Property(e => e.Id)
+                .UseIdentityAlwaysColumn();
             
             builder.Entity<RaspberryPi>()
                 .HasMany(r => r.HourMetrics)
