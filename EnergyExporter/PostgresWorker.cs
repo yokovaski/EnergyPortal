@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using System.Text.Json;
 using DatabaseInterface.Entities;
 using DatabaseInterface.Repositories;
+using EnergyExporter.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace EnergyExporter;
@@ -17,6 +17,15 @@ public class PostgresWorker(
     IOptions<ExporterOptions> exporterOptions
     ) : BackgroundService
 {
+    private readonly ILogger<MySqlWorker> logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IHostApplicationLifetime hostApplicationLifetime = hostApplicationLifetime ?? throw new ArgumentNullException(nameof(hostApplicationLifetime));
+    private readonly DbTenSecondMetricRepository tenSecondMetricRepository = tenSecondMetricRepository ?? throw new ArgumentNullException(nameof(tenSecondMetricRepository));
+    private readonly DbMinuteMetricRepository minuteMetricRepository = minuteMetricRepository ?? throw new ArgumentNullException(nameof(minuteMetricRepository));
+    private readonly DbHourMetricRepository hourMetricRepository = hourMetricRepository ?? throw new ArgumentNullException(nameof(hourMetricRepository));
+    private readonly DbDeviceRepository deviceRepository = deviceRepository ?? throw new ArgumentNullException(nameof(deviceRepository));
+    private readonly DbUserRepository userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+    private readonly IOptions<ExporterOptions> exporterOptions = exporterOptions ?? throw new ArgumentNullException(nameof(exporterOptions));
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (exporterOptions.Value.OperationMode != OperationMode.Import)
@@ -34,7 +43,7 @@ public class PostgresWorker(
     }
     
     private async Task<Dictionary<long, long>> ImportData<T>(Dictionary<long, long> deviceMapping,
-        CancellationToken stoppingToken)
+        CancellationToken stoppingToken) where T : new()
     {
         stoppingToken.ThrowIfCancellationRequested();
         
@@ -56,9 +65,7 @@ public class PostgresWorker(
         
         foreach (var file in files)
         {
-            // TODO add support for MetricsDto type.
-            var content = await File.ReadAllTextAsync(file, stoppingToken);
-            var data = JsonSerializer.Deserialize<List<T>>(content);
+            var data = await file.ReadAllTextToData<T>(stoppingToken);
             
             if (data == null)
             {
@@ -153,15 +160,6 @@ public class PostgresWorker(
 
     private void FixDeviceMapping<T>(List<T> metrics, Dictionary<long, long> mapping) where T : class, IMetric
     {
-        var groupedMetrics = metrics
-            .GroupBy(m => m.RaspberryPiId)
-            .Select(g => new
-            {
-                RaspberryPiId = g.Key,
-                Metrics = g.ToList()
-            })
-            .ToList();
-        
         try
         {
             foreach (var entry in metrics)

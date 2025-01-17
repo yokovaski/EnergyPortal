@@ -62,13 +62,13 @@ public class MySqlWorker(
                     continue;
                 }
                 
-                await WriteData(allMetrics, stoppingToken, counter++);
+                await WriteData(allMetrics, stoppingToken, counter++, nameOfMetric);
                 allMetrics = [];
             }
             
             if (allMetrics.Count > 0)
             {
-                await WriteData(allMetrics, stoppingToken, counter);
+                await WriteData(allMetrics, stoppingToken, counter, nameOfMetric);
             }
         }
         catch (Exception e)
@@ -77,9 +77,9 @@ public class MySqlWorker(
         }
     }
 
-    private async Task WriteData<T>(List<T> data, CancellationToken cancellationToken, int counter = 0)
+    private async Task WriteData<T>(List<T> data, CancellationToken cancellationToken, int counter = 0, string? dataName = null)
     {
-        var dataName = typeof(T).Name;
+        dataName ??= typeof(T).Name;
         logger.LogInformation("Serializing {Count} {Data}s", data.Count, dataName);
         var serialized = data is List<IMetric> metrics
             ? JsonSerializer.Serialize(metrics.ToMetricDtoList())
