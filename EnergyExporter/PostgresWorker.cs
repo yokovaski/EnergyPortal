@@ -48,10 +48,7 @@ public class PostgresWorker(
         stoppingToken.ThrowIfCancellationRequested();
         
         var nameOfData = typeof(T).Name;
-        
-        // Get path of executing assembly
-        var path = Assembly.GetExecutingAssembly().Location;
-        var directory = Path.GetDirectoryName(path);
+        var directory = exporterOptions.Value.ExportFilePath;
 
         if (directory == null)
         {

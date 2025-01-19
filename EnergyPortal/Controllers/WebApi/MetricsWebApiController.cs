@@ -265,6 +265,7 @@ namespace EnergyPortal.Controllers.WebApi
                 end?.ConvertToTimeZone(settings.TimeZoneId) ?? DateTime.UtcNow.ConvertToTimeZone(settings.TimeZoneId), showRealLast);
             var cultureInfo = new System.Globalization.CultureInfo("nl-NL");
             var timestamps = metrics.Select(m => m.DateTime.ToString(format, cultureInfo)).ToList();
+            var epochs = metrics.Select(m => EpochTime.GetIntDate(m.DateTime) * 1000).ToList();
             var usageList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Usage.DivideByThousand() }).ToList();
             var intakeList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Intake.DivideByThousand() }).ToList();
             var solarList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Solar.DivideByThousand() }).ToList();
@@ -285,6 +286,7 @@ namespace EnergyPortal.Controllers.WebApi
             return Ok(new
             {
                 QueryTimestamp = lastDateTime.AddSeconds(1).ToString("o"),
+                Epochs = epochs,
                 Timestamps = timestamps,
                 Usage = usageList,
                 Solar = solarList,

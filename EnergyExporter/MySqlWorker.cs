@@ -14,6 +14,11 @@ public class MySqlWorker(
     IOptions<ExporterOptions> exporterOptions
     ) : BackgroundService
 {
+    private readonly ILogger<MySqlWorker> logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IHostApplicationLifetime hostApplicationLifetime = hostApplicationLifetime ?? throw new ArgumentNullException(nameof(hostApplicationLifetime));
+    private readonly MySqlConnection mySqlConnection = mySqlConnection ?? throw new ArgumentNullException(nameof(mySqlConnection));
+    private readonly IOptions<ExporterOptions> exporterOptions = exporterOptions ?? throw new ArgumentNullException(nameof(exporterOptions));
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (exporterOptions.Value.OperationMode != OperationMode.Export)
@@ -85,9 +90,10 @@ public class MySqlWorker(
             ? JsonSerializer.Serialize(metrics.ToMetricDtoList())
             : JsonSerializer.Serialize(data);
         var filename = $"{dataName}_{counter}.json";
+        var filePath = Path.Combine(exporterOptions.Value.ExportFilePath, filename);
                     
         logger.LogInformation("Writing {Count} {Data}s to {Filename}", data.Count, dataName, filename);
-        await File.WriteAllTextAsync(filename, serialized, cancellationToken);
+        await File.WriteAllTextAsync(filePath, serialized, cancellationToken);
         logger.LogInformation("Wrote {Count} {Data}s to {Filename}", data.Count, dataName, filename);
     } 
 

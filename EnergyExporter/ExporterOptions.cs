@@ -4,6 +4,7 @@ public class ExporterOptions
 {
     public ExporterDatabase DatabaseType { get; set; }
     public OperationMode OperationMode { get; set; }
+    public string ExportFilePath { get; set; }
 }
 
 public enum ExporterDatabase
