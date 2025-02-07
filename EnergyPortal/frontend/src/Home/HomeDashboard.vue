@@ -409,7 +409,7 @@ export default {
           tooltip: {
             x: {
               format: format,
-              timeZone: 'UTC'
+              timeZone: 'Europe/Amsterdam'
             }
           },
           fill: {
