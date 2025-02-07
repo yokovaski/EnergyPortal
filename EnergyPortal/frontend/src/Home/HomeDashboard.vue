@@ -447,7 +447,7 @@ export default {
             continue;
           
           this.electricityCharts[chartName].chartData.series[0].data = chartData;
-          this.electricityCharts[chartName].chartData.chartOptions.xaxis.categories = data.epochs;
+          this.electricityCharts[chartName].chartData.chartOptions.xaxis.categories = data.timestamps;
           this.electricityCharts[chartName].chartData.chartOptions.tooltip.x.format = data.format;
           this.electricityCharts[chartName].chartData.chartOptions.tooltip.x.timeZone = data.userTimeZone;
           
