@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0.11-noble-arm64v8 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble-arm64v8 AS base
 
 USER root
 # Create the /var/dpkeys directory
@@ -11,7 +11,7 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0.404-noble-arm64v8 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0-noble-arm64v8 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["EnergyPortal/EnergyPortal.csproj", "EnergyPortal/"]
