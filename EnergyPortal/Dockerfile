@@ -22,10 +22,9 @@ WORKDIR "/src/EnergyPortal"
 
 # Install Node.js and npm
 RUN apt-get update && apt-get install curl
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-RUN source ~/.bashrc
-RUN nvm install 22
-RUN nvm use 22
+RUN curl -sL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
+RUN bash nodesource_setup.sh
+RUN apt-get install -y nodejs
 
 # Run npm install and npm run build
 RUN npm install
