@@ -136,7 +136,7 @@ export default {
         groupBy: null
       }
     ],
-    selectedRangeText: 'Afgelopen 24 uur',
+    selectedRangeText: 'Afgelopen 7 dagen',
     selectedRange: null,
     oldGroupBy: null,
     groupByOptions: {
@@ -339,6 +339,7 @@ export default {
 
     // This will eventually trigger fetchHistory by the watcher
     this.selectedRange = this.defaultRangeOptions.find(r => r.text === 'Laatste 7 dagen');
+    this.selectedRangeText = this.selectedRange.text;
   },
   methods: {
     formatEpoch(epoch, chartData) {
