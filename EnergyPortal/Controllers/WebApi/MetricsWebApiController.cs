@@ -248,7 +248,7 @@ namespace EnergyPortal.Controllers.WebApi
 
             metrics = metrics.FillMissing(timeGroup, start.ConvertToTimeZone(settings.TimeZoneId),
                 end?.ConvertToTimeZone(settings.TimeZoneId) ?? DateTime.UtcNow.ConvertToTimeZone(settings.TimeZoneId), showRealLast);
-            var timestamps = metrics.Select(m => DateTime.SpecifyKind(m.DateTime, DateTimeKind.Utc).ToString("o", CultureInfo.InvariantCulture)).ToList();
+            var timestamps = metrics.Select(m => m.DateTime.ToString("o", CultureInfo.InvariantCulture)).ToList();
             var epochs = metrics.Select(m => EpochTime.GetIntDate(m.DateTime) * 1000).ToList();
             var usageList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Usage.DivideByThousand() }).ToList();
             var intakeList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Intake.DivideByThousand() }).ToList();

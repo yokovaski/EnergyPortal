@@ -449,7 +449,6 @@ export default {
           this.electricityCharts[chartName].chartData.series[0].data = chartData;
           this.electricityCharts[chartName].chartData.chartOptions.xaxis.categories = data.timestamps.map(t => new Date(t));
           this.electricityCharts[chartName].chartData.chartOptions.tooltip.x.format = data.format;
-          this.electricityCharts[chartName].chartData.chartOptions.tooltip.x.timeZone = data.userTimeZone;
           
           console.log(`Fetched data for ${chartName} with format ${data.format}`);
           this.timeLookup[data.format] = chartData

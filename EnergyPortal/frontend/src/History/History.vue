@@ -344,12 +344,12 @@ export default {
   methods: {
     formatEpoch(epoch, chartData) {
       const d = new Date(epoch);
-      let year = d.toLocaleString([], { year: 'numeric', timeZone: chartData.tooltip.x.timeZone});
-      let month = d.toLocaleString([], { month: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      let day = d.toLocaleString([], { day: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      let hours = d.toLocaleString([], { hour: '2-digit', hour12: false, timeZone: chartData.tooltip.x.timeZone});
-      let minutes = d.toLocaleString([], { minute: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      let seconds = d.toLocaleString([], { second: '2-digit', timeZone: chartData.tooltip.x.timeZone});
+      let year = d.toLocaleString([], { year: 'numeric' });
+      let month = d.toLocaleString([], { month: '2-digit' });
+      let day = d.toLocaleString([], { day: '2-digit' });
+      let hours = d.toLocaleString([], { hour: '2-digit', hour12: false });
+      let minutes = d.toLocaleString([], { minute: '2-digit'});
+      let seconds = d.toLocaleString([], { second: '2-digit'});
       const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
       switch(chartData.tooltip.x.format) {
@@ -394,10 +394,8 @@ export default {
 
         this.chartData.chartOptions.xaxis.categories = response.data.timestamps;
         this.chartData.chartOptions.tooltip.x.format = response.data.format;
-        this.chartData.chartOptions.tooltip.x.timeZone = response.data.userTimeZone;
         this.gasChartData.chartOptions.xaxis.categories = response.data.timestamps;
         this.gasChartData.chartOptions.tooltip.x.format = response.data.format;
-        this.gasChartData.chartOptions.tooltip.x.timeZone = response.data.userTimeZone;
         
         this.datasets.usage.data = response.data.usage;
         this.datasets.solar.data = response.data.solar;
