@@ -249,16 +249,16 @@ namespace EnergyPortal.Controllers.WebApi
             metrics = metrics.FillMissing(timeGroup, start.ConvertToTimeZone(settings.TimeZoneId),
                 end?.ConvertToTimeZone(settings.TimeZoneId) ?? DateTime.UtcNow.ConvertToTimeZone(settings.TimeZoneId), showRealLast);
             var timestamps = metrics.Select(m => m.DateTime.ToString("o", CultureInfo.InvariantCulture)).ToList();
-            var epochs = metrics.Select(m => EpochTime.GetIntDate(m.DateTime) * 1000).ToList();
-            var usageList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Usage.DivideByThousand() }).ToList();
-            var intakeList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Intake.DivideByThousand() }).ToList();
-            var solarList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Solar.DivideByThousand() }).ToList();
-            var redeliveryList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Redelivery.DivideByThousand() }).ToList();
-            var gasList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Gas.DivideByThousand() }).ToList();
-            var usageCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000,  m.UsageCost }).ToList();
-            var intakeCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.IntakeCost }).ToList();
-            var redeliveryCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.RedeliveryCost }).ToList();
-            var gasCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.GasCost }).ToList();
+            var epochs = metrics.Select(m => ToEpochMilliseconds(m.DateTime, settings.TimeZoneId)).ToList();
+            var usageList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Usage.DivideByThousand() }).ToList();
+            var intakeList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Intake.DivideByThousand() }).ToList();
+            var solarList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Solar.DivideByThousand() }).ToList();
+            var redeliveryList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Redelivery.DivideByThousand() }).ToList();
+            var gasList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Gas.DivideByThousand() }).ToList();
+            var usageCosts = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId),  m.UsageCost }).ToList();
+            var intakeCosts = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.IntakeCost }).ToList();
+            var redeliveryCosts = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.RedeliveryCost }).ToList();
+            var gasCosts = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.GasCost }).ToList();
 
             var lastDateTime = metrics
                 .OrderBy(m => m.DateTime)
@@ -284,6 +284,18 @@ namespace EnergyPortal.Controllers.WebApi
                 Format = format,
                 UserTimeZone = settings.TimeZoneId
             });
+        }
+
+        private static long ToEpochMilliseconds(DateTime dateTime, string timeZoneId)
+        {
+            var utcDateTime = dateTime.Kind switch
+            {
+                DateTimeKind.Utc => dateTime,
+                DateTimeKind.Local => dateTime.ToUniversalTime(),
+                _ => TimeZoneInfo.ConvertTimeToUtc(dateTime, timeZoneId.GetTimeZoneInfo())
+            };
+
+            return EpochTime.GetIntDate(utcDateTime) * 1000;
         }
         
         private async Task<long?> GetRaspberryPiId(ApplicationUser user = null)

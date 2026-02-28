@@ -95,6 +95,48 @@ import moment from "moment-timezone";
 import deepCopy from "../deepCopy.js";
 import {VSonner, toast } from "vuetify-sonner";
 
+let electricityChartFormat = 'yyyy-MM-dd';
+let electricityChartTimeZone = 'UTC';
+let gasChartFormat = 'yyyy-MM-dd';
+let gasChartTimeZone = 'UTC';
+
+function formatEpochValue(epoch, format, timeZone) {
+  const parsed = Number(epoch);
+  const d = Number.isNaN(parsed) ? new Date(epoch) : new Date(parsed);
+  const year = d.toLocaleString([], { year: 'numeric', timeZone });
+  const month = d.toLocaleString([], { month: '2-digit', timeZone });
+  const day = d.toLocaleString([], { day: '2-digit', timeZone });
+  const hours = d.toLocaleString([], { hour: '2-digit', hour12: false, timeZone });
+  const minutes = d.toLocaleString([], { minute: '2-digit', timeZone });
+  const seconds = d.toLocaleString([], { second: '2-digit', timeZone });
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  switch (format) {
+    case 'HH:mm':
+      return `${hours}:${minutes}`;
+    case 'HH:mm:ss':
+      return `${hours}:${minutes}:${seconds}`;
+    case 'MM-dd HH:mm':
+      return `${month}-${day} ${hours}:${minutes}`;
+    case 'yyyy-MM-dd (dddd)':
+      return `${year}-${month}-${day} (${daysOfWeek[d.getUTCDay()]})`;
+    case 'yyyy-MM-dd':
+      return `${year}-${month}-${day}`;
+    case 'yyyy-MM':
+      return `${year}-${month}`;
+    case 'yyyy':
+      return `${year}`;
+    default:
+      return `${hours}:${minutes}:${seconds}`;
+  }
+}
+
+function formatEpochFromOptions(value, timestamp, opts, fallbackFormat = 'yyyy-MM-dd', fallbackTimeZone = 'UTC') {
+  const format = fallbackFormat || opts?.w?.config?.tooltip?.x?.format || 'yyyy-MM-dd';
+  const timeZone = fallbackTimeZone || opts?.w?.config?.tooltip?.x?.timeZone || 'UTC';
+  return formatEpochValue(timestamp ?? value, format, timeZone);
+}
+
 export default {
   name: "",
   components: {VSonner},
@@ -177,7 +219,11 @@ export default {
           colors: ['transparent']
         },
         xaxis: {
-          type: 'category'
+          type: 'datetime',
+          labels: {
+            datetimeUTC: false,
+            formatter: (value, timestamp, opts) => formatEpochFromOptions(value, timestamp, opts, electricityChartFormat, electricityChartTimeZone)
+          }
         },
         fill: {
           opacity: 1
@@ -187,13 +233,7 @@ export default {
             format: 'yyyy-MM-dd',
             timeZone: 'UTC',
             formatter: (value, opts) => {
-              const labels = opts?.w?.globals?.labels;
-              const index = opts?.dataPointIndex;
-              if (Array.isArray(labels) && index !== undefined && index !== null && labels[index] !== undefined) {
-                return labels[index];
-              }
-
-              return value;
+              return formatEpochFromOptions(value, null, opts, electricityChartFormat, electricityChartTimeZone);
             }
           }
         },
@@ -243,7 +283,11 @@ export default {
           colors: ['transparent']
         },
         xaxis: {
-          type: 'category'
+          type: 'datetime',
+          labels: {
+            datetimeUTC: false,
+            formatter: (value, timestamp, opts) => formatEpochFromOptions(value, timestamp, opts, gasChartFormat, gasChartTimeZone)
+          }
         },
         fill: {
           opacity: 1
@@ -253,13 +297,7 @@ export default {
             format: 'yyyy-MM-dd',
             timeZone: 'UTC',
             formatter: (value, opts) => {
-              const labels = opts?.w?.globals?.labels;
-              const index = opts?.dataPointIndex;
-              if (Array.isArray(labels) && index !== undefined && index !== null && labels[index] !== undefined) {
-                return labels[index];
-              }
-
-              return value;
+              return formatEpochFromOptions(value, null, opts, gasChartFormat, gasChartTimeZone);
             }
           }
         },
@@ -342,6 +380,7 @@ export default {
       solarSystem: false
     },
     historyLabels: [],
+    historyEpochs: [],
     loading: true
   }),
   async mounted () {
@@ -349,38 +388,9 @@ export default {
 
     // This will eventually trigger fetchHistory by the watcher
     this.selectedRange = this.defaultRangeOptions.find(r => r.text === 'Laatste 7 dagen');
-    this.selectedRangeText = this.selectedRange.text;
+
   },
   methods: {
-    formatEpoch(epoch, chartData) {
-      const parsed = Number(epoch);
-      const d = Number.isNaN(parsed) ? new Date(epoch) : new Date(parsed);
-      let year = d.toLocaleString([], { year: 'numeric', timeZone: chartData.tooltip.x.timeZone});
-      let month = d.toLocaleString([], { month: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      let day = d.toLocaleString([], { day: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      let hours = d.toLocaleString([], { hour: '2-digit', hour12: false, timeZone: chartData.tooltip.x.timeZone});
-      let minutes = d.toLocaleString([], { minute: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      let seconds = d.toLocaleString([], { second: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-      switch(chartData.tooltip.x.format) {
-        case 'HH:mm':
-          return `${hours}:${minutes}`;
-        case 'HH:mm:ss':
-          return `${hours}:${minutes}:${seconds}`;
-        case 'MM-dd HH:mm':
-          return `${month}-${day} ${hours}:${minutes}`;
-        case 'yyyy-MM-dd (dddd)':
-          const dayName = daysOfWeek[d.getUTCDay()]; // Get the day name
-          return `${year}-${month}-${day} (${dayName})`;
-        case 'yyyy-MM-dd':
-          return `${year}-${month}-${day}`;
-        case 'yyyy-MM':
-          return `${year}-${month}`;
-        case 'yyyy':
-          return `${year}`;
-      }
-    },
     async getUserSettings() {
       try {
         let response = await Axios.get('webapi/v3/settings');
@@ -404,10 +414,33 @@ export default {
         let response = await Axios.get(`/webapi/v3/metrics/${this.selectedRange.groupBy}`, config);
 
         this.historyLabels = response.data.timestamps || [];
-        this.chartData.chartOptions.xaxis.categories = response.data.timestamps;
-        this.chartData.chartOptions.tooltip.x.format = response.data.format;
-        this.gasChartData.chartOptions.xaxis.categories = response.data.timestamps;
-        this.gasChartData.chartOptions.tooltip.x.format = response.data.format;
+        this.historyEpochs = response.data.epochs || [];
+        this.chartData.chartOptions = {
+          ...this.chartData.chartOptions,
+          tooltip: {
+            ...this.chartData.chartOptions.tooltip,
+            x: {
+              ...this.chartData.chartOptions.tooltip.x,
+              format: response.data.format,
+              timeZone: response.data.userTimeZone
+            }
+          }
+        };
+        this.gasChartData.chartOptions = {
+          ...this.gasChartData.chartOptions,
+          tooltip: {
+            ...this.gasChartData.chartOptions.tooltip,
+            x: {
+              ...this.gasChartData.chartOptions.tooltip.x,
+              format: response.data.format,
+              timeZone: response.data.userTimeZone
+            }
+          }
+        };
+        electricityChartFormat = response.data.format || electricityChartFormat;
+        electricityChartTimeZone = response.data.userTimeZone || electricityChartTimeZone;
+        gasChartFormat = response.data.format || gasChartFormat;
+        gasChartTimeZone = response.data.userTimeZone || gasChartTimeZone;
         
         this.datasets.usage.data = response.data.usage.map(item => Array.isArray(item) ? item[1] : item);
         this.datasets.solar.data = response.data.solar.map(item => Array.isArray(item) ? item[1] : item);
@@ -447,7 +480,7 @@ export default {
     },
     toChartPoints(values) {
       return values.map((value, index) => ({
-        x: this.historyLabels[index] ?? `${index + 1}`,
+        x: this.historyEpochs[index] ?? index,
         y: value
       }));
     },

@@ -212,6 +212,44 @@
 // @ is an alias to /src
 import ElectricityChart from "./ElectricityChart.vue";
 import Axios from "axios";
+
+function formatEpochValue(epoch, format, timeZone) {
+  const parsed = Number(epoch);
+  const d = Number.isNaN(parsed) ? new Date(epoch) : new Date(parsed);
+  const year = d.toLocaleString([], { year: 'numeric', timeZone });
+  const month = d.toLocaleString([], { month: '2-digit', timeZone });
+  const day = d.toLocaleString([], { day: '2-digit', timeZone });
+  const hours = d.toLocaleString([], { hour: '2-digit', hour12: false, timeZone });
+  const minutes = d.toLocaleString([], { minute: '2-digit', timeZone });
+  const seconds = d.toLocaleString([], { second: '2-digit', timeZone });
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  switch (format) {
+    case 'HH:mm':
+      return `${hours}:${minutes}`;
+    case 'HH:mm:ss':
+      return `${hours}:${minutes}:${seconds}`;
+    case 'MM-dd HH:mm':
+      return `${month}-${day} ${hours}:${minutes}`;
+    case 'yyyy-MM-dd (dddd)':
+      return `${year}-${month}-${day} (${daysOfWeek[d.getUTCDay()]})`;
+    case 'yyyy-MM-dd':
+      return `${year}-${month}-${day}`;
+    case 'yyyy-MM':
+      return `${year}-${month}`;
+    case 'yyyy':
+      return `${year}`;
+    default:
+      return `${hours}:${minutes}:${seconds}`;
+  }
+}
+
+function formatEpochFromOptions(value, timestamp, opts, fallbackFormat = 'yyyy-MM-dd', fallbackTimeZone = 'UTC') {
+  const format = fallbackFormat || opts?.w?.config?.tooltip?.x?.format || 'yyyy-MM-dd';
+  const timeZone = fallbackTimeZone || opts?.w?.config?.tooltip?.x?.timeZone || 'UTC';
+  return formatEpochValue(timestamp ?? value, format, timeZone);
+}
+
 let initialElectricityCharts = {
   usage: {
     index: 0,
@@ -355,35 +393,6 @@ export default {
         this.energyNameMapping[chart.backEndName] = chart.chartName;
       }
     },
-    formatEpoch(epoch, chartData) {      
-      const parsed = Number(epoch);
-      const d = Number.isNaN(parsed) ? new Date(epoch) : new Date(parsed);
-      let year = d.toLocaleString([], { year: 'numeric', timeZone: chartData.tooltip.x.timeZone});
-      let month = d.toLocaleString([], { month: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      let day = d.toLocaleString([], { day: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      let hours = d.toLocaleString([], { hour: '2-digit', hour12: false, timeZone: chartData.tooltip.x.timeZone});
-      let minutes = d.toLocaleString([], { minute: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      let seconds = d.toLocaleString([], { second: '2-digit', timeZone: chartData.tooltip.x.timeZone});
-      const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      
-      switch(chartData.tooltip.x.format) {
-        case 'HH:mm':
-          return `${hours}:${minutes}`;
-        case 'HH:mm:ss':
-          return `${hours}:${minutes}:${seconds}`;
-        case 'MM-dd HH:mm':
-          return `${month}-${day} ${hours}:${minutes}`;
-        case 'yyyy-MM-dd (dddd)':
-          const dayName = daysOfWeek[d.getUTCDay()]; // Get the day name
-          return `${year}-${month}-${day} (${dayName})`;
-        case 'yyyy-MM-dd':
-          return `${year}-${month}-${day}`;
-        case 'yyyy-MM':
-          return `${year}-${month}`;
-        case 'yyyy':
-          return `${year}`;
-      }
-    },
     buildChartData(dataName, data, labels, backgroundColor, borderColor, format) {
       let chartData = {
         chartOptions: {
@@ -402,9 +411,10 @@ export default {
             curve: 'smooth'
           },
           xaxis: {
-            type: 'category',
+            type: 'datetime',
             labels: {
-              formatter: undefined
+              datetimeUTC: false,
+              formatter: (value, timestamp, opts) => formatEpochFromOptions(value, timestamp, opts, chartData.chartOptions.tooltip.x.format, chartData.chartOptions.tooltip.x.timeZone)
             }
           },
           tooltip: {
@@ -412,15 +422,7 @@ export default {
               format: format,
               timeZone: 'Europe/Amsterdam',
               formatter: (value, opts) => {
-                const seriesIndex = opts?.seriesIndex;
-                const pointIndex = opts?.dataPointIndex;
-                const point = opts?.w?.config?.series?.[seriesIndex]?.data?.[pointIndex];
-
-                if (point && typeof point === 'object' && point.x !== undefined) {
-                  return point.x;
-                }
-
-                return value;
+                return formatEpochFromOptions(value, null, opts, chartData.chartOptions.tooltip.x.format, chartData.chartOptions.tooltip.x.timeZone);
               }
             }
           },
@@ -456,13 +458,23 @@ export default {
           if (chartData === undefined)
             continue;
 
-          const chartPoints = chartData.map((epochAndValue, index) => ({
-            x: data.timestamps[index],
+          const chartPoints = chartData.map((epochAndValue) => ({
+            x: epochAndValue[0],
             y: epochAndValue[1]
           }));
 
           this.electricityCharts[chartName].chartData.series[0].data = chartPoints;
-          this.electricityCharts[chartName].chartData.chartOptions.tooltip.x.format = data.format;
+          this.electricityCharts[chartName].chartData.chartOptions = {
+            ...this.electricityCharts[chartName].chartData.chartOptions,
+            tooltip: {
+              ...this.electricityCharts[chartName].chartData.chartOptions.tooltip,
+              x: {
+                ...this.electricityCharts[chartName].chartData.chartOptions.tooltip.x,
+                format: data.format,
+                timeZone: data.userTimeZone
+              }
+            }
+          };
           
           console.log(`Fetched data for ${chartName} with format ${data.format}`);
           this.timeLookup[data.format] = chartData
