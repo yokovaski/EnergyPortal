@@ -14,7 +14,7 @@ namespace EnergyWorker
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -26,7 +26,9 @@ namespace EnergyWorker
             try
             {
                 Log.Information("Starting up");
-                CreateHostBuilder(args).Build().Run();
+                var host = CreateHostBuilder(args).Build();
+                await ApplyMigrationsWithRetry(host);
+                await host.RunAsync();
             }
             catch (Exception ex)
             {
@@ -53,5 +55,32 @@ namespace EnergyWorker
                     });
                     services.AddHostedService<Worker>();
                 });
+
+        private static async Task ApplyMigrationsWithRetry(IHost host)
+        {
+            const int maxAttempts = 20;
+
+            for (var attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
+                {
+                    using var scope = host.Services.CreateScope();
+                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    await dbContext.Database.MigrateAsync();
+                    Log.Information("Database migration completed");
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    if (attempt == maxAttempts)
+                    {
+                        throw;
+                    }
+
+                    Log.Warning(ex, "Database migration attempt {Attempt} failed; retrying", attempt);
+                    await Task.Delay(TimeSpan.FromSeconds(3));
+                }
+            }
+        }
     }
 }

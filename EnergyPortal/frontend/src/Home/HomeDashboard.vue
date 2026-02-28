@@ -356,7 +356,8 @@ export default {
       }
     },
     formatEpoch(epoch, chartData) {      
-      const d = new Date(epoch);
+      const parsed = Number(epoch);
+      const d = Number.isNaN(parsed) ? new Date(epoch) : new Date(parsed);
       let year = d.toLocaleString([], { year: 'numeric', timeZone: chartData.tooltip.x.timeZone});
       let month = d.toLocaleString([], { month: '2-digit', timeZone: chartData.tooltip.x.timeZone});
       let day = d.toLocaleString([], { day: '2-digit', timeZone: chartData.tooltip.x.timeZone});
@@ -401,15 +402,26 @@ export default {
             curve: 'smooth'
           },
           xaxis: {
-            type: 'datetime',
+            type: 'category',
             labels: {
-              formatter: null
+              formatter: undefined
             }
           },
           tooltip: {
             x: {
               format: format,
-              timeZone: 'Europe/Amsterdam'
+              timeZone: 'Europe/Amsterdam',
+              formatter: (value, opts) => {
+                const seriesIndex = opts?.seriesIndex;
+                const pointIndex = opts?.dataPointIndex;
+                const point = opts?.w?.config?.series?.[seriesIndex]?.data?.[pointIndex];
+
+                if (point && typeof point === 'object' && point.x !== undefined) {
+                  return point.x;
+                }
+
+                return value;
+              }
             }
           },
           fill: {
@@ -428,8 +440,6 @@ export default {
         }]
       }
 
-      chartData.chartOptions.xaxis.labels.formatter = v => this.formatEpoch(v, chartData.chartOptions);
-      
       return chartData;
     },
     async setGraphRange(range) {
@@ -445,9 +455,13 @@ export default {
           let chartData = data[backEndName];
           if (chartData === undefined)
             continue;
-          
-          this.electricityCharts[chartName].chartData.series[0].data = chartData;
-          this.electricityCharts[chartName].chartData.chartOptions.xaxis.categories = data.timestamps;
+
+          const chartPoints = chartData.map((epochAndValue, index) => ({
+            x: data.timestamps[index],
+            y: epochAndValue[1]
+          }));
+
+          this.electricityCharts[chartName].chartData.series[0].data = chartPoints;
           this.electricityCharts[chartName].chartData.chartOptions.tooltip.x.format = data.format;
           this.electricityCharts[chartName].chartData.chartOptions.tooltip.x.timeZone = data.userTimeZone;
           

@@ -2,33 +2,39 @@
   
   energy_portal:
     image: energy_portal
+    platform: linux/amd64
     build:
       context: .
       dockerfile: EnergyPortal/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Database=energycloud;Username=energycloud;Password=energycloud"
     ports:
         - "8082:8080"
         - "8083:8081"
     depends_on:
-      - "postgres"
+      postgres:
+        condition: service_healthy
     networks:
       - portal-network
     volumes:
-      - ./EnergyPortal/wwwroot:/app/wwwroot
       - portal_volume:/var/dpkeys:rw
   
   energy_worker:
     image: energy_worker
+    platform: linux/amd64
     build:
       context: .
       dockerfile: EnergyWorker/Dockerfile
     depends_on:
-      - "postgres"
+      postgres:
+        condition: service_healthy
     networks:
       - worker-network
 
   postgres:
     container_name: 'postgres'
-    image: postgres
+    image: postgres:16
+    platform: linux/amd64
     ports:
       - "5432:5432"
     networks:
@@ -38,6 +44,11 @@
       POSTGRES_USER: "energycloud"
       POSTGRES_PASSWORD: "energycloud"
       POSTGRES_DB: "energycloud"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U energycloud -d energycloud"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
     restart: always
     volumes:
       - ./postgres:/var/lib/postgresql/data

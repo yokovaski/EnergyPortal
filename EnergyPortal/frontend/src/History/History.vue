@@ -136,7 +136,7 @@ export default {
         groupBy: null
       }
     ],
-    selectedRangeText: 'Afgelopen 24 uur',
+    selectedRangeText: 'Laatste 7 dagen',
     selectedRange: null,
     oldGroupBy: null,
     groupByOptions: {
@@ -177,10 +177,7 @@ export default {
           colors: ['transparent']
         },
         xaxis: {
-          type: 'datetime',
-          labels: {
-            formatter: null
-          }
+          type: 'category'
         },
         fill: {
           opacity: 1
@@ -188,7 +185,16 @@ export default {
         tooltip: {
           x: {
             format: 'yyyy-MM-dd',
-            timeZone: 'UTC'
+            timeZone: 'UTC',
+            formatter: (value, opts) => {
+              const labels = opts?.w?.globals?.labels;
+              const index = opts?.dataPointIndex;
+              if (Array.isArray(labels) && index !== undefined && index !== null && labels[index] !== undefined) {
+                return labels[index];
+              }
+
+              return value;
+            }
           }
         },
         // fill: {
@@ -237,10 +243,7 @@ export default {
           colors: ['transparent']
         },
         xaxis: {
-          type: 'datetime',
-          labels: {
-            formatter: null
-          }
+          type: 'category'
         },
         fill: {
           opacity: 1
@@ -248,7 +251,16 @@ export default {
         tooltip: {
           x: {
             format: 'yyyy-MM-dd',
-            timeZone: 'UTC'
+            timeZone: 'UTC',
+            formatter: (value, opts) => {
+              const labels = opts?.w?.globals?.labels;
+              const index = opts?.dataPointIndex;
+              if (Array.isArray(labels) && index !== undefined && index !== null && labels[index] !== undefined) {
+                return labels[index];
+              }
+
+              return value;
+            }
           }
         },
       },
@@ -329,12 +341,10 @@ export default {
     settings: {
       solarSystem: false
     },
+    historyLabels: [],
     loading: true
   }),
   async mounted () {
-    this.chartData.chartOptions.xaxis.labels.formatter = v => this.formatEpoch(v, this.chartData.chartOptions);
-    this.gasChartData.chartOptions.xaxis.labels.formatter = v => this.formatEpoch(v, this.chartData.chartOptions);
-    
     await this.getUserSettings();
 
     // This will eventually trigger fetchHistory by the watcher
@@ -342,7 +352,8 @@ export default {
   },
   methods: {
     formatEpoch(epoch, chartData) {
-      const d = new Date(epoch);
+      const parsed = Number(epoch);
+      const d = Number.isNaN(parsed) ? new Date(epoch) : new Date(parsed);
       let year = d.toLocaleString([], { year: 'numeric', timeZone: chartData.tooltip.x.timeZone});
       let month = d.toLocaleString([], { month: '2-digit', timeZone: chartData.tooltip.x.timeZone});
       let day = d.toLocaleString([], { day: '2-digit', timeZone: chartData.tooltip.x.timeZone});
@@ -391,6 +402,7 @@ export default {
 
         let response = await Axios.get(`/webapi/v3/metrics/${this.selectedRange.groupBy}`, config);
 
+        this.historyLabels = response.data.timestamps || [];
         this.chartData.chartOptions.xaxis.categories = response.data.timestamps;
         this.chartData.chartOptions.tooltip.x.format = response.data.format;
         this.chartData.chartOptions.tooltip.x.timeZone = response.data.userTimeZone;
@@ -398,16 +410,16 @@ export default {
         this.gasChartData.chartOptions.tooltip.x.format = response.data.format;
         this.gasChartData.chartOptions.tooltip.x.timeZone = response.data.userTimeZone;
         
-        this.datasets.usage.data = response.data.usage;
-        this.datasets.solar.data = response.data.solar;
-        this.datasets.redelivery.data = response.data.redelivery;
-        this.datasets.intake.data = response.data.intake;
-        this.datasets.usageCosts.data = response.data.usageCosts;
-        this.datasets.intakeCosts.data = response.data.intakeCosts;
-        this.datasets.redeliveryCosts.data = response.data.redeliveryCosts;
-        this.datasets.intake.data = response.data.intake;
-        this.datasets.gas.data = response.data.gas;
-        this.datasets.gasCosts.data = response.data.gasCosts;
+        this.datasets.usage.data = response.data.usage.map(item => Array.isArray(item) ? item[1] : item);
+        this.datasets.solar.data = response.data.solar.map(item => Array.isArray(item) ? item[1] : item);
+        this.datasets.redelivery.data = response.data.redelivery.map(item => Array.isArray(item) ? item[1] : item);
+        this.datasets.intake.data = response.data.intake.map(item => Array.isArray(item) ? item[1] : item);
+        this.datasets.usageCosts.data = response.data.usageCosts.map(item => Array.isArray(item) ? item[1] : item);
+        this.datasets.intakeCosts.data = response.data.intakeCosts.map(item => Array.isArray(item) ? item[1] : item);
+        this.datasets.redeliveryCosts.data = response.data.redeliveryCosts.map(item => Array.isArray(item) ? item[1] : item);
+        this.datasets.intake.data = response.data.intake.map(item => Array.isArray(item) ? item[1] : item);
+        this.datasets.gas.data = response.data.gas.map(item => Array.isArray(item) ? item[1] : item);
+        this.datasets.gasCosts.data = response.data.gasCosts.map(item => Array.isArray(item) ? item[1] : item);
 
         if (populateCharts) {
           this.populateChartsWithCorrectDatasets();
@@ -434,30 +446,36 @@ export default {
       this.messageText = message;
       this.showMessage = true;
     },
+    toChartPoints(values) {
+      return values.map((value, index) => ({
+        x: this.historyLabels[index] ?? `${index + 1}`,
+        y: value
+      }));
+    },
     populateChartsWithCorrectDatasets() {
       this.gasChartData.series = [];
       this.chartData.series = [];
 
       if (this.showCosts) {
         let gasSeries = {
-          data: this.datasets.gasCosts.data,
+          data: this.toChartPoints(this.datasets.gasCosts.data),
           name: this.datasets.gasCosts.label
         }
         this.gasChartData.series.push(gasSeries);
 
         let usageSeries = {
-          data: this.datasets.usageCosts.data,
+          data: this.toChartPoints(this.datasets.usageCosts.data),
           name: this.datasets.usageCosts.label
         }
         this.chartData.series.push(usageSeries);
 
         if (this.settings.solarSystem) {
           let intakeSeries = {
-            data: this.datasets.intakeCosts.data,
+            data: this.toChartPoints(this.datasets.intakeCosts.data),
             name: this.datasets.intakeCosts.label
           }
           let redeliverySeries = {
-            data: this.datasets.redeliveryCosts.data,
+            data: this.toChartPoints(this.datasets.redeliveryCosts.data),
             name: this.datasets.redeliveryCosts.label
           }
           
@@ -466,13 +484,13 @@ export default {
         }
       } else {
         let gasSeries = {
-          data: this.datasets.gas.data,
+          data: this.toChartPoints(this.datasets.gas.data),
           name: this.datasets.gas.label
         }
         this.gasChartData.series.push(gasSeries);
         
         let usageSeries = {
-          data: this.datasets.usage.data,
+          data: this.toChartPoints(this.datasets.usage.data),
           name: this.datasets.usage.label
         }
         
@@ -480,15 +498,15 @@ export default {
 
         if (this.settings.solarSystem) {
           let solarSeries = {
-            data: this.datasets.solar.data,
+            data: this.toChartPoints(this.datasets.solar.data),
             name: this.datasets.solar.label
           }
           let redeliverySeries = {
-            data: this.datasets.redelivery.data,
+            data: this.toChartPoints(this.datasets.redelivery.data),
             name: this.datasets.redelivery.label
           }
           let intakeSeries = {
-            data: this.datasets.intake.data,
+            data: this.toChartPoints(this.datasets.intake.data),
             name: this.datasets.intake.label
           }
           

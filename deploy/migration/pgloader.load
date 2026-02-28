@@ -1,0 +1,28 @@
+LOAD DATABASE
+     FROM mysql://energycloud:energycloud@mysql-source/energycloud
+     INTO postgresql://energycloud:energycloud@host.docker.internal:5432/energycloud
+
+ WITH include drop, create tables, create indexes, reset sequences, foreign keys,
+      workers = 8,
+      concurrency = 1,
+      multiple readers per thread,
+      rows per range = 50000,
+      batch rows = 5000,
+      prefetch rows = 50000
+
+ SET PostgreSQL PARAMETERS
+      maintenance_work_mem to '512MB',
+      work_mem to '64MB',
+      search_path to 'public'
+
+ CAST
+      type datetime to timestamptz using zero-dates-to-null,
+      type tinyint when (= precision 1) to boolean drop typemod using tinyint-to-boolean,
+      type tinyint to smallint drop typemod,
+      type year to integer,
+      type int to integer,
+      type bigint to bigint,
+      type decimal to numeric
+
+ INCLUDING ONLY TABLE NAMES MATCHING
+      ~/^(AspNetRoleClaims|AspNetRoles|AspNetUserClaims|AspNetUserLogins|AspNetUserRoles|AspNetUsers|AspNetUserTokens|HourMetrics|MinuteMetrics|RaspberryPis|Settings|TenSecondMetrics)$/;
