@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using DatabaseInterface;
@@ -19,33 +20,17 @@ namespace EnergyPortal.Controllers.WebApi
 {
     [Authorize]
     [Route("webapi/v3/metrics")]
-    public class MetricsWebApiController : Controller
+    public class MetricsWebApiController(
+        ApplicationDbContext dbContext,
+        UserManager<ApplicationUser> userManager,
+        DbTenSecondMetricRepository tenSecondMetricRepository,
+        DbMinuteMetricRepository minuteMetricRepository,
+        DbHourMetricRepository hourMetricRepository,
+        DbSettingsRepository dbSettingsRepository,
+        ILogger<MetricsWebApiController> logger)
+        : Controller
     {
-        private readonly ApplicationDbContext dbContext;
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly DbTenSecondMetricRepository tenSecondMetricRepository;
-        private readonly DbMinuteMetricRepository minuteMetricRepository;
-        private readonly DbHourMetricRepository hourMetricRepository;
-        private readonly DbSettingsRepository dbSettingsRepository;
-        private readonly ILogger<MetricsWebApiController> logger;
-
-        public MetricsWebApiController(
-            ApplicationDbContext dbContext, 
-            UserManager<ApplicationUser> userManager,
-            DbTenSecondMetricRepository tenSecondMetricRepository,
-            DbMinuteMetricRepository minuteMetricRepository, 
-            DbHourMetricRepository hourMetricRepository,
-            DbSettingsRepository dbSettingsRepository,
-            ILogger<MetricsWebApiController> logger)
-        {
-            this.dbContext = dbContext;
-            this.userManager = userManager;
-            this.tenSecondMetricRepository = tenSecondMetricRepository;
-            this.minuteMetricRepository = minuteMetricRepository;
-            this.hourMetricRepository = hourMetricRepository;
-            this.dbSettingsRepository = dbSettingsRepository;
-            this.logger = logger;
-        }
+        private readonly ILogger<MetricsWebApiController> logger = logger;
 
         [HttpGet("last-reading")]
         public async Task<IActionResult> GetLastReading()
@@ -263,8 +248,7 @@ namespace EnergyPortal.Controllers.WebApi
 
             metrics = metrics.FillMissing(timeGroup, start.ConvertToTimeZone(settings.TimeZoneId),
                 end?.ConvertToTimeZone(settings.TimeZoneId) ?? DateTime.UtcNow.ConvertToTimeZone(settings.TimeZoneId), showRealLast);
-            var cultureInfo = new System.Globalization.CultureInfo("nl-NL");
-            var timestamps = metrics.Select(m => m.DateTime.ToString(format, cultureInfo)).ToList();
+            var timestamps = metrics.Select(m => m.DateTime.ToString("o", CultureInfo.InvariantCulture)).ToList();
             var epochs = metrics.Select(m => EpochTime.GetIntDate(m.DateTime) * 1000).ToList();
             var usageList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Usage.DivideByThousand() }).ToList();
             var intakeList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Intake.DivideByThousand() }).ToList();

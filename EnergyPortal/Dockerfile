@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0.11-noble AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.11-noble AS base
 
 USER root
 # Create the /var/dpkeys directory
@@ -21,7 +21,10 @@ COPY . .
 WORKDIR "/src/EnergyPortal"
 
 # Install Node.js and npm
-RUN apt-get update && apt-get install -y nodejs npm
+RUN apt-get update && apt-get install curl
+RUN curl -sL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh
+RUN bash nodesource_setup.sh
+RUN apt-get install -y nodejs
 
 # Run npm install and npm run build
 RUN npm install

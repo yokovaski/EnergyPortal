@@ -349,6 +349,7 @@ export default {
 
     // This will eventually trigger fetchHistory by the watcher
     this.selectedRange = this.defaultRangeOptions.find(r => r.text === 'Laatste 7 dagen');
+    this.selectedRangeText = this.selectedRange.text;
   },
   methods: {
     formatEpoch(epoch, chartData) {
@@ -405,10 +406,8 @@ export default {
         this.historyLabels = response.data.timestamps || [];
         this.chartData.chartOptions.xaxis.categories = response.data.timestamps;
         this.chartData.chartOptions.tooltip.x.format = response.data.format;
-        this.chartData.chartOptions.tooltip.x.timeZone = response.data.userTimeZone;
         this.gasChartData.chartOptions.xaxis.categories = response.data.timestamps;
         this.gasChartData.chartOptions.tooltip.x.format = response.data.format;
-        this.gasChartData.chartOptions.tooltip.x.timeZone = response.data.userTimeZone;
         
         this.datasets.usage.data = response.data.usage.map(item => Array.isArray(item) ? item[1] : item);
         this.datasets.solar.data = response.data.solar.map(item => Array.isArray(item) ? item[1] : item);
