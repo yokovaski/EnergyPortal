@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DatabaseInterface;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -52,9 +51,7 @@ namespace EnergyWorker
                         options
                             .UseNpgsql(connectionString,
                                 assembly => assembly.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
-                            .UseSnakeCaseNamingConvention()
-                            .ConfigureWarnings(warnings =>
-                                warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+                            .UseSnakeCaseNamingConvention();
                     });
                     services.AddHostedService<Worker>();
                 });

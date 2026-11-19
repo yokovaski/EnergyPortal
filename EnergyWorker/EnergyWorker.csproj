@@ -15,6 +15,9 @@
     <ProjectReference Include="..\DatabaseInterface\DatabaseInterface.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="EnergyPortal.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="..\.dockerignore">
       <Link>.dockerignore</Link>
     </Content>

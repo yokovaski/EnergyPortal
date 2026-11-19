@@ -1,3 +1,4 @@
+using System.Globalization;
 using System;
 using System.IO;
 using System.Linq;
@@ -38,17 +39,17 @@ namespace EnergyPortal.Controllers.Api
             var tenSecondMetrics = legacyModel.Data
                 .Select(metric => new TenSecondMetric
                 {
-                    UsageNow = (int) double.Parse(metric.UsageNow),
-                    RedeliveryNow = (int) double.Parse(metric.RedeliveryNow),
+                    UsageNow = (int) double.Parse(metric.UsageNow, CultureInfo.InvariantCulture),
+                    RedeliveryNow = (int) double.Parse(metric.RedeliveryNow, CultureInfo.InvariantCulture),
                     SolarNow = metric.SolarNow,
-                    UsageGasNow = (int) double.Parse(metric.UsageGasNow),
-                    UsageTotalHigh = (long) double.Parse(metric.UsageTotalHigh),
-                    RedeliveryTotalHigh = (long) double.Parse(metric.RedeliveryTotalHigh),
-                    UsageTotalLow = (long) double.Parse(metric.UsageTotalLow),
-                    RedeliveryTotalLow = (long) double.Parse(metric.RedeliveryTotalLow),
-                    UsageGasTotal = (long) double.Parse(metric.UsageGasTotal),
+                    UsageGasNow = (int) double.Parse(metric.UsageGasNow, CultureInfo.InvariantCulture),
+                    UsageTotalHigh = (long) double.Parse(metric.UsageTotalHigh, CultureInfo.InvariantCulture),
+                    RedeliveryTotalHigh = (long) double.Parse(metric.RedeliveryTotalHigh, CultureInfo.InvariantCulture),
+                    UsageTotalLow = (long) double.Parse(metric.UsageTotalLow, CultureInfo.InvariantCulture),
+                    RedeliveryTotalLow = (long) double.Parse(metric.RedeliveryTotalLow, CultureInfo.InvariantCulture),
+                    UsageGasTotal = (long) double.Parse(metric.UsageGasTotal, CultureInfo.InvariantCulture),
                     SolarTotal = metric.SolarTotal,
-                    Mode = int.Parse(metric.Mode),
+                    Mode = int.Parse(metric.Mode, CultureInfo.InvariantCulture),
                     Created = GetDateTimeFromUnixTimeStamp(metric.UnixTimeStamp),
                     RaspberryPi = raspberryPi
                 })

@@ -46,9 +46,10 @@ namespace EnergyPortal.Controllers.WebApi
 
             var settings = await settingsRepository.GetSettingsAsync(user.Id) ?? new Settings();
 
-            var raspberryPiId = await dbContext.Users.Where(u => u.Id.Equals(user.Id))
-                .Select(u => u.RaspberryPi.Id)
-                .FirstOrDefaultAsync();
+            var raspberryPiId = await GetRaspberryPiId(user);
+
+            if (!raspberryPiId.HasValue)
+                return NotFound("The user does not have a raspberry pi");
 
             var now = DateTime.UtcNow.Date;
             var midnight = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Unspecified);
@@ -83,7 +84,7 @@ namespace EnergyPortal.Controllers.WebApi
             };
 
             var (minSolar, maxSolar) = await tenSecondMetricRepository
-                .GetMinAndMaxSolarToday(raspberryPiId, settings.TimeZoneId);
+                .GetMinAndMaxSolarToday(raspberryPiId.Value, settings.TimeZoneId);
 
             var difference = list
                 .SelectWithPrevious((previous, current) => new
@@ -119,7 +120,7 @@ namespace EnergyPortal.Controllers.WebApi
                 .LastOrDefaultAsync();
 
             if (lastMetric == null)
-                NotFound("Could not find metrics");
+                return NotFound("Could not find metrics");
 
             return Ok(lastMetric);
         }
@@ -132,7 +133,7 @@ namespace EnergyPortal.Controllers.WebApi
                 return null;
 
             return await dbContext.Users.Where(u => u.Id.Equals(user.Id))
-                .Select(u => u.RaspberryPi.Id)
+                .Select(u => (long?) u.RaspberryPi.Id)
                 .FirstOrDefaultAsync();
         }
     }

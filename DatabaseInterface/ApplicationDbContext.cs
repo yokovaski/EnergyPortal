@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using DatabaseInterface.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,19 @@ namespace DatabaseInterface
                 .HasIndex(t => t.Created);
 
             base.OnModelCreating(builder);
+
+            // The existing schema uses varchar(128) for Identity login/token keys; newer Identity defaults to
+            // unbounded text. Pin the lengths so the model keeps matching the migrations snapshot.
+            builder.Entity<IdentityUserLogin<string>>(b =>
+            {
+                b.Property(l => l.LoginProvider).HasMaxLength(128);
+                b.Property(l => l.ProviderKey).HasMaxLength(128);
+            });
+            builder.Entity<IdentityUserToken<string>>(b =>
+            {
+                b.Property(t => t.LoginProvider).HasMaxLength(128);
+                b.Property(t => t.Name).HasMaxLength(128);
+            });
         }
     }
 }

@@ -114,11 +114,9 @@ namespace EnergyPortal
             app.UseAuthentication();
             app.UseAuthorization();
             
-            app.MapWhen(context => context.Request.Path.StartsWithSegments("/api/v3/energy"), builder =>
-            {
-                builder.UseAuthenticateByPiKey();
-                app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-            });
+            // UseWhen rejoins the main pipeline, so the Pi key is checked before the endpoint executes.
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/v3/energy"),
+                builder => builder.UseAuthenticateByPiKey());
 
             app.UseEndpoints(endpoints =>
             {

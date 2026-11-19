@@ -17,6 +17,7 @@ namespace EnergyWorker
         private readonly IServiceProvider serviceProvider;
         private readonly ILogger<Worker> logger;
 
+        private static readonly TimeSpan Interval = TimeSpan.FromSeconds(10);
         private DateTime lastMinuteUpdate = DateTime.MinValue;
         private DateTime lastHourUpdate = DateTime.MinValue;
         private DateTime lastDayUpdate = DateTime.MinValue;
@@ -37,33 +38,46 @@ namespace EnergyWorker
                 
                 try
                 {
-                    List<long> raspberryPiIds;
-
-                    using (var scope = serviceProvider.CreateScope())
-                    {
-                        var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
-                        raspberryPiIds = await dbContext.RaspberryPis.Select(r => r.Id).ToListAsync(stoppingToken);
-                    }
-
-                    await Task.WhenAll(
-                        WriteMinuteData(raspberryPiIds, stoppingToken), 
-                        WriteHourData(raspberryPiIds, stoppingToken),
-                        DeleteOldMinuteMetrics(raspberryPiIds, stoppingToken),
-                        DeleteOldTenSecondMetrics(raspberryPiIds, stoppingToken));
-                    
-                    await Task.Delay(10000, stoppingToken);
+                    await RunOnceAsync(stoppingToken);
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
-                    // stop gracefully
+                    break;
                 }
                 catch (Exception e)
                 {
                     logger.LogError(e, "Exception encountered while running worker");
                 }
+
+                // Always wait, also after a failure, so an outage does not turn into a hot retry loop.
+                try
+                {
+                    await Task.Delay(Interval, stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
             }
             
             logger.LogInformation("Stopping worker");
+        }
+
+        internal async Task RunOnceAsync(CancellationToken stoppingToken)
+        {
+            List<long> raspberryPiIds;
+
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
+                raspberryPiIds = await dbContext.RaspberryPis.Select(r => r.Id).ToListAsync(stoppingToken);
+            }
+
+            await Task.WhenAll(
+                WriteMinuteData(raspberryPiIds, stoppingToken),
+                WriteHourData(raspberryPiIds, stoppingToken),
+                DeleteOldMinuteMetrics(raspberryPiIds, stoppingToken),
+                DeleteOldTenSecondMetrics(raspberryPiIds, stoppingToken));
         }
 
         private async Task DeleteOldMinuteMetrics(ICollection<long> raspberryPiIds, CancellationToken cancellationToken)
@@ -92,7 +106,7 @@ namespace EnergyWorker
                         continue;
 
                     var metrics = dbContext.MinuteMetrics
-                        .Where(t => t.Created < threeMonthsAgo)
+                        .Where(t => t.RaspberryPiId == raspberryPiId && t.Created < threeMonthsAgo)
                         .OrderBy(t => t.Created)
                         .Take(batchSize)
                         .ToList();
@@ -138,7 +152,7 @@ namespace EnergyWorker
                         continue;
 
                     var metrics = dbContext.TenSecondMetrics
-                        .Where(t => t.Created < twoWeeksAgo)
+                        .Where(t => t.RaspberryPiId == raspberryPiId && t.Created < twoWeeksAgo)
                         .OrderBy(t => t.Created)
                         .Take(batchSize)
                         .ToList();

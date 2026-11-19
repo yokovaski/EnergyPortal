@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using EnergyPortal.Controllers.WebApi;
@@ -8,62 +8,38 @@ namespace EnergyPortal.Extensions;
 
 public static class OutMetricModelExtensions
 {
+    /// <summary>
+    /// Normalizes metric timestamps to <paramref name="timeGroup"/> and adds empty slots for every missing
+    /// period from <paramref name="from"/> up to the last metric (or up to <paramref name="to"/> when
+    /// <paramref name="showRealLast"/> is set or there are no metrics). Local times that do not exist in
+    /// <paramref name="timeZone"/> (DST spring-forward) are never generated.
+    /// </summary>
     public static List<OutMetricModel> FillMissing(this List<OutMetricModel> metrics, TimeGroup timeGroup,
-        DateTime from, DateTime to, bool showRealLast)
+        DateTime from, DateTime to, bool showRealLast, TimeZoneInfo timeZone = null)
     {
         if (timeGroup == TimeGroup.None)
         {
             return metrics;
         }
-        
-        var dateTime = from.GetNormalizedDateTime(timeGroup);
-        var lastDateTime = dateTime;
-        
-        var allTimes = new Dictionary<DateTime, OutMetricModel>();
 
-        if (!metrics.Any())
-        {
-            for (var time = dateTime; time <= to; time = time.GetNextDateTime(timeGroup))
-            {
-                allTimes.Add(time, new OutMetricModel { DateTime = time });
-            }
-
-            return allTimes.Values.ToList();
-        }
-
+        var slots = new Dictionary<DateTime, OutMetricModel>();
         foreach (var metric in metrics)
         {
             metric.DateTime = metric.DateTime.GetNormalizedDateTime(timeGroup);
-            
-            while (dateTime < metric.DateTime &&
-                   GetAbsoluteDifferenceInSeconds(metric.DateTime, dateTime) >
-                   GetAbsoluteDifferenceInSeconds(dateTime, dateTime.GetNextDateTime(timeGroup)))
-            {
-                allTimes.TryAdd(dateTime, new OutMetricModel { DateTime = dateTime });
-                dateTime = dateTime.GetNextDateTime(timeGroup);
-            }
-
-            _ = allTimes.TryAdd(metric.DateTime, metric);
-            lastDateTime = metric.DateTime;
-
-            if (dateTime < lastDateTime)
-            {
-                dateTime = lastDateTime.GetNextDateTime(timeGroup);
-            }
+            slots.TryAdd(metric.DateTime, metric);
         }
 
-        while (showRealLast && lastDateTime < to)
+        var end = metrics.Count == 0 || showRealLast
+            ? to
+            : metrics.Max(m => m.DateTime);
+
+        for (var time = from.GetNormalizedDateTime(timeGroup); time <= end; time = time.GetNextDateTime(timeGroup))
         {
-            lastDateTime = lastDateTime.GetNextDateTime(timeGroup);
-            allTimes.Add(lastDateTime, new OutMetricModel { DateTime = lastDateTime });
+            if (timeZone == null || !timeZone.IsInvalidTime(time))
+                slots.TryAdd(time, new OutMetricModel { DateTime = time });
         }
 
-        return allTimes.Values.ToList();
-    }
-
-    private static long GetAbsoluteDifferenceInSeconds(DateTime first, DateTime second)
-    {
-        return (long) Math.Abs((first - second).TotalSeconds);
+        return slots.Values.OrderBy(m => m.DateTime).ToList();
     }
 
     private static DateTime GetNextDateTime(this DateTime dateTime, TimeGroup timeGroup)

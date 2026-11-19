@@ -185,7 +185,7 @@ namespace EnergyPortal.Controllers.WebApi
                         })
                         .ToList();
                     
-                    format = user.Settings.ShowDayName ? "yyyy-MM-dd (dddd)" : "yyyy-MM-dd";
+                    format = settings.ShowDayName ? "yyyy-MM-dd (dddd)" : "yyyy-MM-dd";
                     break;
                 // case TimeGroup.Weeks:
                     // break;
@@ -247,7 +247,8 @@ namespace EnergyPortal.Controllers.WebApi
             }
 
             metrics = metrics.FillMissing(timeGroup, start.ConvertToTimeZone(settings.TimeZoneId),
-                end?.ConvertToTimeZone(settings.TimeZoneId) ?? DateTime.UtcNow.ConvertToTimeZone(settings.TimeZoneId), showRealLast);
+                end?.ConvertToTimeZone(settings.TimeZoneId) ?? DateTime.UtcNow.ConvertToTimeZone(settings.TimeZoneId), showRealLast,
+                settings.TimeZoneId.GetTimeZoneInfo());
             var timestamps = metrics.Select(m => m.DateTime.ToString("o", CultureInfo.InvariantCulture)).ToList();
             var epochs = metrics.Select(m => ToEpochMilliseconds(m.DateTime, settings.TimeZoneId)).ToList();
             var usageList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Usage.DivideByThousand() }).ToList();
@@ -306,7 +307,7 @@ namespace EnergyPortal.Controllers.WebApi
                 return null;
 
             return await dbContext.Users.Where(u => u.Id.Equals(user.Id))
-                .Select(u => u.RaspberryPi.Id)
+                .Select(u => (long?) u.RaspberryPi.Id)
                 .FirstOrDefaultAsync();
         }
     }

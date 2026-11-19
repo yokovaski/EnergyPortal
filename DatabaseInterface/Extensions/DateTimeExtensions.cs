@@ -8,19 +8,23 @@ namespace DatabaseInterface.Extensions
         {
             var timeZoneInfo = timeZoneId.GetTimeZoneInfo();
             
-            return timeZoneInfo.BaseUtcOffset != TimeZoneInfo.Utc.BaseUtcOffset 
-                ? TimeZoneInfo.ConvertTimeFromUtc(dateTime, timeZoneInfo) 
-                : dateTime;
+            return IsPlainUtc(timeZoneInfo)
+                ? dateTime
+                : TimeZoneInfo.ConvertTimeFromUtc(dateTime, timeZoneInfo);
         }
         
         public static DateTime ConvertToUtc(this DateTime dateTime, string timeZoneId)
         {
             var timeZoneInfo = timeZoneId.GetTimeZoneInfo();
             
-            return timeZoneInfo.BaseUtcOffset != TimeZoneInfo.Utc.BaseUtcOffset 
-                ? TimeZoneInfo.ConvertTimeToUtc(dateTime, timeZoneInfo) 
-                : dateTime;
+            return IsPlainUtc(timeZoneInfo)
+                ? dateTime
+                : TimeZoneInfo.ConvertTimeToUtc(dateTime, timeZoneInfo);
         }
+
+        // Zones like Europe/London have a zero base offset but do observe DST, so only skip true UTC zones.
+        private static bool IsPlainUtc(TimeZoneInfo timeZoneInfo) =>
+            timeZoneInfo.BaseUtcOffset == TimeSpan.Zero && !timeZoneInfo.SupportsDaylightSavingTime;
 
         public static bool IsLastDayOfMonth(this DateTime dateTime)
         {
