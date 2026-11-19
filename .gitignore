@@ -48,3 +48,6 @@ mono_crash.mem.*
 /EnergyPortal/logs/
 /EnergyWorker/logs/
 MigrateDatabase/connectionstring.txt
+
+# Test run output (coverage reports)
+**/TestResults/
