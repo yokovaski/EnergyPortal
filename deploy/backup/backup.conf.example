@@ -1,0 +1,13 @@
+# Copy to ~/backup/backup.conf on the backup machine and adjust. Sourced by borg-pull-backup.sh.
+SERVER=user@your-server.example.com
+BORG_REPO=$HOME/backup/borg
+
+# Everything listed here lands in one borg archive. Add other apps on the same server the same way.
+backup_items() {
+  dump_postgres postgres energycloud energyportal.sql
+  pull_volume energyportal_portal_volume
+  pull_root /etc/nginx host/nginx
+  pull_root /etc/letsencrypt host/letsencrypt
+  # Project folder incl. git-ignored files such as .env; the database files are covered by the dump above.
+  pull_home --exclude=/EnergyPortal/postgres/ EnergyPortal
+}
