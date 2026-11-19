@@ -20,7 +20,7 @@ namespace EnergyWorker
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
-                .WriteTo.RollingFile("logs/worker-{Date}.log", LogEventLevel.Information, fileSizeLimitBytes: 10000000)
+                .WriteTo.File("logs/worker-.log", LogEventLevel.Information, fileSizeLimitBytes: 10000000, rollingInterval: RollingInterval.Day)
                 .CreateLogger();
         
             try

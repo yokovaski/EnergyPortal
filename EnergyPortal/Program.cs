@@ -23,7 +23,7 @@ namespace EnergyPortal
                 .MinimumLevel.Override("Microsoft.Hosting", LogEventLevel.Information)
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
-                .WriteTo.RollingFile("logs/portal-{Date}.log", LogEventLevel.Information, fileSizeLimitBytes: 10000000)
+                .WriteTo.File("logs/portal-.log", LogEventLevel.Information, fileSizeLimitBytes: 10000000, rollingInterval: RollingInterval.Day)
                 .CreateLogger();
         
             try

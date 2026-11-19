@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace EnergyPortal.Controllers.WebApi
 {
@@ -296,7 +295,7 @@ namespace EnergyPortal.Controllers.WebApi
                 _ => TimeZoneInfo.ConvertTimeToUtc(dateTime, timeZoneId.GetTimeZoneInfo())
             };
 
-            return EpochTime.GetIntDate(utcDateTime) * 1000;
+            return new DateTimeOffset(DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc)).ToUnixTimeSeconds() * 1000;
         }
         
         private async Task<long?> GetRaspberryPiId(ApplicationUser user = null)
