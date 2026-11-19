@@ -205,6 +205,37 @@ public class WebApiTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Weeks_are_seven_day_buckets_from_the_start_day()
+    {
+        var start = DateTime.UtcNow.Date.AddDays(-21);
+        await SeedMetrics<HourMetric>(start, TimeSpan.FromHours(6), 21 * 4);
+
+        var json = await Json(await Client().GetAsync($"/webapi/v3/metrics/weeks?from={Iso(start)}"));
+
+        Assert.Equal("yyyy-MM-dd (dddd)", json.GetProperty("format").GetString());
+        var slots = json.GetProperty("timestamps").EnumerateArray().Select(t => DateTime.Parse(t.GetString())).ToList();
+        Assert.Equal(start.Date, slots[0]);
+        Assert.All(slots.Zip(slots.Skip(1)), p => Assert.Equal(TimeSpan.FromDays(7), p.Second - p.First));
+        // 28 readings per week, each adding 100 Wh high + 50 Wh low.
+        Assert.Equal(4.2m, json.GetProperty("intake")[0][1].GetDecimal());
+        Assert.Equal(4.2m, json.GetProperty("intake")[1][1].GetDecimal());
+    }
+
+    [Fact]
+    public async Task Weeks_stay_on_the_seven_day_grid_when_a_week_starts_with_a_gap()
+    {
+        var start = DateTime.UtcNow.Date.AddDays(-14);
+        // First reading three days into the first week.
+        await SeedMetrics<HourMetric>(start.AddDays(3), TimeSpan.FromHours(6), 11 * 4);
+
+        var json = await Json(await Client().GetAsync($"/webapi/v3/metrics/weeks?from={Iso(start)}"));
+
+        var slots = json.GetProperty("timestamps").EnumerateArray().Select(t => DateTime.Parse(t.GetString())).ToList();
+        Assert.Equal([start.Date, start.Date.AddDays(7)], slots.Take(2));
+        Assert.All(slots.Zip(slots.Skip(1)), p => Assert.Equal(TimeSpan.FromDays(7), p.Second - p.First));
+    }
+
+    [Fact]
     public async Task Days_work_for_user_without_settings()
     {
         await factory.SeedAsync(db =>

@@ -127,6 +127,30 @@ namespace EnergyPortal.Controllers.WebApi
             //         Intake = Array.Empty<int>(),
             //     });
 
+            // One output point per period: the delta from its first reading to the first reading of the next period.
+            List<OutMetricModel> GroupTotals(Func<IMetric, DateTime> period) => dbMetrics
+                .GroupBy(period)
+                .Select(m => new
+                {
+                    Period = m.Key,
+                    First = m.First(),
+                    Last = m.Last(),
+                    SolarTotalMin = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Min(a => a.SolarTotal) : 0,
+                    SolarTotalMax = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Max(a => a.SolarTotal) : 0
+                })
+                .SelectWithNextOrDefault((c, n) =>
+                {
+                    var current = c.First;
+                    var next = n?.First ?? c.Last;
+                    current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
+                    next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
+
+                    var model = current.ToOutMetricModel(next, settings);
+                    model.DateTime = c.Period;
+                    return model;
+                })
+                .ToList();
+
             var format = "";
             List<OutMetricModel> metrics;
 
@@ -164,81 +188,21 @@ namespace EnergyPortal.Controllers.WebApi
                         .ToList();
                     break;
                 case TimeGroup.Days:
-                    metrics = dbMetrics
-                        .GroupBy(m => m.Created.Date)
-                        .Select(m => new
-                        {
-                            First = m.First(),
-                            Last = m.Last(),
-                            SolarTotalMin = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Min(a => a.SolarTotal) : 0,
-                            SolarTotalMax = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Max(a => a.SolarTotal) : 0
-                        })
-                        .SelectWithNextOrDefault((c, n) =>
-                        {
-                            var current = c.First;
-                            var next = n?.First ?? c.Last;
-                            current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
-                            next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
-                            
-                            return current.ToOutMetricModel(next, settings);
-                        })
-                        .ToList();
-                    
+                    metrics = GroupTotals(m => m.Created.Date);
                     format = settings.ShowDayName ? "yyyy-MM-dd (dddd)" : "yyyy-MM-dd";
                     break;
-                // case TimeGroup.Weeks:
-                    // break;
+                case TimeGroup.Weeks:
+                    // 7-day buckets anchored on the start day, matching the slots FillMissing generates
+                    var weekStart = start.ConvertToTimeZone(settings.TimeZoneId).Date;
+                    metrics = GroupTotals(m => weekStart.AddDays(Math.Floor((m.Created.Date - weekStart).TotalDays / 7) * 7));
+                    format = settings.ShowDayName ? "yyyy-MM-dd (dddd)" : "yyyy-MM-dd";
+                    break;
                 case TimeGroup.Months:
-                    metrics = dbMetrics
-                        .GroupBy(m => new
-                        {
-                            m.Created.Date.Year,
-                            m.Created.Month
-                        })
-                        .Select(m => new
-                        {
-                            First = m.First(),
-                            Last = m.Last(),
-                            SolarTotalMin = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Min(a => a.SolarTotal) : 0,
-                            SolarTotalMax = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Max(a => a.SolarTotal) : 0
-                        })
-                        .SelectWithNextOrDefault((c, n) =>
-                        {
-                            var current = c.First;
-                            var next = n?.First ?? c.Last;
-                            current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
-                            next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
-                            
-                            return current.ToOutMetricModel(next, settings);
-                        })
-                        .ToList();
-
+                    metrics = GroupTotals(m => new DateTime(m.Created.Year, m.Created.Month, 1));
                     format = "yyyy-MM";
                     break;
                 case TimeGroup.Years:
-                    metrics = dbMetrics
-                        .GroupBy(m => new
-                        {
-                            m.Created.Date.Year
-                        })
-                        .Select(m => new
-                        {
-                            First = m.First(),
-                            Last = m.Last(),
-                            SolarTotalMin = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Min(a => a.SolarTotal) : 0,
-                            SolarTotalMax = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Max(a => a.SolarTotal) : 0
-                        })
-                        .SelectWithNextOrDefault((c, n) =>
-                        {
-                            var current = c.First;
-                            var next = n?.First ?? c.Last;
-                            current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
-                            next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
-                            
-                            return current.ToOutMetricModel(next, settings);
-                        })
-                        .ToList();
-
+                    metrics = GroupTotals(m => new DateTime(m.Created.Year, 1, 1));
                     format = "yyyy";
                     break;
                 default:
