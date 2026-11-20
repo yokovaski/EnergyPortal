@@ -21,7 +21,7 @@ useDismiss(menu, menuOpen);
 <template>
   <header class="sticky top-0 z-20 border-b border-line bg-surface-raised">
     <div class="mx-auto flex h-14 max-w-content items-center gap-6 px-8 max-[560px]:px-4">
-      <RouterLink to="/" class="text-xl no-underline" aria-label="EnergieZicht, naar Actueel"><Wordmark/></RouterLink>
+      <RouterLink to="/" class="flex shrink-0 items-center no-underline" aria-label="EnergieZicht, naar Actueel"><Wordmark/></RouterLink>
       <nav aria-label="Hoofdmenu" class="flex gap-1 max-md:hidden">
         <RouterLink v-for="t in tabs" :key="t.to" v-slot="{ href, navigate, isExactActive }" :to="t.to" custom>
           <a :href="href" :aria-current="isExactActive ? 'page' : undefined" @click="navigate"

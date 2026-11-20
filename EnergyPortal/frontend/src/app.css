@@ -10,6 +10,9 @@
 @source "../../Views";
 @source "../../Areas";
 
+/* Logo: two images, the one for the current theme is shown */
+[data-theme="dark"] .ez-logo-light, :root:not([data-theme="dark"]) .ez-logo-dark { display: none; }
+
 /* Only design tokens are available as colours, so no hex values slip into components. */
 @theme {
   --color-*: initial;

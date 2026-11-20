@@ -23,7 +23,10 @@
 <body>
     <header class="sticky top-0 z-20 border-b border-line bg-surface-raised">
         <div class="mx-auto flex h-14 max-w-content items-center gap-6 px-8 max-[560px]:px-4">
-            <a href="/" class="text-xl font-bold tracking-[-0.02em] text-ink no-underline" aria-label="EnergieZicht, naar Actueel">Energie<span class="text-brand">Zicht</span></a>
+            <a href="/" class="flex shrink-0 items-center no-underline" aria-label="EnergieZicht, naar Actueel">
+                <img src="/img/energiezicht-logo.svg" alt="" height="20" class="ez-logo-light h-5 w-auto">
+                <img src="/img/energiezicht-logo-donker.svg" alt="" height="20" class="ez-logo-dark h-5 w-auto">
+            </a>
             <nav aria-label="Hoofdmenu" class="flex gap-1 max-md:hidden">
                 @foreach (var t in tabs)
                 {
