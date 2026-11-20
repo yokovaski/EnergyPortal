@@ -27,7 +27,7 @@ const MIN = 60_000, HOUR = 3_600_000;
 const config: Record<Range, { group: Group; hoursPerPoint: number; refresh: number; caption: string }> = {
   nu: {group: 'tenseconds', hoursPerPoint: 10 / 3600, refresh: 10_000, caption: 'Afgelopen 10 minuten, per 10 seconden'},
   uur: {group: 'minutes', hoursPerPoint: 1 / 60, refresh: MIN, caption: 'Afgelopen uur, gemiddeld per minuut'},
-  dag: {group: 'hours', hoursPerPoint: 1, refresh: 5 * MIN, caption: 'Afgelopen 24 uur, gemiddeld per uur'},
+  dag: {group: 'fiveminutes', hoursPerPoint: 5 / 60, refresh: 5 * MIN, caption: 'Afgelopen 24 uur, gemiddeld per 5 minuten'},
   week: {group: 'hours', hoursPerPoint: 1, refresh: 5 * MIN, caption: 'Afgelopen 7 dagen, gemiddeld per uur'},
 };
 
@@ -114,6 +114,7 @@ function tipHeader(x: number): string {
   switch (range.value) {
     case 'nu': return `${day(d, tz)}, ${time(d, tz, true)}`;
     case 'uur': return `${day(d, tz)}, ${time(d, tz)}`;
+    case 'dag': return `${day(d, tz)}, ${time(d, tz)}–${time(new Date(x + 5 * MIN), tz)}`;
     default: return `${day(d, tz)}, ${time(d, tz)}–${time(new Date(x + HOUR), tz)}`;
   }
 }

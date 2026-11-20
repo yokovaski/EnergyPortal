@@ -112,7 +112,7 @@ export interface Account {
     rpiKey: string | null;
 }
 
-export type Group = 'tenseconds' | 'minutes' | 'hours' | 'days' | 'months' | 'years';
+export type Group = 'tenseconds' | 'minutes' | 'fiveminutes' | 'hours' | 'days' | 'months' | 'years';
 
 export function getSeries(group: Group, from: Date, to?: Date) {
     return get<Series>(`/webapi/v3/metrics/${group}?${query({from, to})}`);

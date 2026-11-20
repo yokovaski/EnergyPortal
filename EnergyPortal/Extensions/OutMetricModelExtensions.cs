@@ -48,6 +48,7 @@ public static class OutMetricModelExtensions
         {
             TimeGroup.TenSeconds => dateTime.AddSeconds(10),
             TimeGroup.Minutes => dateTime.AddMinutes(1),
+            TimeGroup.FiveMinutes => dateTime.AddMinutes(5),
             TimeGroup.Hours => dateTime.AddHours(1),
             TimeGroup.Days => dateTime.AddDays(1),
             TimeGroup.Weeks => dateTime.AddDays(7),
@@ -64,6 +65,7 @@ public static class OutMetricModelExtensions
         {
             TimeGroup.TenSeconds => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second / 10 * 10, dateTime.Kind),
             TimeGroup.Minutes => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, dateTime.Kind),
+            TimeGroup.FiveMinutes => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute / 5 * 5, 0, dateTime.Kind),
             TimeGroup.Hours => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, dateTime.Kind),
             TimeGroup.Days => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, dateTime.Kind),
             TimeGroup.Weeks => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, dateTime.Kind),

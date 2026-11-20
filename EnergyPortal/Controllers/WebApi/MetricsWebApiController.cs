@@ -56,6 +56,7 @@ namespace EnergyPortal.Controllers.WebApi
                 case TimeGroup.TenSeconds:
                     return GetMetrics(tenSecondMetricRepository, from, to, timeGroup, showRealLast, skipTimeSpanCheck);
                 case TimeGroup.Minutes:
+                case TimeGroup.FiveMinutes:
                     return GetMetrics(minuteMetricRepository, from, to, timeGroup, showRealLast, skipTimeSpanCheck);
                 case TimeGroup.Hours:
                 case TimeGroup.Days:
@@ -79,6 +80,8 @@ namespace EnergyPortal.Controllers.WebApi
                     return timeSpan > TimeSpan.FromHours(3);
                 case TimeGroup.Minutes:
                     return timeSpan > TimeSpan.FromHours(12);
+                case TimeGroup.FiveMinutes:
+                    return timeSpan > TimeSpan.FromDays(3);
                 case TimeGroup.Hours:
                     return timeSpan > TimeSpan.FromDays(30);
                 case TimeGroup.Days:
@@ -170,6 +173,23 @@ namespace EnergyPortal.Controllers.WebApi
                             Redelivery = d.RedeliveryNow,
                             Solar = d.SolarNow,
                             Usage = d.UsageNow + d.SolarNow - d.RedeliveryNow
+                        })
+                        .ToList();
+                    break;
+                case TimeGroup.FiveMinutes:
+                    format = "HH:mm";
+
+                    // Mean power of the minute rows in each 5-minute bucket
+                    metrics = dbMetrics
+                        .GroupBy(d => new DateTime(d.Created.Year, d.Created.Month, d.Created.Day, d.Created.Hour, d.Created.Minute / 5 * 5, 0, d.Created.Kind))
+                        .Select(g => new OutMetricModel
+                        {
+                            DateTime = g.Key,
+                            Gas = (long)Math.Round(g.Average(d => d.UsageGasNow)),
+                            Intake = (long)Math.Round(g.Average(d => d.UsageNow)),
+                            Redelivery = (long)Math.Round(g.Average(d => d.RedeliveryNow)),
+                            Solar = (long)Math.Round(g.Average(d => d.SolarNow)),
+                            Usage = (long)Math.Round(g.Average(d => d.UsageNow + d.SolarNow - d.RedeliveryNow))
                         })
                         .ToList();
                     break;
@@ -265,7 +285,7 @@ namespace EnergyPortal.Controllers.WebApi
             var temperature = new List<object[]>();
             var degreeDays = new List<object[]>();
             if (settings.Latitude == null || settings.Longitude == null || metrics.Count == 0 ||
-                timeGroup is TimeGroup.None or TimeGroup.TenSeconds or TimeGroup.Minutes)
+                timeGroup is TimeGroup.None or TimeGroup.TenSeconds or TimeGroup.Minutes or TimeGroup.FiveMinutes)
                 return (temperature, degreeDays);
 
             var station = await temperatureRepository.NearestStationAsync(settings.Latitude.Value, settings.Longitude.Value);

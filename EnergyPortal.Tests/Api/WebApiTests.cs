@@ -322,6 +322,22 @@ public class WebApiTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Five_minute_metrics_average_minute_rows_per_bucket()
+    {
+        var start = new DateTime(2026, 11, 20, 9, 0, 0, DateTimeKind.Utc);
+        await SeedMetrics<MinuteMetric>(start, TimeSpan.FromMinutes(1), 10); // usage 400..409
+
+        var json = await Json(await Client().GetAsync(
+            $"/webapi/v3/metrics/fiveminutes?from={Iso(start)}&to={Iso(start.AddMinutes(10))}"));
+
+        Assert.Equal("HH:mm", json.GetProperty("format").GetString());
+        var epochs = json.GetProperty("epochs").EnumerateArray().Select(e => e.GetInt64()).ToList();
+        Assert.Equal([0L, 300_000L], epochs.Take(2).Select(e => e - epochs[0]));
+        var intake = json.GetProperty("intake").EnumerateArray().Select(p => p[1].GetDecimal()).ToList();
+        Assert.Equal([0.402m, 0.407m], intake.Take(2)); // mean of 400..404 and 405..409
+    }
+
+    [Fact]
     public async Task Hour_metrics_use_hour_format()
     {
         var start = DateTime.UtcNow.AddHours(-10);
@@ -399,6 +415,7 @@ public class WebApiTests : IAsyncLifetime
     [Theory]
     [InlineData("tenseconds", 4)]   // > 3 h
     [InlineData("minutes", 13)]     // > 12 h
+    [InlineData("fiveminutes", 73)] // > 3 d
     [InlineData("hours", 24 * 31)]  // > 30 d
     [InlineData("days", 24 * 701)]  // > 700 d
     public async Task Rejects_ranges_too_large_for_resolution(string group, int hours)

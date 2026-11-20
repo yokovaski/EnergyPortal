@@ -121,6 +121,16 @@ public class FillMissingTests
     }
 
     [Fact]
+    public void FiveMinutes_slots_line_up_on_five_minute_boundaries()
+    {
+        var result = new List<OutMetricModel> { At(Ten.AddMinutes(7)), At(Ten.AddMinutes(17)) }
+            .FillMissing(TimeGroup.FiveMinutes, Ten.AddMinutes(3), Ten.AddMinutes(17), false);
+
+        Assert.Equal([Ten, Ten.AddMinutes(5), Ten.AddMinutes(10), Ten.AddMinutes(15)], result.Select(r => r.DateTime));
+        Assert.Equal([0L, 1L, 0L, 1L], result.Select(r => r.Usage));
+    }
+
+    [Fact]
     public void Fills_gap_between_metrics()
     {
         var result = new List<OutMetricModel> { At(Ten), At(Ten.AddHours(2)) }
@@ -200,6 +210,7 @@ public class FillMissingTests
     [Theory]
     [InlineData(TimeGroup.TenSeconds)]
     [InlineData(TimeGroup.Minutes)]
+    [InlineData(TimeGroup.FiveMinutes)]
     [InlineData(TimeGroup.Hours)]
     [InlineData(TimeGroup.Days)]
     [InlineData(TimeGroup.Weeks)]
