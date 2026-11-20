@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<{
   state?: 'normal' | 'changed' | 'warning';
   describedby?: string;
   labelledby?: string;
-}>(), {digits: 4, state: 'normal'});
+}>(), {digits: 5, state: 'normal'});
 
 const model = defineModel<number>({required: true});
 const text = ref(num(model.value, props.digits));
@@ -26,7 +26,7 @@ watch(model, v => {
 
 function onInput() {
   const value = parseAmount(text.value);
-  if (value == null) error.value = 'Vul een bedrag in, bijvoorbeeld 0,2720.';
+  if (value == null) error.value = 'Vul een bedrag in, bijvoorbeeld 0,27205.';
   else if (value < 0 && !props.allowNegative) error.value = 'Bedrag kan niet negatief zijn.';
   else {
     error.value = '';

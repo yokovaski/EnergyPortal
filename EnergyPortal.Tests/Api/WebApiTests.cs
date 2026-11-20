@@ -155,12 +155,12 @@ public class WebApiTests : IAsyncLifetime
     public async Task Settings_put_updates_current_user_only()
     {
         var response = await Client().PutAsJsonAsync("/webapi/v3/settings",
-            new { solarSystem = true, timeZoneId = "Europe/London", gasPrice = 2.5m, userId = "someone-else" });
+            new { solarSystem = true, timeZoneId = "Europe/London", gasPrice = 1.23456m, userId = "someone-else" });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var json = await Json(await Client().GetAsync("/webapi/v3/settings"));
         Assert.True(json.GetProperty("solarSystem").GetBoolean());
-        Assert.Equal(2.5m, json.GetProperty("gasPrice").GetDecimal());
+        Assert.Equal(1.23456m, json.GetProperty("gasPrice").GetDecimal());
         Assert.Equal(User, json.GetProperty("userId").GetString());
     }
 

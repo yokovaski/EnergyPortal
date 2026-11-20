@@ -48,7 +48,7 @@ const fields: { key: keyof Form; label: string }[] = [
 ];
 const changed = computed(() => fields.filter(f => form.value && saved.value && (form.value[f.key] ?? '') !== (saved.value[f.key] ?? '')));
 const isChanged = (key: keyof Form) => changed.value.some(f => f.key === key);
-const changeNote = (key: keyof Form, digits = 4) => {
+const changeNote = (key: keyof Form, digits = 5) => {
   const f = fields.find(x => x.key === key)!;
   return `${f.label} gewijzigd, was € ${num(saved.value![key] as number, digits)}.`;
 };
