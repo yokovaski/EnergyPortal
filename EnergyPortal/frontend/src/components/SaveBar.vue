@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {mdiCheck} from '@mdi/js';
+import {mdiCheck, mdiLoading} from '@mdi/js';
 import Icon from './Icon.vue';
 
 defineProps<{ changes: number; saving?: boolean; saved?: boolean; error?: string }>();
@@ -15,9 +15,14 @@ defineEmits<{ save: []; reset: [] }>();
       </p>
       <div class="flex gap-2">
         <button type="button" class="ez-btn" :disabled="saving" @click="$emit('reset')">Herstellen</button>
-        <button type="button" class="ez-btn ez-btn-primary" :disabled="saving" @click="$emit('save')">Opslaan</button>
+        <button type="button" class="ez-btn ez-btn-primary" :disabled="saving" :aria-busy="saving" @click="$emit('save')">
+          <Icon v-if="saving" :path="mdiLoading" :size="18" class="animate-spin"/>{{ saving ? 'Opslaan…' : 'Opslaan' }}
+        </button>
       </div>
     </div>
-    <p v-else-if="saved" class="ez-label m-0 flex items-center justify-end gap-1 text-live"><Icon :path="mdiCheck" :size="18"/>Instellingen opgeslagen.</p>
+    <!-- Same card as the bar, so it never sits bare on top of the fields -->
+    <p v-else-if="saved" class="ez-label m-0 ml-auto flex w-fit items-center gap-1 rounded-lg border border-line bg-surface-raised px-5 py-3 text-live shadow-float">
+      <Icon :path="mdiCheck" :size="18"/>Instellingen opgeslagen.
+    </p>
   </div>
 </template>
