@@ -110,6 +110,17 @@ public class FillMissingTests
     }
 
     [Fact]
+    public void TenSeconds_readings_off_the_range_start_get_no_empty_slots_in_between()
+    {
+        // Readings at :04/:14/:24, range starting at :07: slots must line up, no zeros interleaved
+        var result = new List<OutMetricModel> { At(Ten.AddSeconds(4)), At(Ten.AddSeconds(14)), At(Ten.AddSeconds(24)) }
+            .FillMissing(TimeGroup.TenSeconds, Ten.AddSeconds(7), Ten.AddSeconds(24), false);
+
+        Assert.Equal([Ten, Ten.AddSeconds(10), Ten.AddSeconds(20)], result.Select(r => r.DateTime));
+        Assert.All(result, r => Assert.Equal(1, r.Usage));
+    }
+
+    [Fact]
     public void Fills_gap_between_metrics()
     {
         var result = new List<OutMetricModel> { At(Ten), At(Ten.AddHours(2)) }

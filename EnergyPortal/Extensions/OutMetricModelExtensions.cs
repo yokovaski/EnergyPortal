@@ -62,7 +62,7 @@ public static class OutMetricModelExtensions
     {
         return timeGroup switch
         {
-            TimeGroup.TenSeconds => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Kind),
+            TimeGroup.TenSeconds => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second / 10 * 10, dateTime.Kind),
             TimeGroup.Minutes => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, dateTime.Kind),
             TimeGroup.Hours => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, dateTime.Kind),
             TimeGroup.Days => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0, dateTime.Kind),
