@@ -1,12 +1,13 @@
-﻿@page
+@page
 @model DownloadPersonalDataModel
 @{
-    ViewData["Title"] = "Download Your Data";
-    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+    ViewData["Title"] = "Gegevens downloaden";
 }
 
-<h4>@ViewData["Title"]</h4>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+<nav aria-label="Kruimelpad" class="ez-label">
+    <a class="ez-link" href="/settings">Instellingen</a> <span aria-hidden="true">›</span> <a class="ez-link" asp-page="./Index">Account</a>
+</nav>
+<h1 class="ez-title-lg mt-1">Gegevens downloaden</h1>
+<section class="ez-card mt-6 max-w-[640px]">
+    <form method="post"><button type="submit" class="ez-btn ez-btn-primary">Exporteren</button></form>
+</section>

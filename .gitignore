@@ -43,11 +43,17 @@ mono_crash.mem.*
 .vs/
 
 # Project specific
-/EnergyPortal/wwwroot/css/bundle.css
-/EnergyPortal/wwwroot/js/bundle.js
+/EnergyPortal/wwwroot/css/
+/EnergyPortal/wwwroot/js/
+/EnergyPortal/wwwroot/assets/
+/EnergyPortal/wwwroot/images/
+/EnergyPortal/wwwroot/assets.manifest.json
 /EnergyPortal/logs/
 /EnergyWorker/logs/
 MigrateDatabase/connectionstring.txt
 
 # Test run output (coverage reports)
 **/TestResults/
+
+# KNMI Open Data API key
+knmi_api_key*.txt

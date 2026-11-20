@@ -1,4 +1,4 @@
-﻿// See https://khalidabuhakmeh.com/running-vite-with-aspnet-core-web-applications
+// See https://khalidabuhakmeh.com/running-vite-with-aspnet-core-web-applications
 // This setup is needed to use the same certificates for both ASP.Core as the Vite dev server
 // This is necessary to be able to run Portal locally using HTTPS
 import {spawn} from "child_process";
@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import {UserConfig, defineConfig} from 'vite';
 import vue from '@vitejs/plugin-vue';
+import tailwindcss from '@tailwindcss/vite';
 import {PreRenderedAsset} from "rollup";
 
 // @ts-ignore
@@ -90,8 +91,8 @@ export default defineConfig(async () => {
         clearScreen: true,
         appType: 'mpa',
         root: 'frontend',
-        publicDir: 'public',
-        plugins: [vue()],
+        publicDir: false,
+        plugins: [vue(), tailwindcss()],
         build: {
             manifest: appsettings.Vite.Manifest,
             emptyOutDir: false,
@@ -99,10 +100,16 @@ export default defineConfig(async () => {
             assetsDir: '',
             cssCodeSplit: false,
             rollupOptions: {
+                // app = the Vue app, auth = styles + small scripts for the Razor Identity pages
+                input: {
+                    app: path.resolve(__dirname, 'frontend/app.ts'),
+                    auth: path.resolve(__dirname, 'frontend/auth.ts'),
+                },
                 // remove hashing, but I could add it back in
                 output: {
                     // Save entry files to the appropriate folder
-                    entryFileNames: 'js/bundle.js',
+                    entryFileNames: 'js/[name]-[hash].js',
+                    chunkFileNames: 'js/[name]-[hash].js',
                     // Save asset files to the appropriate folder
                     assetFileNames: (info) => {
                         return determineAssetFileName(info);

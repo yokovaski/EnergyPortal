@@ -1,0 +1,77 @@
+@using DatabaseInterface.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@* Server-rendered pages inside the app shell (Account, errors). Mirrors frontend/src/App.vue. *@
+@{
+    var user = User.Identity?.IsAuthenticated == true ? await UserManager.GetUserAsync(User) : null;
+    var display = user?.Name ?? user?.Email ?? "";
+    var words = display.Split('@')[0].Split(new[] { ' ', '.', '_', '-' }, StringSplitOptions.RemoveEmptyEntries);
+    var initials = words.Length >= 2 ? $"{words[0][0]}{words[^1][0]}" : words.Length == 1 ? words[0][..Math.Min(2, words[0].Length)] : "";
+    var active = ViewData["Nav"] as string;
+    var tabs = new[]
+    {
+        (Href: "/", Label: "Actueel", Key: "actueel", Icon: "M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,13H11V3H3V13Z"),
+        (Href: "/history", Label: "Historie", Key: "historie", Icon: "M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z"),
+        (Href: "/settings", Label: "Instellingen", Key: "instellingen", Icon: "M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"),
+    };
+}
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <partial name="_Head" model='"auth"' />
+</head>
+<body>
+    <header class="sticky top-0 z-20 border-b border-line bg-surface-raised">
+        <div class="mx-auto flex h-14 max-w-content items-center gap-6 px-8 max-[560px]:px-4">
+            <a href="/" class="text-xl font-bold tracking-[-0.02em] text-ink no-underline" aria-label="EnergieZicht, naar Actueel">Energie<span class="text-brand">Zicht</span></a>
+            <nav aria-label="Hoofdmenu" class="flex gap-1 max-md:hidden">
+                @foreach (var t in tabs)
+                {
+                    var isActive = t.Key == active;
+                    <a href="@t.Href" aria-current="@(isActive ? "page" : null)"
+                       class="flex h-10 items-center gap-2 rounded-full px-4 font-medium no-underline @(isActive ? "bg-brand-soft font-semibold text-brand" : "text-ink hover:bg-surface-sunken")">
+                        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="@t.Icon" fill="currentColor" /></svg>@t.Label
+                    </a>
+                }
+            </nav>
+            @if (user != null)
+            {
+                <details class="relative ml-auto">
+                    <summary class="flex size-10 cursor-pointer list-none items-center justify-center rounded-full bg-brand-soft text-sm font-semibold text-brand max-md:size-11 [&::-webkit-details-marker]:hidden"
+                             aria-label="Accountmenu van @display">@initials.ToUpperInvariant()</summary>
+                    <div class="absolute right-0 z-30 mt-2 w-56 rounded-lg border border-line bg-surface-raised py-2 shadow-float">
+                        <p class="ez-caption m-0 truncate px-4 pb-2">@user.Email</p>
+                        <a href="/Identity/Account/Manage" class="block px-4 py-2 text-ink no-underline hover:bg-brand-soft">Account</a>
+                        <a href="/settings" class="block px-4 py-2 text-ink no-underline hover:bg-brand-soft">Instellingen</a>
+                        <form method="post" action="/Identity/Account/Logout">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="block w-full px-4 py-2 text-left text-ink hover:bg-brand-soft">Uitloggen</button>
+                        </form>
+                    </div>
+                </details>
+            }
+        </div>
+    </header>
+
+    <main class="mx-auto max-w-content px-8 pt-8 pb-12 max-[560px]:px-4 max-[560px]:pt-5 max-md:pb-[calc(var(--ez-tabbar-h)+env(safe-area-inset-bottom)+24px)]">
+        @RenderBody()
+    </main>
+
+    @if (user != null)
+    {
+        <nav aria-label="Hoofdmenu" class="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-surface-raised pb-[env(safe-area-inset-bottom)] md:hidden">
+            @foreach (var t in tabs)
+            {
+                var isActive = t.Key == active;
+                <a href="@t.Href" aria-current="@(isActive ? "page" : null)"
+                   class="flex h-16 flex-1 flex-col items-center justify-center gap-1 text-xs no-underline @(isActive ? "font-semibold text-brand" : "text-ink-muted")">
+                    <span class="flex h-7 w-14 items-center justify-center rounded-full @(isActive ? "bg-brand-soft" : "")">
+                        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="@t.Icon" fill="currentColor" /></svg>
+                    </span>
+                    @t.Label
+                </a>
+            }
+        </nav>
+    }
+</body>
+</html>

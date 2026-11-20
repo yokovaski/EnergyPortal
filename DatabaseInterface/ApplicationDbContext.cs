@@ -13,7 +13,9 @@ namespace DatabaseInterface
         public DbSet<TenSecondMetric> TenSecondMetrics { get; set; }
         public DbSet<MinuteMetric> MinuteMetrics { get; set; }
         public DbSet<HourMetric> HourMetrics { get; set; }
-        
+        public DbSet<WeatherStation> WeatherStations { get; set; }
+        public DbSet<Temperature> Temperatures { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<ApplicationUser>()
@@ -53,6 +55,9 @@ namespace DatabaseInterface
 
             builder.Entity<TenSecondMetric>()
                 .HasIndex(t => t.Created);
+
+            builder.Entity<Temperature>()
+                .HasKey(t => new { t.StationId, t.Created });
 
             base.OnModelCreating(builder);
 

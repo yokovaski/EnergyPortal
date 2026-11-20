@@ -25,6 +25,9 @@
     build:
       context: .
       dockerfile: EnergyWorker/Dockerfile
+    environment:
+      # KNMI Open Data API key for outdoor temperature; set in .env next to this file. Without it the worker skips temperatures.
+      Knmi__ApiKey: ${KNMI_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy

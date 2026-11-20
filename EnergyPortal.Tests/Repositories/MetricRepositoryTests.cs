@@ -88,7 +88,7 @@ public class MetricRepositoryTests
 public class TenSecondMetricRepositoryTests
 {
     [Fact]
-    public async Task GetMinAndMaxSolarToday_only_counts_producing_readings_since_midnight()
+    public async Task GetMinAndMaxSolar_only_counts_producing_readings_in_window()
     {
         await using var db = TestDb.Create();
         var now = DateTime.UtcNow;
@@ -101,17 +101,17 @@ public class TenSecondMetricRepositoryTests
             TestDb.Metric<TenSecondMetric>(2, now, m => { m.SolarNow = 10; m.SolarTotal = 9999; }));
         await db.SaveChangesAsync();
 
-        var (min, max) = await new DbTenSecondMetricRepository(db).GetMinAndMaxSolarToday(1, null);
+        var (min, max) = await new DbTenSecondMetricRepository(db).GetMinAndMaxSolar(1, now.Date, now);
 
         Assert.Equal((100, 300), (min, max));
     }
 
     [Fact]
-    public async Task GetMinAndMaxSolarToday_is_zero_without_data()
+    public async Task GetMinAndMaxSolar_is_zero_without_data()
     {
         await using var db = TestDb.Create();
 
-        Assert.Equal((0L, 0L), await new DbTenSecondMetricRepository(db).GetMinAndMaxSolarToday(1, "Europe/Amsterdam"));
+        Assert.Equal((0L, 0L), await new DbTenSecondMetricRepository(db).GetMinAndMaxSolar(1, DateTime.UtcNow.Date, DateTime.UtcNow));
     }
 
     [Fact]

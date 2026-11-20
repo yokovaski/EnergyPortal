@@ -40,6 +40,9 @@ namespace DatabaseInterface.Repositories
             dbSettings.GasPrice = settings.GasPrice;
             dbSettings.ElectricityDeliveryPricePerMonth = settings.ElectricityDeliveryPricePerMonth;
             dbSettings.GasDeliveryPricePerMonth = settings.GasDeliveryPricePerMonth;
+            dbSettings.Postcode = settings.Postcode;
+            dbSettings.Latitude = settings.Latitude;
+            dbSettings.Longitude = settings.Longitude;
             
             await dbContext.SaveChangesAsync();
         } 

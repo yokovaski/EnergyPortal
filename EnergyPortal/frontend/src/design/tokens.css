@@ -1,0 +1,106 @@
+/* EnergieZicht design tokens — generated from tokens.json. Light is the default; dark via [data-theme="dark"] on <html>. */
+:root {
+  --ez-surface: #f3f5f4;
+  --ez-surface-raised: #ffffff;
+  --ez-surface-sunken: #e7ecea;
+  --ez-line: #dbe1de;
+  --ez-line-strong: #7d8a86;
+  --ez-ink: #13201d;
+  --ez-ink-muted: #4d5b57;
+  --ez-brand: #0f5257;
+  --ez-brand-soft: #dcecea;
+  --ez-on-brand: #ffffff;
+  --ez-focus-ring: #0f5257;
+  --ez-series-verbruik: #2563c9;
+  --ez-series-opname: #a3360b;
+  --ez-series-teruglevering: #13896b;
+  --ez-series-opwekking: #b07800;
+  --ez-series-gas: #7650c0;
+  --ez-tariff-dal-bg: #e3e6f6;
+  --ez-tariff-dal-ink: #2e3a87;
+  --ez-tariff-normaal-bg: #f6ecd9;
+  --ez-tariff-normaal-ink: #7a4e00;
+  --ez-status-live: #16794a;
+  --ez-status-warning: #8a5a00;
+  --ez-status-warning-bg: #fbefd6;
+  --ez-status-danger: #b42318;
+  --ez-status-danger-bg: #fdebe9;
+  --ez-scrim: #13201d66;
+  --ez-shadow-float: 0 8px 24px rgba(19, 32, 29, 0.14), 0 1px 2px rgba(19, 32, 29, 0.08);
+  --ez-font-sans: "Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
+  --ez-font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", monospace;
+  --ez-num-hero-size: 44px; --ez-num-hero-lh: 48px; --ez-num-hero-weight: 600; --ez-num-hero-tracking: -0.02em;
+  --ez-num-lg-size: 28px; --ez-num-lg-lh: 32px; --ez-num-lg-weight: 600; --ez-num-lg-tracking: -0.01em;
+  --ez-num-md-size: 18px; --ez-num-md-lh: 24px; --ez-num-md-weight: 600;
+  --ez-title-lg-size: 24px; --ez-title-lg-lh: 30px; --ez-title-lg-weight: 600; --ez-title-lg-tracking: -0.01em;
+  --ez-title-size: 17px; --ez-title-lh: 24px; --ez-title-weight: 600;
+  --ez-body-size: 15px; --ez-body-lh: 22px; --ez-body-weight: 400;
+  --ez-body-strong-size: 15px; --ez-body-strong-lh: 22px; --ez-body-strong-weight: 600;
+  --ez-label-size: 13px; --ez-label-lh: 18px; --ez-label-weight: 500;
+  --ez-caption-size: 12px; --ez-caption-lh: 16px; --ez-caption-weight: 400;
+  --ez-meter-size: 14px; --ez-meter-lh: 20px; --ez-meter-weight: 500;
+  --ez-space-1: 4px;
+  --ez-space-2: 8px;
+  --ez-space-3: 12px;
+  --ez-space-4: 16px;
+  --ez-space-5: 24px;
+  --ez-space-6: 32px;
+  --ez-space-7: 48px;
+  --ez-radius-sm: 6px;
+  --ez-radius-md: 10px;
+  --ez-radius-lg: 16px;
+  --ez-radius-pill: 999px;
+  --ez-control-h: 40px;
+  --ez-control-h-touch: 44px;
+  --ez-appbar-h: 56px;
+  --ez-tabbar-h: 64px;
+  --ez-content-max: 1200px;
+}
+
+[data-theme="dark"] {
+  --ez-surface: #0e1312;
+  --ez-surface-raised: #161d1b;
+  --ez-surface-sunken: #0a0e0d;
+  --ez-line: #26302d;
+  --ez-line-strong: #62706c;
+  --ez-ink: #e8eeec;
+  --ez-ink-muted: #a1aeaa;
+  --ez-brand: #6fcfc3;
+  --ez-brand-soft: #16302d;
+  --ez-on-brand: #08201d;
+  --ez-focus-ring: #6fcfc3;
+  --ez-series-verbruik: #6a9cf0;
+  --ez-series-opname: #de6534;
+  --ez-series-teruglevering: #62dbb4;
+  --ez-series-opwekking: #f2b437;
+  --ez-series-gas: #a98bea;
+  --ez-tariff-dal-bg: #1e2340;
+  --ez-tariff-dal-ink: #b3bcf5;
+  --ez-tariff-normaal-bg: #33280f;
+  --ez-tariff-normaal-ink: #f2c56b;
+  --ez-status-live: #4cc98a;
+  --ez-status-warning: #f2b437;
+  --ez-status-warning-bg: #332611;
+  --ez-status-danger: #f47b6e;
+  --ez-status-danger-bg: #3a1714;
+  --ez-scrim: #00000099;
+  --ez-shadow-float: 0 8px 24px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Base */
+body { margin: 0; background: var(--ez-surface); color: var(--ez-ink); font-family: var(--ez-font-sans);
+  font-size: var(--ez-body-size); line-height: var(--ez-body-lh); font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--ez-focus-ring); outline-offset: 2px; }
+
+/* Type helpers */
+.ez-num-hero { font-family: inherit; font-size: var(--ez-num-hero-size); line-height: var(--ez-num-hero-lh); font-weight: var(--ez-num-hero-weight); letter-spacing: var(--ez-num-hero-tracking); }
+.ez-num-lg { font-family: inherit; font-size: var(--ez-num-lg-size); line-height: var(--ez-num-lg-lh); font-weight: var(--ez-num-lg-weight); letter-spacing: var(--ez-num-lg-tracking); }
+.ez-num-md { font-family: inherit; font-size: var(--ez-num-md-size); line-height: var(--ez-num-md-lh); font-weight: var(--ez-num-md-weight); }
+.ez-title-lg { font-family: inherit; font-size: var(--ez-title-lg-size); line-height: var(--ez-title-lg-lh); font-weight: var(--ez-title-lg-weight); letter-spacing: var(--ez-title-lg-tracking); }
+.ez-title { font-family: inherit; font-size: var(--ez-title-size); line-height: var(--ez-title-lh); font-weight: var(--ez-title-weight); }
+.ez-body { font-family: inherit; font-size: var(--ez-body-size); line-height: var(--ez-body-lh); font-weight: var(--ez-body-weight); }
+.ez-body-strong { font-family: inherit; font-size: var(--ez-body-strong-size); line-height: var(--ez-body-strong-lh); font-weight: var(--ez-body-strong-weight); }
+.ez-label { font-family: inherit; font-size: var(--ez-label-size); line-height: var(--ez-label-lh); font-weight: var(--ez-label-weight); }
+.ez-caption { font-family: inherit; font-size: var(--ez-caption-size); line-height: var(--ez-caption-lh); font-weight: var(--ez-caption-weight); color: var(--ez-ink-muted); }
+.ez-meter { font-family: var(--ez-font-mono); font-size: var(--ez-meter-size); line-height: var(--ez-meter-lh); font-weight: var(--ez-meter-weight); }
+.ez-unit { font-size: .55em; color: var(--ez-ink-muted); font-weight: 500; margin-left: .3em; } /* unit inside a figure */

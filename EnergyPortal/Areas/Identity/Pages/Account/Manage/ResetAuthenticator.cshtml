@@ -1,24 +1,17 @@
-﻿@page
+@page
 @model ResetAuthenticatorModel
 @{
-    ViewData["Title"] = "Reset authenticator key";
-    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+    ViewData["Title"] = "Authenticator-app opnieuw instellen";
 }
 
-<partial name="_StatusMessage" for="StatusMessage" />
-<h4>@ViewData["Title"]</h4>
-<div class="alert alert-warning" role="alert">
-    <p>
-        <span class="glyphicon glyphicon-warning-sign"></span>
-        <strong>If you reset your authenticator key your authenticator app will not work until you reconfigure it.</strong>
-    </p>
-    <p>
-        This process disables 2FA until you verify your authenticator app.
-        If you do not complete your authenticator app configuration you may lose access to your account.
-    </p>
-</div>
-<div>
-    <form id="reset-authenticator-form" method="post" class="form-group">
-        <button id="reset-authenticator-button" class="btn btn-danger" type="submit">Reset authenticator key</button>
+<nav aria-label="Kruimelpad" class="ez-label">
+    <a class="ez-link" href="/settings">Instellingen</a> <span aria-hidden="true">›</span> <a class="ez-link" asp-page="./Index">Account</a>
+</nav>
+<h1 class="ez-title-lg mt-1">Authenticator-app opnieuw instellen</h1>
+<section class="ez-card mt-6 max-w-[640px]">
+    <p class="m-0">Je krijgt een nieuwe sleutel. <strong>De codes uit je huidige app werken daarna niet meer</strong> en tweestapsverificatie staat uit tot je de app opnieuw hebt ingesteld.</p>
+    <form id="reset-authenticator-form" method="post" class="mt-6 flex gap-2">
+        <button type="submit" class="ez-btn ez-btn-danger">Nieuwe sleutel maken</button>
+        <a class="ez-btn" asp-page="./Index" asp-fragment="tweestapsverificatie">Annuleren</a>
     </form>
-</div>
+</section>

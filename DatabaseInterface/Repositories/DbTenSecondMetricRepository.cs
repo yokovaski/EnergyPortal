@@ -73,15 +73,12 @@ namespace DatabaseInterface.Repositories
             return results;
         }
 
-        public async Task<(long minSolar, long maxSolar)> GetMinAndMaxSolarToday(long rpiId, string timeZoneId)
+        /// <summary>Lowest and highest solar meter total of producing readings in (fromUtc, toUtc].</summary>
+        public async Task<(long minSolar, long maxSolar)> GetMinAndMaxSolar(long rpiId, DateTime fromUtc, DateTime toUtc)
         {
-            var now = DateTime.UtcNow;
-            var midnight = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Unspecified);
-            var midnightUtc = midnight.ConvertToUtc(timeZoneId);
-
             var query = dbContext.TenSecondMetrics
                 .Where(t => t.RaspberryPiId == rpiId)
-                .Where(t => t.Created > midnightUtc)
+                .Where(t => t.Created > fromUtc && t.Created <= toUtc)
                 .Where(t => t.SolarNow > 0);
 
             var lowest = await query

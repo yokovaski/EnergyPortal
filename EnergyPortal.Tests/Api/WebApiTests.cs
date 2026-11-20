@@ -75,13 +75,55 @@ public class WebApiTests : IAsyncLifetime
     [Theory]
     [InlineData("/")]
     [InlineData("/history")]
-    [InlineData("/home/settings")]
+    [InlineData("/settings")]
     public async Task Pages_render_vue_mount_point(string url)
     {
         var response = await Client().GetAsync(url);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("id=\"app\"", await response.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Old_settings_url_redirects()
+    {
+        var response = await Client().GetAsync("/home/settings");
+
+        Assert.Equal(HttpStatusCode.MovedPermanently, response.StatusCode);
+        Assert.Equal("/settings", response.Headers.Location?.OriginalString);
+    }
+
+    [Fact]
+    public async Task Unknown_page_shows_styled_404()
+    {
+        var response = await Client().GetAsync("/bestaat-niet");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Contains("Pagina niet gevonden", await response.Content.ReadAsStringAsync());
+    }
+
+    [Theory]
+    [InlineData("/Identity/Account/Login", "Inloggen")]
+    [InlineData("/Identity/Account/ForgotPassword", "Wachtwoord vergeten")]
+    [InlineData("/Identity/Account/Lockout", "Te veel pogingen")]
+    public async Task Identity_pages_render_in_dutch(string url, string text)
+    {
+        var response = await factory.ClientFor(null).GetAsync(url);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains(text, await response.Content.ReadAsStringAsync());
+    }
+
+    [Theory]
+    [InlineData("/Identity/Account/Manage", "Tweestapsverificatie")]
+    [InlineData("/Identity/Account/Manage/EnableAuthenticator", "Authenticator-app instellen")]
+    [InlineData("/Identity/Account/Manage/DeletePersonalData", "Account verwijderen")]
+    public async Task Account_pages_render(string url, string text)
+    {
+        var response = await Client().GetAsync(url);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains(text, await response.Content.ReadAsStringAsync());
     }
 
     [Fact]
@@ -120,6 +162,111 @@ public class WebApiTests : IAsyncLifetime
         Assert.True(json.GetProperty("solarSystem").GetBoolean());
         Assert.Equal(2.5m, json.GetProperty("gasPrice").GetDecimal());
         Assert.Equal(User, json.GetProperty("userId").GetString());
+    }
+
+    [Theory]
+    [InlineData("gasPrice")]
+    [InlineData("highUsagePricePerKwh")]
+    [InlineData("electricityDeliveryPricePerMonth")]
+    public async Task Settings_put_rejects_negative_prices(string field)
+    {
+        var response = await Client().PutAsJsonAsync("/webapi/v3/settings", new Dictionary<string, object> { [field] = -0.1m });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Settings_put_accepts_negative_feed_in_tariffs()
+    {
+        var response = await Client().PutAsJsonAsync("/webapi/v3/settings",
+            new { highRedeliveryPricePerKwh = -0.05m, lowRedeliveryPricePerKwh = -0.02m });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var json = await Json(await Client().GetAsync("/webapi/v3/settings"));
+        Assert.Equal(-0.05m, json.GetProperty("highRedeliveryPricePerKwh").GetDecimal());
+    }
+
+    [Theory]
+    [InlineData("12345")]
+    [InlineData("0123AB")]
+    [InlineData("1234 A")]
+    public async Task Settings_put_rejects_malformed_postcode(string postcode)
+    {
+        var response = await Client().PutAsJsonAsync("/webapi/v3/settings", new { postcode });
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Settings_put_ignores_client_coordinates()
+    {
+        var response = await Client().PutAsJsonAsync("/webapi/v3/settings", new { latitude = 1.0, longitude = 2.0 });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var json = await Json(await Client().GetAsync("/webapi/v3/settings"));
+        Assert.Equal(JsonValueKind.Null, json.GetProperty("latitude").ValueKind);
+    }
+
+    // ---------- outdoor temperature ----------
+
+    [Fact]
+    public async Task Metrics_have_no_temperature_without_location()
+    {
+        var start = DateTime.UtcNow.Date.AddDays(-3);
+        await SeedMetrics<HourMetric>(start, TimeSpan.FromHours(6), 12);
+
+        var json = await Json(await Client().GetAsync($"/webapi/v3/metrics/days?from={Iso(start)}"));
+
+        Assert.Empty(json.GetProperty("temperature").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task Metrics_use_nearest_station_for_temperature_and_degree_days()
+    {
+        var start = DateTime.UtcNow.Date.AddDays(-3);
+        await SeedMetrics<HourMetric>(start, TimeSpan.FromHours(6), 12);
+        await factory.SeedAsync(async db =>
+        {
+            var settings = db.Settings.Single(s => s.UserId == User);
+            // Utrecht; De Bilt is ~5 km away, Maastricht ~150 km
+            settings.Latitude = 52.09;
+            settings.Longitude = 5.12;
+            db.WeatherStations.Add(new WeatherStation { Id = "06260", Name = "De Bilt", Latitude = 52.10, Longitude = 5.18 });
+            db.WeatherStations.Add(new WeatherStation { Id = "06380", Name = "Maastricht", Latitude = 50.91, Longitude = 5.77 });
+            for (var t = start.AddDays(-1); t < DateTime.UtcNow; t = t.AddHours(1))
+            {
+                db.Temperatures.Add(new Temperature { StationId = "06260", Created = t, Value = 8 });
+                db.Temperatures.Add(new Temperature { StationId = "06380", Created = t, Value = 30 });
+            }
+            await Task.CompletedTask;
+        });
+
+        var json = await Json(await Client().GetAsync($"/webapi/v3/metrics/days?from={Iso(start)}"));
+
+        var day = json.GetProperty("temperature")[1];
+        Assert.Equal(json.GetProperty("intake")[1][0].GetInt64(), day[0].GetInt64());
+        Assert.Equal(8, day[1].GetDouble());
+        // 18 - 8 = 10 degree days for a full day (23 or 25 hours on a DST switch)
+        Assert.InRange(json.GetProperty("degreeDays")[1][1].GetDouble(), 9.5, 10.5);
+
+        var settingsJson = await Json(await Client().GetAsync("/webapi/v3/settings"));
+        Assert.Equal("De Bilt", settingsJson.GetProperty("weatherStation").GetString());
+    }
+
+    // ---------- account ----------
+
+    [Fact]
+    public async Task Account_returns_user_and_pi_key()
+    {
+        var json = await Json(await Client().GetAsync("/webapi/v3/account"));
+
+        Assert.Equal("user1@test", json.GetProperty("email").GetString());
+        Assert.Equal("pi", json.GetProperty("rpiKey").GetString());
+    }
+
+    [Fact]
+    public async Task Account_has_no_key_for_user_without_pi()
+    {
+        var json = await Json(await Client(UserWithoutPi).GetAsync("/webapi/v3/account"));
+        Assert.Equal(JsonValueKind.Null, json.GetProperty("rpiKey").ValueKind);
     }
 
     [Theory]
@@ -317,6 +464,25 @@ public class WebApiTests : IAsyncLifetime
         Assert.Equal(2.5, json.GetProperty("usageTotalHigh").GetDouble());
         Assert.Equal(0.75, json.GetProperty("totalGas").GetDouble());
         Assert.Equal(1.0, json.GetProperty("totalSolar").GetDouble());
+    }
+
+    [Fact]
+    public async Task Total_yesterday_until_now_only_counts_yesterday()
+    {
+        var dayAgo = DateTime.UtcNow.AddDays(-1);
+        await factory.SeedAsync(db =>
+        {
+            db.Add(TestDb.Metric<TenSecondMetric>(piId, dayAgo.AddSeconds(-20), m => { m.UsageTotalHigh = 10_000; }));
+            db.Add(TestDb.Metric<TenSecondMetric>(piId, dayAgo.AddSeconds(-10), m => { m.UsageTotalHigh = 11_000; }));
+            // later yesterday (after "now" yesterday) and today: not counted
+            db.Add(TestDb.Metric<TenSecondMetric>(piId, dayAgo.AddMinutes(5), m => { m.UsageTotalHigh = 50_000; }));
+            db.Add(TestDb.Metric<TenSecondMetric>(piId, DateTime.UtcNow.AddSeconds(-5), m => { m.UsageTotalHigh = 90_000; }));
+            return Task.CompletedTask;
+        });
+
+        var json = await Json(await Client().GetAsync("/webapi/v3/energy/total-yesterday-until-now"));
+
+        Assert.Equal(1.0, json.GetProperty("usageTotalHigh").GetDouble());
     }
 
     [Fact]

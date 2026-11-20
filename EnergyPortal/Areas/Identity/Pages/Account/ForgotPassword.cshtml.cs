@@ -31,8 +31,8 @@ namespace EnergyPortal.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Vul je e-mailadres in.")]
+            [EmailAddress(ErrorMessage = "Dit is geen geldig e-mailadres.")]
             public string Email { get; set; }
         }
 
@@ -59,8 +59,8 @@ namespace EnergyPortal.Areas.Identity.Pages.Account
 
                 await _emailSender.SendEmailAsync(
                     Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    "Nieuw wachtwoord instellen",
+                    $"Stel een nieuw wachtwoord in voor EnergieZicht via <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>deze link</a>.");
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }

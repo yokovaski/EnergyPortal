@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EnergieZicht — Actueel (mobiel)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+.ez{--surface:#f3f5f4;--surface-raised:#ffffff;--surface-sunken:#e7ecea;--line:#dbe1de;--line-strong:#7d8a86;--ink:#13201d;--ink-muted:#4d5b57;--brand:#0f5257;--brand-soft:#dcecea;--on-brand:#ffffff;--focus-ring:#0f5257;--series-verbruik:#2563c9;--series-opname:#a3360b;--series-teruglevering:#13896b;--series-opwekking:#b07800;--series-gas:#7650c0;--tariff-normaal-bg:#f6ecd9;--tariff-normaal-ink:#7a4e00;--status-live:#16794a;--status-danger:#b42318;--status-danger-bg:#fdebe9;font-family:"Hanken Grotesk","Segoe UI",system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:15px;line-height:22px}
+.ez[data-theme="dark"]{--surface:#0e1312;--surface-raised:#161d1b;--surface-sunken:#0a0e0d;--line:#26302d;--line-strong:#62706c;--ink:#e8eeec;--ink-muted:#a1aeaa;--brand:#6fcfc3;--brand-soft:#16302d;--on-brand:#08201d;--focus-ring:#6fcfc3;--series-verbruik:#6a9cf0;--series-opname:#de6534;--series-teruglevering:#62dbb4;--series-opwekking:#f2b437;--series-gas:#a98bea;--tariff-normaal-bg:#33280f;--tariff-normaal-ink:#f2c56b;--status-live:#4cc98a;--status-danger:#f47b6e;--status-danger-bg:#3a1714}
+.ez :focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+.ez h1,.ez h2,.ez p{margin:0}
+.num-hero{font-size:44px;line-height:48px;font-weight:600;letter-spacing:-0.02em}
+.num-lg{font-size:28px;line-height:32px;font-weight:600;letter-spacing:-0.01em}
+.num-md{font-size:18px;line-height:24px;font-weight:600}
+.title{font-size:17px;line-height:24px;font-weight:600}
+.label{font-size:13px;line-height:18px;font-weight:500}
+.caption{font-size:12px;line-height:16px;font-weight:400;color:var(--ink-muted)}
+.meter{font-family:"JetBrains Mono",ui-monospace,"Cascadia Mono",monospace;font-size:14px;line-height:20px;font-weight:500}
+.u{font-size:.55em;color:var(--ink-muted);font-weight:500;margin-left:.3em}
+.ub{font-size:.55em;color:var(--ink-muted);font-weight:500;margin-right:.3em}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+<!-- Reference prototype generated from the design canvas. Rendered by dc-lite.js; not production code. -->
+<div id="dc-root"></div>
+<template id="dc-src"><x-dc>
+
+<div class="ez" data-theme="{{theme}}" style="width: 390px; height: 1800px; overflow: hidden; background: var(--surface); color: var(--ink); display: flex; flex-direction: column">
+
+<header style="flex-shrink: 0; height: 56px; box-sizing: border-box; padding: 0 16px; display: flex; align-items: center; background: var(--surface-raised); border-bottom: 1px solid var(--line)">
+<a href="#" style="font-size: 20px; line-height: 24px; font-weight: 700; letter-spacing: -0.02em; text-decoration: none; color: var(--ink)">Energie<span style="color: var(--brand)">Zicht</span></a>
+<button type="button" aria-label="Accountmenu" style="margin-left: auto; width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--line); background: var(--brand-soft); color: var(--brand); font: 600 14px/1 'Hanken Grotesk', sans-serif">EL</button>
+</header>
+
+<main style="flex: 1; box-sizing: border-box; padding: 16px; display: flex; flex-direction: column; gap: 16px">
+
+<div style="display: flex; align-items: baseline; gap: 10px">
+<h1 style="font-size: 20px; line-height: 26px; font-weight: 600">Actueel</h1>
+<span class="caption" style="font-size: 15px; line-height: 22px">do 19 nov</span>
+</div>
+
+<sc-if value="{{offline}}" hint-placeholder-val="{{false}}">
+<div role="status" style="display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 16px; background: var(--status-danger-bg)">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0; margin-top: 1px"><path d="{{icons.alert}}" style="fill: var(--status-danger)"></path></svg>
+<p style="font-size: 14px; line-height: 20px"><strong style="color: var(--status-danger)">Geen nieuwe metingen sinds 13:02.</strong> Controleer de Raspberry Pi in de meterkast.</p>
+</div>
+</sc-if>
+
+<section aria-labelledby="m-nu" style="background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 8px">
+<h2 id="m-nu" class="title">Nu</h2>
+<div style="margin-left: auto; display: flex; align-items: center; gap: 6px">
+<sc-if value="{{live}}" hint-placeholder-val="{{true}}">
+<span style="width: 8px; height: 8px; border-radius: 999px; background: var(--status-live)"></span>
+<span class="label">Live</span>
+<span class="caption">13:42:30</span>
+</sc-if>
+<sc-if value="{{offline}}" hint-placeholder-val="{{false}}">
+<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.alert}}" style="fill: var(--status-danger)"></path></svg>
+<span class="label" style="color: var(--status-danger)">Offline</span>
+<span class="caption">13:02:10</span>
+</sc-if>
+</div>
+</div>
+<div style="display: flex; align-items: flex-end; gap: 12px">
+<div style="display: flex; flex-direction: column">
+<span class="label">Verbruik</span>
+<span class="num-hero">{{now.verbruik}}<span class="u">kW</span></span>
+</div>
+<span class="label" style="margin-left: auto; margin-bottom: 8px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; background: var(--tariff-normaal-bg); color: var(--tariff-normaal-ink)"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.sun}}" style="fill: currentColor"></path></svg>Normaaltarief</span>
+</div>
+
+<sc-if value="{{solar}}" hint-placeholder-val="{{true}}">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr) 36px minmax(0, 1fr); align-items: start; padding-top: 4px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center">
+<div style="width: 48px; height: 48px; box-sizing: border-box; border-radius: 999px; border: 3px solid var(--series-opwekking); display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.solar}}" style="fill: var(--ink)"></path></svg></div>
+<span class="caption" style="color: var(--ink)">Opwekking</span>
+<span style="font-weight: 600">{{now.opwekking}} <span style="color: var(--ink-muted); font-size: 12px; font-weight: 500">kW</span></span>
+</div>
+<div style="display: flex; align-items: center; height: 48px"><div style="flex: 1; height: 3px; border-radius: 2px; background: var(--series-opwekking)"></div><svg width="8" height="10" viewBox="0 0 10 12" aria-hidden="true"><path d="M0,0 L10,6 L0,12 Z" style="fill: var(--series-opwekking)"></path></svg></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center">
+<div style="width: 48px; height: 48px; box-sizing: border-box; border-radius: 999px; border: 3px solid var(--series-verbruik); display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.home}}" style="fill: var(--ink)"></path></svg></div>
+<span class="caption" style="color: var(--ink)">Huis</span>
+<span style="font-weight: 600">{{now.verbruik}} <span style="color: var(--ink-muted); font-size: 12px; font-weight: 500">kW</span></span>
+</div>
+<div style="display: flex; align-items: center; height: 48px"><div style="flex: 1; height: 3px; border-radius: 2px; background: var(--series-teruglevering)"></div><svg width="8" height="10" viewBox="0 0 10 12" aria-hidden="true"><path d="M0,0 L10,6 L0,12 Z" style="fill: var(--series-teruglevering)"></path></svg></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center">
+<div style="width: 48px; height: 48px; box-sizing: border-box; border-radius: 999px; border: 3px solid var(--series-teruglevering); display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.grid}}" style="fill: var(--ink)"></path></svg></div>
+<span class="caption" style="color: var(--ink)">Teruglevering</span>
+<span style="font-weight: 600">{{now.teruglevering}} <span style="color: var(--ink-muted); font-size: 12px; font-weight: 500">kW</span></span>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{noSolar}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: center; gap: 10px">
+<div style="width: 40px; height: 40px; box-sizing: border-box; border-radius: 999px; border: 3px solid var(--series-opname); display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.grid}}" style="fill: var(--ink)"></path></svg></div>
+<span style="font-size: 14px">Alles komt nu van het net: <strong>{{now.verbruik}} kW</strong> Opname.</span>
+</div>
+</sc-if>
+</section>
+
+<section aria-labelledby="m-vandaag" style="background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column">
+<h2 id="m-vandaag" class="title">Vandaag</h2>
+<span class="caption">tot 13:42 · streep = gisteren tot nu</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{kpis}}" as="k" hint-placeholder-count="6">
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 10px; background: var(--surface)">
+<span class="label" style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: {{k.color}}"></span>{{k.label}}</span>
+<span class="num-lg" style="font-size: 26px; line-height: 30px"><sc-if value="{{k.pre}}" hint-placeholder-val="{{false}}"><span class="ub">{{k.pre}}</span></sc-if>{{k.val}}<sc-if value="{{k.unit}}" hint-placeholder-val="{{true}}"><span class="u">{{k.unit}}</span></sc-if></span>
+<div style="position: relative; height: 6px; border-radius: 999px; background: var(--surface-sunken); margin: 4px 0">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{k.fill}}; border-radius: 999px; background: {{k.color}}"></div>
+<div style="position: absolute; top: -4px; width: 2px; height: 14px; border-radius: 1px; background: var(--ink); left: {{k.tick}}"></div>
+</div>
+<span class="caption">{{k.delta}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="m-vermogen" style="background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column">
+<h2 id="m-vermogen" class="title">Vermogen</h2>
+<span class="caption">Afgelopen 24 uur, gemiddeld per uur</span>
+</div>
+<div role="group" aria-label="Periode" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; padding: 3px; border-radius: 10px; background: var(--surface-sunken)">
+<button type="button" aria-pressed="false" style="height: 38px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font: 500 15px/22px 'Hanken Grotesk', sans-serif">Nu</button>
+<button type="button" aria-pressed="false" style="height: 38px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font: 500 15px/22px 'Hanken Grotesk', sans-serif">Uur</button>
+<button type="button" aria-pressed="true" style="height: 38px; border: 0; border-radius: 6px; background: var(--brand); color: var(--on-brand); font: 600 15px/22px 'Hanken Grotesk', sans-serif">Dag</button>
+<button type="button" aria-pressed="false" style="height: 38px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); font: 500 15px/22px 'Hanken Grotesk', sans-serif">Week</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px">
+<sc-for list="{{legend}}" as="l" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column">
+<span class="label" style="display: flex; align-items: center; gap: 6px"><span style="width: {{l.sw}}; height: {{l.sh}}; border-radius: 2px; background: {{l.color}}"></span>{{l.label}}</span>
+<span class="num-md">{{l.total}}<span class="u">kWh</span></span>
+</div>
+</sc-for>
+</div>
+<div style="position: relative">
+<svg viewBox="0 0 326 236" role="img" aria-label="Vermogen afgelopen 24 uur per uur" style="display: block; width: 100%; height: auto; overflow: visible">
+<path d="{{c.grid}}" style="fill: none; stroke: var(--line); stroke-width: 1"></path>
+<path d="{{c.zero}}" style="fill: none; stroke: var(--line-strong); stroke-width: 1"></path>
+<line x1="{{c.midX}}" x2="{{c.midX}}" y1="10" y2="226" style="stroke: var(--line-strong); stroke-width: 1; stroke-dasharray: 3 3"></line>
+<path d="{{c.direct}}" style="fill: var(--series-opwekking); fill-opacity: 0.45"></path>
+<path d="{{c.opname}}" style="fill: var(--series-opname); fill-opacity: 0.4"></path>
+<path d="{{c.terug}}" style="fill: var(--series-teruglevering); fill-opacity: 0.45"></path>
+<path d="{{c.line}}" style="fill: none; stroke: var(--series-verbruik); stroke-width: 2.5; stroke-linejoin: round"></path>
+<line x1="32" x2="322" y1="186" y2="186" style="stroke: var(--line-strong); stroke-width: 1"></line>
+<path d="{{c.minor}}" style="stroke: var(--line-strong); stroke-width: 1"></path>
+<path d="{{c.major}}" style="fill: none; stroke: var(--line-strong); stroke-width: 1"></path>
+</svg>
+<sc-for list="{{c.yt}}" as="t" hint-placeholder-count="4">
+<span class="caption" aria-hidden="true" style="position: absolute; left: 0; top: {{t.top}}; width: {{c.yw}}; transform: translateY(-50%); text-align: right; padding-right: 6px; box-sizing: border-box; white-space: nowrap">{{t.label}}</span>
+</sc-for>
+<sc-for list="{{c.xt}}" as="t" hint-placeholder-count="4">
+<span class="caption" aria-hidden="true" style="position: absolute; left: {{t.left}}; top: {{c.xTop}}; transform: translateX(-50%); white-space: nowrap">{{t.label}}</span>
+</sc-for>
+<sc-for list="{{c.days}}" as="d" hint-placeholder-count="2">
+<span class="label" aria-hidden="true" style="position: absolute; left: {{d.left}}; top: {{c.dayTop}}; transform: translateX(-50%); white-space: nowrap; font-size: 12px; line-height: 16px">{{d.label}}</span>
+</sc-for>
+</div>
+<p class="caption">Tik op de grafiek voor de waarden per uur.</p>
+</section>
+
+<section aria-labelledby="m-meter" style="background: var(--surface-raised); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; flex-direction: column">
+<h2 id="m-meter" class="title">Meterstanden</h2>
+<span class="caption">Stand om 13:42:30</span>
+</div>
+<div role="table" style="display: table; width: 100%; border-collapse: collapse">
+<div style="display: table-row-group">
+<sc-for list="{{meters}}" as="m" hint-placeholder-count="6">
+<div role="row" style="display: table-row; background: {{m.bg}}">
+<div role="rowheader" style="display: table-cell; text-align: left; font-weight: 400; font-size: 14px; padding: 8px; border-radius: 6px 0 0 6px">{{m.label}}</div>
+<div role="cell" class="meter" style="display: table-cell; text-align: right; padding: 8px; white-space: nowrap; border-radius: 0 6px 6px 0">{{m.val}} <span style="color: var(--ink-muted)">{{m.unit}}</span></div>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+</main>
+
+<nav aria-label="Hoofdmenu" style="flex-shrink: 0; height: 64px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--surface-raised); border-top: 1px solid var(--line)">
+<a href="#" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--brand)"><span style="width: 56px; height: 28px; border-radius: 999px; background: var(--brand-soft); display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.dash}}" style="fill: currentColor"></path></svg></span><span style="font-size: 12px; line-height: 16px; font-weight: 600">Actueel</span></a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--ink-muted)"><span style="width: 56px; height: 28px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.chart}}" style="fill: currentColor"></path></svg></span><span style="font-size: 12px; line-height: 16px; font-weight: 500">Historie</span></a>
+<a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: var(--ink-muted)"><span style="width: 56px; height: 28px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="{{icons.cog}}" style="fill: currentColor"></path></svg></span><span style="font-size: 12px; line-height: 16px; font-weight: 500">Instellingen</span></a>
+</nav>
+</div>
+</x-dc></template>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Weergave"},"solar":{"editor":"boolean","default":true,"section":"Situatie"},"status":{"editor":"enum","options":["live","offline"],"default":"live","section":"Situatie"},"$preview":{"width":390,"height":1800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const theme = this.props.theme ?? 'light';
+    const solar = this.props.solar ?? true;
+    const offline = (this.props.status ?? 'live') === 'offline';
+    const nl = (v, d) => v.toLocaleString('nl-NL', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+    const hours = []; for (let i = 0; i < 24; i++) hours.push((14 + i) % 24);
+    const V = [0.45,0.5,0.6,1.4,1.9,1.1,0.8,0.7,0.55,0.35,0.28,0.25,0.24,0.24,0.25,0.27,0.45,0.95,0.6,0.5,0.55,0.75,0.9,0.64];
+    const S0 = [0.6,0.25,0.02].concat(new Array(15).fill(0), [0.05,0.35,0.8,1.2,1.35,1.14]);
+    const S = solar ? S0 : S0.map(() => 0);
+    const D = V.map((v, i) => Math.min(v, S[i]));
+    const O = V.map((v, i) => v - D[i]);
+    const T = S.map((s, i) => s - D[i]);
+    const sum = a => a.reduce((x, y) => x + y, 0);
+
+    const W = 326, H = 236, L = 32, R = 4, Tp = 10, B = 50, step = 6;
+    const pw = W - L - R, ph = H - Tp - B, n = V.length;
+    const yMax = 2, yMin = solar ? -1 : 0;
+    const x = i => L + i * pw / (n - 1);
+    const y = v => Tp + (yMax - v) / (yMax - yMin) * ph;
+    const pts = arr => arr.map((v, i) => x(i).toFixed(1) + ',' + y(v).toFixed(1));
+    const zeros = V.map(() => 0);
+    const area = (top, bot) => 'M' + pts(top).join(' L') + ' L' + pts(bot).reverse().join(' L') + ' Z';
+    const yt = [];
+    for (let v = yMin; v <= yMax + 1e-9; v += 1) yt.push({ y: y(v).toFixed(1), ty: (y(v) + 4).toFixed(1), label: nl(v, 1), stroke: Math.abs(v) < 1e-9 ? 'var(--line-strong)' : 'var(--line)' });
+    const xt = [];
+    hours.forEach((h, i) => { if (i % step === 0) xt.push({ x: x(i).toFixed(1), label: String(h).padStart(2, '0') + ':00' }); });
+    const c = { yt, xt, direct: area(D, zeros), opname: area(V, D), terug: area(zeros, T.map(t => -t)), line: 'M' + pts(V).join(' L'), midX: x(10).toFixed(1),
+      minor: hours.map((h, i) => 'M' + x(i).toFixed(1) + ',186 V190').join(' '),
+      days: [{ x: ((x(0) + x(9)) / 2).toFixed(1), label: 'wo 18 nov' }, { x: ((x(10) + x(23)) / 2).toFixed(1), label: 'do 19 nov' }] };
+
+    const pct = (v, of) => (v / of * 100).toFixed(2) + '%';
+    const plotB = Tp + ph;
+    yt.forEach(t => { t.top = pct(+t.y, H); });
+    xt.forEach(t => { t.left = pct(+t.x, W); });
+    c.days.forEach(d => { d.left = pct(+d.x, W); });
+    c.grid = yt.filter(t => t.stroke !== 'var(--line-strong)').map(t => 'M' + L + ',' + t.y + ' H' + (W - R)).join(' ') + ' ' + xt.map(t => 'M' + t.x + ',' + Tp + ' V' + plotB).join(' ');
+    c.zero = 'M' + L + ',' + y(0).toFixed(1) + ' H' + (W - R);
+    c.major = xt.map(t => 'M' + t.x + ',' + plotB + ' V' + (plotB + 7)).join(' ');
+    c.yw = pct(L, W);
+    c.xTop = pct(plotB + 10, H);
+    c.dayTop = pct(plotB + 30, H);
+
+    const line = { sw: '14px', sh: '3px' }, sq = { sw: '10px', sh: '10px' };
+    const legend = solar ? [
+      { label: 'Verbruik', color: 'var(--series-verbruik)', total: nl(sum(V), 1), ...line },
+      { label: 'Opname', color: 'var(--series-opname)', total: nl(sum(O), 1), ...sq },
+      { label: 'Opwekking', color: 'var(--series-opwekking)', total: nl(sum(S), 1), ...sq },
+      { label: 'Teruglevering', color: 'var(--series-teruglevering)', total: nl(sum(T), 1), ...sq }
+    ] : [
+      { label: 'Verbruik', color: 'var(--series-verbruik)', total: nl(sum(V), 1), ...line },
+      { label: 'Opname', color: 'var(--series-opname)', total: nl(sum(O), 1), ...sq }
+    ];
+
+    const kpi = (label, color, today, yday, d, unit, pre) => {
+      const scale = Math.max(today, yday) * 1.12;
+      const diff = today - yday;
+      const amt = (pre ? pre + ' ' : '') + nl(Math.abs(diff), d) + (unit ? ' ' + unit : '');
+      return { label, color, val: nl(today, d), unit, pre,
+        fill: (today / scale * 100).toFixed(1) + '%', tick: (yday / scale * 100).toFixed(1) + '%',
+        delta: Math.abs(diff) < 1e-9 ? 'Gelijk aan gisteren' : amt + (diff > 0 ? ' meer' : ' minder') + ' dan gisteren' };
+    };
+    const kpis = solar ? [
+      kpi('Verbruik', 'var(--series-verbruik)', 6.8, 7.2, 1, 'kWh', ''),
+      kpi('Opname', 'var(--series-opname)', 4.9, 6.0, 1, 'kWh', ''),
+      kpi('Opwekking', 'var(--series-opwekking)', 2.6, 1.7, 1, 'kWh', ''),
+      kpi('Teruglevering', 'var(--series-teruglevering)', 0.7, 0.5, 1, 'kWh', ''),
+      kpi('Gas', 'var(--series-gas)', 3.42, 3.04, 2, 'm³', ''),
+      kpi('Kosten', 'var(--line-strong)', 1.87, 2.09, 2, '', '€')
+    ] : [
+      kpi('Verbruik', 'var(--series-verbruik)', 6.8, 7.2, 1, 'kWh', ''),
+      kpi('Gas', 'var(--series-gas)', 3.42, 3.04, 2, 'm³', ''),
+      kpi('Kosten', 'var(--line-strong)', 2.41, 2.63, 2, '', '€')
+    ];
+
+    const rows = solar ? [
+      ['Opname normaal', '4.277,964', 'kWh'], ['Opname dal', '3.902,118', 'kWh'],
+      ['Teruglevering normaal', '1.208,440', 'kWh'], ['Teruglevering dal', '512,307', 'kWh'],
+      ['Opwekking totaal', '5.871,032', 'kWh'], ['Gas', '2.914,286', 'm³']
+    ] : [
+      ['Opname normaal', '4.277,964', 'kWh'], ['Opname dal', '3.902,118', 'kWh'], ['Gas', '2.914,286', 'm³']
+    ];
+    const meters = rows.map((r, i) => ({ label: r[0], val: r[1], unit: r[2], bg: i % 2 === 0 ? 'var(--surface-sunken)' : 'transparent' }));
+
+    const icons = {
+      dash: 'M13,3V9H21V3M13,21H21V11H13M3,21H11V15H3M3,13H11V3H3V13Z',
+      chart: 'M22,21H2V3H4V19H6V10H10V19H12V6H16V19H18V14H22V21Z',
+      cog: 'M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z',
+      home: 'M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z',
+      solar: 'M4,2H20A2,2 0 0,1 22,4V14A2,2 0 0,1 20,16H15V20H18V22H13V16H11V22H6V20H9V16H4A2,2 0 0,1 2,14V4A2,2 0 0,1 4,2M4,4V8H11V4H4M4,14H11V10H4V14M20,14V10H13V14H20M20,4H13V8H20V4Z',
+      grid: 'M8.28,5.45L6.5,4.55L7.76,2H16.23L17.5,4.55L15.72,5.44L15,4H9L8.28,5.45M18.62,8H14.09L13.3,5H10.7L9.91,8H5.38L4.1,10.55L5.89,11.44L6.62,10H17.38L18.1,11.45L19.89,10.56L18.62,8M17.77,22H15.7L15.46,21.1L12,15.9L8.53,21.1L8.3,22H6.23L9.12,11H11.19L10.83,12.35L12,14.1L13.16,12.35L12.81,11H14.88L17.77,22M11.2,15L10.5,13.95L9.64,17.22L11.2,15M14.37,17.22L13.5,13.95L12.8,15L14.37,17.22M10.48,8H13.52L13.26,7H10.74L10.48,8Z',
+      sun: 'M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.39,5.42C13.65,5.15 12.84,5 12,5C11.16,5 10.35,5.15 9.61,5.42L12,2M3.34,7L7.5,6.65C6.9,7.16 6.36,7.78 5.94,8.5C5.5,9.24 5.25,10 5.11,10.79L3.34,7M3.36,17L5.12,13.23C5.26,14 5.53,14.78 5.95,15.5C6.37,16.24 6.91,16.86 7.5,17.37L3.36,17M20.65,7L18.88,10.79C18.74,10 18.47,9.23 18.05,8.5C17.63,7.78 17.1,7.15 16.5,6.64L20.65,7M20.64,17L16.5,17.36C17.09,16.85 17.62,16.22 18.04,15.5C18.46,14.77 18.73,14 18.87,13.21L20.64,17M12,22L9.59,18.56C10.33,18.83 11.14,19 12,19C12.82,19 13.63,18.83 14.37,18.56L12,22Z',
+      alert: 'M11,15H13V17H11V15M11,7H13V13H11V7M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20Z'
+    };
+
+    const now = solar
+      ? { verbruik: nl(0.64, 3), opwekking: nl(1.14, 3), teruglevering: nl(0.5, 3) }
+      : { verbruik: nl(0.64, 3) };
+
+    return { theme, solar, noSolar: !solar, offline, live: !offline, now, kpis, legend, c, meters, icons };
+  }
+}
+</script>
+<script src="dc-lite.js"></script>
+</body>
+</html>

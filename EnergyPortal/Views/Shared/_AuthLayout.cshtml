@@ -1,0 +1,17 @@
+@* Login, password reset and other signed-out pages: card on a blurred photo. *@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <partial name="_Head" model='"auth"' />
+</head>
+<body>
+    <div class="ez-login-photo" aria-hidden="true"></div>
+    <main class="relative flex min-h-dvh flex-col items-center justify-center px-4 py-12">
+        <a href="/" class="ez-login-wordmark mb-6 no-underline">Energie<span>Zicht</span></a>
+        <div class="w-full max-w-[400px] rounded-lg bg-surface-raised p-8 text-ink shadow-float max-[560px]:p-6">
+            @RenderBody()
+        </div>
+    </main>
+    <span class="ez-photo-credit">Foto: Michael Pointner, Pexels</span>
+</body>
+</html>

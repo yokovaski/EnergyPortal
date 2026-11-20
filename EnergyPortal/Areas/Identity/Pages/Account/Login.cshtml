@@ -1,48 +1,45 @@
 @page
 @model LoginModel
-
 @{
-    ViewData["Title"] = "Log in";
+    ViewData["Title"] = "Inloggen";
+    var failed = !ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty]?.Errors.Count > 0;
+    var invalid = failed ? "true" : null;
 }
 
-<div class="row">
-    <div class="col-md-4 offset-md-4">
-        <h1>@ViewData["Title"]</h1>
-        <section>
-            <form id="account" method="post">
-                <hr />
-                <div asp-validation-summary="All" class="text-danger"></div>
-                <div class="form-group">
-                    <label asp-for="Input.Email"></label>
-                    <input asp-for="Input.Email" class="form-control" />
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Input.Password"></label>
-                    <input asp-for="Input.Password" class="form-control" />
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <div class="checkbox">
-                        <label asp-for="Input.RememberMe">
-                            <input asp-for="Input.RememberMe" />
-                            @Html.DisplayNameFor(m => m.Input.RememberMe)
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Log in</button>
-                </div>
-                <div class="form-group">
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                    </p>
-                </div>
-            </form>
-        </section>
+<h1 class="ez-title-lg">Inloggen</h1>
+<p class="mt-1 mb-0 text-ink-muted">Bekijk wat je huis nu verbruikt.</p>
+
+<form id="account" method="post" novalidate>
+    @if (failed)
+    {
+        <div class="ez-alert" role="alert">
+            <strong>@ViewData.ModelState[string.Empty]!.Errors[0].ErrorMessage</strong>
+            Probeer het opnieuw of <a class="ez-link" asp-page="./ForgotPassword">stel een nieuw wachtwoord in</a>.
+        </div>
+    }
+
+    <div class="ez-field">
+        <label asp-for="Input.Email">E-mailadres</label>
+        <input asp-for="Input.Email" class="ez-input" autocomplete="username" aria-invalid="@invalid" />
+        <span asp-validation-for="Input.Email" class="ez-field-error"></span>
     </div>
-</div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+    <div class="ez-field">
+        <div class="ez-field-label">
+            <label for="Input_Password">Wachtwoord</label>
+            <a id="forgot-password" class="ez-link font-normal" asp-page="./ForgotPassword">Wachtwoord vergeten?</a>
+        </div>
+        <div class="ez-pw">
+            <input asp-for="Input.Password" class="ez-input" autocomplete="current-password" aria-invalid="@invalid" />
+            <button type="button" data-toggle-password="Input_Password" aria-pressed="false" aria-label="Wachtwoord tonen">Toon</button>
+        </div>
+        <span asp-validation-for="Input.Password" class="ez-field-error"></span>
+    </div>
+
+    <label class="ez-check">
+        <input asp-for="Input.RememberMe" />
+        Ingelogd blijven
+    </label>
+
+    <button type="submit" class="ez-btn ez-btn-primary mt-6 h-11 w-full">Inloggen</button>
+</form>

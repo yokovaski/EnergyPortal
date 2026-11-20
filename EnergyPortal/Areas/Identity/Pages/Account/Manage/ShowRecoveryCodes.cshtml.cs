@@ -22,7 +22,7 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
         {
             if (RecoveryCodes == null || RecoveryCodes.Length == 0)
             {
-                return RedirectToPage("./TwoFactorAuthentication");
+                return RedirectToPage("./Index", null, "tweestapsverificatie");
             }
 
             return Page();

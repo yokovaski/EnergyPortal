@@ -1,0 +1,43 @@
+/* Login photo background (spec §7.4). The fixed colours here are part of the photo treatment, not theme colours. */
+.ez-login-photo {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; background: #181008;
+}
+.ez-login-photo::before {
+  content: ""; position: absolute; inset: 0;
+  background: url("/img/login-zonnepanelen.jpg") center 55% / cover no-repeat;
+  filter: blur(8px); transform: scale(1.05);
+}
+.ez-login-photo::after { content: ""; position: absolute; inset: 0; background: rgba(24, 16, 8, 0.60); }
+
+.ez-login-wordmark {
+  font-size: 34px; line-height: 40px; font-weight: 700; letter-spacing: -0.02em; color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 2px 16px rgba(0, 0, 0, .45);
+}
+.ez-login-wordmark span { color: #a8ece3; }
+
+.ez-photo-credit {
+  position: fixed; right: 16px; bottom: 16px; padding: 4px 10px; border-radius: var(--ez-radius-sm);
+  background: rgba(20, 14, 8, 0.6); color: #f6f1ea; font-size: 12px; line-height: 16px;
+}
+
+/* Form bits shared by the Razor pages */
+.ez-field { display: block; margin-top: var(--ez-space-4); }
+.ez-field > label, .ez-field-label { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ez-space-2);
+  font-size: var(--ez-label-size); line-height: var(--ez-label-lh); font-weight: 500; margin-bottom: 6px; }
+.ez-field-error { display: block; color: var(--ez-status-danger); font-size: var(--ez-caption-size); line-height: var(--ez-caption-lh); margin-top: 4px; }
+.ez-field-error:empty { display: none; }
+.ez-help { color: var(--ez-ink-muted); font-size: var(--ez-caption-size); line-height: var(--ez-caption-lh); margin: 4px 0 0; }
+.ez-check { display: flex; align-items: center; gap: var(--ez-space-3); margin-top: var(--ez-space-4); }
+.ez-check input { width: 20px; height: 20px; accent-color: var(--ez-brand); }
+.ez-alert { border-radius: var(--ez-radius-md); background: var(--ez-status-danger-bg); color: var(--ez-ink); padding: var(--ez-space-3) var(--ez-space-4); margin-top: var(--ez-space-4); }
+.ez-alert ul { margin: 0; padding-left: 1.2em; }
+.validation-summary-valid { display: none; }
+.ez-alert-ok { background: var(--ez-brand-soft); }
+.ez-code-input { height: 52px; font-size: 24px; letter-spacing: .3em; text-align: center; }
+.ez-pw { position: relative; }
+.ez-pw .ez-input { padding-right: 84px; }
+.ez-pw button { position: absolute; right: 4px; top: 4px; bottom: 4px; padding: 0 12px; border: 0; border-radius: var(--ez-radius-sm);
+  background: transparent; color: var(--ez-brand); font: inherit; font-weight: 600; }
+dialog.ez-dialog { border: 1px solid var(--ez-line); border-radius: var(--ez-radius-lg); background: var(--ez-surface-raised); color: var(--ez-ink);
+  box-shadow: var(--ez-shadow-float); padding: var(--ez-space-5); max-width: min(440px, calc(100vw - 32px)); }
+dialog.ez-dialog::backdrop { background: var(--ez-scrim); }

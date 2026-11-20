@@ -26,6 +26,7 @@ namespace EnergyPortal.Controllers.WebApi
         DbMinuteMetricRepository minuteMetricRepository,
         DbHourMetricRepository hourMetricRepository,
         DbSettingsRepository dbSettingsRepository,
+        DbTemperatureRepository temperatureRepository,
         ILogger<MetricsWebApiController> logger)
         : Controller
     {
@@ -224,6 +225,8 @@ namespace EnergyPortal.Controllers.WebApi
             var redeliveryCosts = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.RedeliveryCost }).ToList();
             var gasCosts = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.GasCost }).ToList();
 
+            var (temperature, degreeDays) = await GetTemperatures(settings, metrics, timeGroup);
+
             var lastDateTime = metrics
                 .OrderBy(m => m.DateTime)
                 .Select(m => m.DateTime)
@@ -245,9 +248,57 @@ namespace EnergyPortal.Controllers.WebApi
                 IntakeCosts = intakeCosts,
                 RedeliveryCosts = redeliveryCosts,
                 GasCosts = gasCosts,
+                Temperature = temperature,
+                DegreeDays = degreeDays,
                 Format = format,
                 UserTimeZone = settings.TimeZoneId
             });
+        }
+
+        /// <summary>
+        /// Per bucket: mean outdoor temperature (°C) of the nearest KNMI station and heating degree days (base 18 °C).
+        /// Empty without a location; null for buckets without measurements.
+        /// </summary>
+        private async Task<(List<object[]> Temperature, List<object[]> DegreeDays)> GetTemperatures(
+            Settings settings, List<OutMetricModel> metrics, TimeGroup timeGroup)
+        {
+            var temperature = new List<object[]>();
+            var degreeDays = new List<object[]>();
+            if (settings.Latitude == null || settings.Longitude == null || metrics.Count == 0 ||
+                timeGroup is TimeGroup.None or TimeGroup.TenSeconds or TimeGroup.Minutes)
+                return (temperature, degreeDays);
+
+            var station = await temperatureRepository.NearestStationAsync(settings.Latitude.Value, settings.Longitude.Value);
+            if (station == null)
+                return (temperature, degreeDays);
+
+            var tz = settings.TimeZoneId;
+            var last = metrics[^1].DateTime;
+            var end = timeGroup switch
+            {
+                TimeGroup.Hours => last.AddHours(1),
+                TimeGroup.Days => last.AddDays(1),
+                TimeGroup.Weeks => last.AddDays(7),
+                TimeGroup.Months => last.AddMonths(1),
+                _ => last.AddYears(1)
+            };
+            var bounds = metrics.Select(m => ToEpochMilliseconds(m.DateTime, tz)).Append(ToEpochMilliseconds(end, tz)).ToList();
+
+            var temperatures = (await temperatureRepository.GetAsync(station.Id,
+                    DateTimeOffset.FromUnixTimeMilliseconds(bounds[0]).UtcDateTime,
+                    DateTimeOffset.FromUnixTimeMilliseconds(bounds[^1]).UtcDateTime))
+                .Select(t => (Epoch: new DateTimeOffset(DateTime.SpecifyKind(t.Created, DateTimeKind.Utc)).ToUnixTimeMilliseconds(), t.Value))
+                .ToList();
+
+            for (var i = 0; i < metrics.Count; i++)
+            {
+                var values = temperatures.Where(t => t.Epoch >= bounds[i] && t.Epoch < bounds[i + 1]).Select(t => t.Value).ToList();
+                // shortcut: degree hours / 24 instead of the KNMI daily-mean method; slightly higher on days that swing around 18 °C
+                temperature.Add([bounds[i], values.Count > 0 ? Math.Round(values.Average(), 1) : null]);
+                degreeDays.Add([bounds[i], values.Count > 0 ? Math.Round(values.Sum(v => Math.Max(0, 18 - v)) / 24, 2) : null]);
+            }
+
+            return (temperature, degreeDays);
         }
 
         private static long ToEpochMilliseconds(DateTime dateTime, string timeZoneId)

@@ -54,6 +54,7 @@ namespace EnergyWorker
                             .UseSnakeCaseNamingConvention();
                     });
                     services.AddHostedService<Worker>();
+                    services.AddHostedService<TemperatureWorker>();
                 });
 
         private static async Task ApplyMigrationsWithRetry(IHost host)

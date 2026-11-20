@@ -45,15 +45,19 @@ namespace EnergyPortal
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddErrorDescriber<EnergyPortal.Areas.Identity.DutchIdentityErrorDescriber>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
             
+            services.AddSingleton<ViteManifest>();
             services.AddScoped<DbTenSecondMetricRepository, DbTenSecondMetricRepository>();
             services.AddScoped<DbMinuteMetricRepository, DbMinuteMetricRepository>();
             services.AddScoped<DbHourMetricRepository, DbHourMetricRepository>();
             services.AddScoped<DbSettingsRepository, DbSettingsRepository>();
             services.AddScoped<DbDeviceRepository, DbDeviceRepository>();
+            services.AddScoped<DbTemperatureRepository>();
+            services.AddHttpClient();
 
             // if (environment.IsDevelopment())
             // {
@@ -100,6 +104,9 @@ namespace EnergyPortal
                 app.UseHsts();
             }
             
+            // Empty error responses (e.g. 404 for an unknown page) get the styled error page
+            app.UseStatusCodePagesWithReExecute("/Home/Error", "?code={0}");
+
             // app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();

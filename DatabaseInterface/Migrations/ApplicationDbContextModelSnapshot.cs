@@ -17,7 +17,7 @@ namespace DatabaseInterface.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -84,6 +84,10 @@ namespace DatabaseInterface.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("lockout_end");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -351,6 +355,14 @@ namespace DatabaseInterface.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("high_usage_price_per_kwh");
 
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("latitude");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("longitude");
+
                     b.Property<decimal>("LowRedeliveryPricePerKwh")
                         .HasColumnType("numeric")
                         .HasColumnName("low_redelivery_price_per_kwh");
@@ -358,6 +370,10 @@ namespace DatabaseInterface.Migrations
                     b.Property<decimal>("LowUsagePricePerKwh")
                         .HasColumnType("numeric")
                         .HasColumnName("low_usage_price_per_kwh");
+
+                    b.Property<string>("Postcode")
+                        .HasColumnType("text")
+                        .HasColumnName("postcode");
 
                     b.Property<bool>("ShowDayName")
                         .HasColumnType("boolean")
@@ -383,6 +399,26 @@ namespace DatabaseInterface.Migrations
                         .HasDatabaseName("ix_settings_user_id");
 
                     b.ToTable("settings", (string)null);
+                });
+
+            modelBuilder.Entity("DatabaseInterface.Entities.Temperature", b =>
+                {
+                    b.Property<string>("StationId")
+                        .HasColumnType("text")
+                        .HasColumnName("station_id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created");
+
+                    b.Property<double>("Value")
+                        .HasColumnType("double precision")
+                        .HasColumnName("value");
+
+                    b.HasKey("StationId", "Created")
+                        .HasName("pk_temperatures");
+
+                    b.ToTable("temperatures", (string)null);
                 });
 
             modelBuilder.Entity("DatabaseInterface.Entities.TenSecondMetric", b =>
@@ -460,6 +496,30 @@ namespace DatabaseInterface.Migrations
                         .HasDatabaseName("ix_ten_second_metrics_raspberry_pi_id");
 
                     b.ToTable("ten_second_metrics", (string)null);
+                });
+
+            modelBuilder.Entity("DatabaseInterface.Entities.WeatherStation", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
+                        .HasColumnName("id");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("latitude");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision")
+                        .HasColumnName("longitude");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_weather_stations");
+
+                    b.ToTable("weather_stations", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

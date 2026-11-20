@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EnergieZicht — prototypes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#f3f5f4;color:#13201d;font:15px/22px "Hanken Grotesk",system-ui,sans-serif}
+main{max-width:880px;margin:0 auto;padding:48px 24px}
+h1{font-size:28px;line-height:32px;margin:0 0 4px;letter-spacing:-0.02em}h1 span{color:#0f5257}
+p{color:#4d5b57;margin:0 0 32px}
+section{background:#fff;border:1px solid #dbe1de;border-radius:16px;padding:20px 24px;margin-bottom:16px}
+h2{font-size:17px;line-height:24px;margin:0 0 10px}
+ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+a{display:inline-flex;align-items:center;height:36px;padding:0 12px;border:1px solid #7d8a86;border-radius:10px;color:#13201d;text-decoration:none}
+a:hover{background:#dcecea}a:focus-visible{outline:2px solid #0f5257;outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+<h1>Energie<span>Zicht</span> — prototypes</h1>
+<p>Reference renderings of the redesign, with mock data. States are switched with query parameters.</p>
+<section><h2>Actueel</h2><ul>
+<li><a href="actueel.html">Desktop</a></li><li><a href="actueel.html?status=offline">Offline</a></li><li><a href="actueel.html?solar=false">Zonder zonnepanelen</a></li><li><a href="actueel.html?theme=dark">Donker</a></li><li><a href="actueel-mobiel.html">Mobiel</a></li></ul></section>
+<section><h2>Historie</h2><ul>
+<li><a href="historie.html">Desktop kWh</a></li><li><a href="historie.html?unit=eur">Desktop €</a></li><li><a href="historie-kosten.html">€ + gasprijs ontbreekt + periodekiezer</a></li><li><a href="historie.html?solar=false">Zonder zonnepanelen</a></li><li><a href="historie-mobiel.html">Mobiel</a></li><li><a href="historie-mobiel.html?tab=gas">Mobiel, gas</a></li></ul></section>
+<section><h2>Instellingen</h2><ul>
+<li><a href="instellingen.html">Desktop</a></li><li><a href="instellingen.html?tariffsMissing=true&amp;dirty=false">Gasprijs ontbreekt</a></li><li><a href="instellingen-mobiel.html">Mobiel</a></li></ul></section>
+<section><h2>Inloggen en account</h2><ul>
+<li><a href="inloggen.html">Inloggen</a></li><li><a href="inloggen.html?error=true">Fout wachtwoord</a></li><li><a href="inloggen.html?step=code">Code (2FA)</a></li><li><a href="inloggen-mobiel.html">Mobiel</a></li><li><a href="account.html">Account</a></li></ul></section>
+<p style="margin-top:24px">Query parameters: <code>theme=light|dark</code>, <code>solar=true|false</code>, <code>status=live|offline</code>, <code>unit=kwh|eur</code>, <code>tariffsMissing=true</code>, <code>pickerOpen=true</code>, <code>tab=gas</code>, <code>step=code</code>, <code>error=true</code>, <code>blur</code>, <code>scrim</code>.</p>
+</main>
+</body>
+</html>

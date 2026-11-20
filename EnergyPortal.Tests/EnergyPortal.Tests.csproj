@@ -27,4 +27,7 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Worker/knmi-10min-sample.nc" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

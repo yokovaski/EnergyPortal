@@ -1,25 +1,18 @@
-﻿@page
+@page
 @model Disable2faModel
 @{
-    ViewData["Title"] = "Disable two-factor authentication (2FA)";
-    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+    ViewData["Title"] = "Tweestapsverificatie uitzetten";
 }
 
-<partial name="_StatusMessage" for="StatusMessage" />
-<h2>@ViewData["Title"]</h2>
-
-<div class="alert alert-warning" role="alert">
-    <p>
-        <strong>This action only disables 2FA.</strong>
-    </p>
-    <p>
-        Disabling 2FA does not change the keys used in authenticator apps. If you wish to change the key
-        used in an authenticator app you should <a asp-page="./ResetAuthenticator">reset your authenticator keys.</a>
-    </p>
-</div>
-
-<div>
-    <form method="post" class="form-group">
-        <button class="btn btn-danger" type="submit">Disable 2FA</button>
+<nav aria-label="Kruimelpad" class="ez-label">
+    <a class="ez-link" href="/settings">Instellingen</a> <span aria-hidden="true">›</span> <a class="ez-link" asp-page="./Index">Account</a>
+</nav>
+<h1 class="ez-title-lg mt-1">Tweestapsverificatie uitzetten</h1>
+<section class="ez-card mt-6 max-w-[640px]">
+    <p class="m-0">Je account is daarna alleen met je wachtwoord beveiligd. Je authenticator-app blijft gekoppeld, zodat je het later weer aan kunt zetten.</p>
+    <p class="mt-2 mb-0 text-ink-muted">Wil je een nieuwe sleutel voor je app? <a class="ez-link" asp-page="./ResetAuthenticator">Stel de app opnieuw in</a>.</p>
+    <form method="post" class="mt-6 flex gap-2">
+        <button type="submit" class="ez-btn ez-btn-danger">Uitzetten</button>
+        <a class="ez-btn" asp-page="./Index" asp-fragment="tweestapsverificatie">Annuleren</a>
     </form>
-</div>
+</section>

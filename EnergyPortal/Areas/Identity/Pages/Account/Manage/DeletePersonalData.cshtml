@@ -1,33 +1,30 @@
-﻿@page
+@page
 @model DeletePersonalDataModel
 @{
-    ViewData["Title"] = "Delete Personal Data";
-    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+    ViewData["Title"] = "Account verwijderen";
 }
 
-<h4>@ViewData["Title"]</h4>
-
-<div class="alert alert-warning" role="alert">
-    <p>
-        <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-    </p>
-</div>
-
-<div>
-    <form id="delete-user" method="post" class="form-group">
-        <div asp-validation-summary="All" class="text-danger"></div>
+<nav aria-label="Kruimelpad" class="ez-label">
+    <a class="ez-link" href="/settings">Instellingen</a> <span aria-hidden="true">›</span> <a class="ez-link" asp-page="./Index">Account</a>
+</nav>
+<h1 class="ez-title-lg mt-1">Account verwijderen</h1>
+<section class="ez-card mt-6 max-w-[640px]">
+    <div class="rounded-md bg-danger-bg p-4">
+        <p class="m-0"><strong class="text-danger">Dit kun je niet ongedaan maken.</strong> Je account, je instellingen, je Raspberry Pi-koppeling en alle metingen worden verwijderd.</p>
+    </div>
+    <form id="delete-user" method="post" class="max-w-[396px]" novalidate>
+        <div asp-validation-summary="ModelOnly" class="ez-alert" role="alert"></div>
         @if (Model.RequirePassword)
         {
-            <div class="form-group">
-                <label asp-for="Input.Password"></label>
-                <input asp-for="Input.Password" class="form-control" />
-                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            <div class="ez-field">
+                <label asp-for="Input.Password">Bevestig met je wachtwoord</label>
+                <input asp-for="Input.Password" class="ez-input" autocomplete="current-password" />
+                <span asp-validation-for="Input.Password" class="ez-field-error"></span>
             </div>
         }
-        <button class="btn btn-danger" type="submit">Delete data and close my account</button>
+        <div class="mt-6 flex gap-2">
+            <button type="submit" class="ez-btn ez-btn-danger">Account verwijderen</button>
+            <a class="ez-btn" asp-page="./Index" asp-fragment="persoonlijke-gegevens">Annuleren</a>
+        </div>
     </form>
-</div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+</section>

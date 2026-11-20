@@ -24,6 +24,15 @@ namespace DatabaseInterface.Entities
         public decimal ElectricityDeliveryPricePerMonth { get; set; }
         public decimal GasDeliveryPricePerMonth { get; set; }
 
+        /// <summary>Dutch postcode; its coordinates pick the nearest KNMI station for outdoor temperature.</summary>
+        public string Postcode { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+
+        /// <summary>Name of the nearest KNMI station; filled by the API, not stored.</summary>
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public string WeatherStation { get; set; }
+
         [JsonIgnore]
         public virtual ApplicationUser User { get; set; }
     }
