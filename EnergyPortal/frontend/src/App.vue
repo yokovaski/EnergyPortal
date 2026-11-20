@@ -42,7 +42,8 @@ useDismiss(menu, menuOpen);
           <p v-if="account" class="ez-caption m-0 truncate px-4 pb-2">{{ account.email }}</p>
           <a role="menuitem" href="/Identity/Account/Manage" class="block px-4 py-2 text-ink no-underline hover:bg-brand-soft">Account</a>
           <RouterLink role="menuitem" to="/settings" class="block px-4 py-2 text-ink no-underline hover:bg-brand-soft">Instellingen</RouterLink>
-          <button role="menuitem" type="submit" form="logout-form" class="block w-full px-4 py-2 text-left text-ink hover:bg-brand-soft">Uitloggen</button>
+          <!-- .stop: closing the menu would detach this button before the browser submits the form -->
+          <button role="menuitem" type="submit" form="logout-form" @click.stop class="block w-full px-4 py-2 text-left text-ink hover:bg-brand-soft">Uitloggen</button>
         </div>
       </div>
     </div>
