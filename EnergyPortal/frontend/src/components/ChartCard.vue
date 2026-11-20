@@ -12,7 +12,7 @@ withDefaults(defineProps<{
 </script>
 
 <template>
-  <section class="ez-card flex min-w-0 flex-col">
+  <section class="ez-card flex h-full min-w-0 flex-col">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h2 class="ez-title">{{ title }}</h2>
@@ -32,6 +32,6 @@ withDefaults(defineProps<{
         <slot/>
       </template>
     </div>
-    <p v-if="footnote" class="ez-caption mt-4 mb-0">{{ footnote }}</p>
+    <p v-if="footnote" class="ez-caption mt-auto mb-0 pt-4">{{ footnote }}</p>
   </section>
 </template>

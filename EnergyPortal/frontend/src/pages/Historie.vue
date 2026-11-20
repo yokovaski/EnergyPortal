@@ -217,7 +217,7 @@ const gasOptions = computed<ApexOptions>(() => {
   return {
     ...options,
     chart: {...options.chart, type: 'line'},
-    stroke: {width: [0, 2], curve: 'smooth'},
+    stroke: {width: [0, 2], curve: 'straight'},
     markers: {size: 0},
     yaxis: [options.yaxis as ApexYAxis,
       {opposite: true, forceNiceScale: true, labels: {style: labelStyle, formatter: v => `${num(v, 0)}°`}}],

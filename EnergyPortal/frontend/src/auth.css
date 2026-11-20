@@ -15,11 +15,6 @@
 }
 .ez-login-wordmark span { color: #a8ece3; }
 
-.ez-photo-credit {
-  position: fixed; right: 16px; bottom: 16px; padding: 4px 10px; border-radius: var(--ez-radius-sm);
-  background: rgba(20, 14, 8, 0.6); color: #f6f1ea; font-size: 12px; line-height: 16px;
-}
-
 /* Form bits shared by the Razor pages */
 .ez-field { display: block; margin-top: var(--ez-space-4); }
 .ez-field > label, .ez-field-label { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ez-space-2);
