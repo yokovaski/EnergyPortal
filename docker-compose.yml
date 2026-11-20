@@ -9,8 +9,8 @@
     environment:
       ConnectionStrings__DefaultConnection: "Host=postgres;Database=energycloud;Username=energycloud;Password=energycloud"
     ports:
-        - "8082:8080"
-        - "8083:8081"
+        - "127.0.0.1:8082:8080"
+        - "127.0.0.1:8083:8081"
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,7 +39,7 @@
     image: postgres:16
     platform: linux/amd64
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     networks:
       - portal-network
       - worker-network
