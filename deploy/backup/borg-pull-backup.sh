@@ -25,6 +25,9 @@ flock -n 9 || { echo "$(date -Is) previous run still busy, skipping"; exit 1; }
 
 remote() { ssh -o BatchMode=yes "$SERVER" "$@"; }
 
+# No container keeps the helper image in use, so `docker system prune -a` on the server deletes it: rebuild when missing.
+remote 'docker image inspect backup-tools >/dev/null 2>&1 || printf "FROM alpine:3.20\nRUN apk add --no-cache rsync sqlite\n" | docker build -q -t backup-tools - >/dev/null'
+
 # Plain SQL, not gzipped, so borg can deduplicate unchanged data between hours.
 # $1 container, $2 database superuser, $3 file name in staging.
 dump_postgres() { remote docker exec "$1" pg_dumpall -U "$2" > "$STAGE/$3"; }
