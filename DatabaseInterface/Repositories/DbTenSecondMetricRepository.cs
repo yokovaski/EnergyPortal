@@ -79,7 +79,8 @@ namespace DatabaseInterface.Repositories
             var query = dbContext.TenSecondMetrics
                 .Where(t => t.RaspberryPiId == rpiId)
                 .Where(t => t.Created > fromUtc && t.Created <= toUtc)
-                .Where(t => t.SolarNow > 0);
+                // Zero total = failed inverter read (power can still come from a second meter)
+                .Where(t => t.SolarNow > 0 && t.SolarTotal > 0);
 
             var lowest = await query
                 .OrderBy(t => t.SolarTotal)

@@ -120,6 +120,15 @@ namespace EnergyPortal.Controllers.WebApi
             if (lastMetric == null)
                 return NotFound("Could not find metrics");
 
+            // The inverter reports a zero total while asleep or unreachable: show its last known total instead.
+            // Limited to two days so users without solar don't scan the whole table on every poll.
+            if (lastMetric.SolarTotal == 0)
+                lastMetric.SolarTotal = await dbContext.TenSecondMetrics
+                    .Where(t => t.RaspberryPiId == raspberryPiId.Value && t.SolarTotal > 0 && t.Created > lastMetric.Created.AddDays(-2))
+                    .OrderByDescending(t => t.Created)
+                    .Select(t => t.SolarTotal)
+                    .FirstOrDefaultAsync();
+
             return Ok(lastMetric);
         }
 

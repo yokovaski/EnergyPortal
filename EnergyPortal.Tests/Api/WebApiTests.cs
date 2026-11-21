@@ -520,6 +520,22 @@ public class WebApiTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Totals_keep_last_known_solar_total_when_latest_is_zero()
+    {
+        await SeedMetrics<TenSecondMetric>(DateTime.UtcNow.AddMinutes(-2), TimeSpan.FromSeconds(10), 3); // solar 0, 20, 40
+        await factory.SeedAsync(db =>
+        {
+            db.Add(TestDb.Metric<TenSecondMetric>(piId, DateTime.UtcNow, m => { m.UsageTotalHigh = 1_000_999; m.SolarTotal = 0; }));
+            return Task.CompletedTask;
+        });
+
+        var json = await Json(await Client().GetAsync("/webapi/v3/energy/totals"));
+
+        Assert.Equal(40, json.GetProperty("solarTotal").GetInt64());
+        Assert.Equal(1_000_999, json.GetProperty("usageTotalHigh").GetInt64());
+    }
+
+    [Fact]
     public async Task Total_today_returns_404_for_user_without_pi()
     {
         var response = await Client(UserWithoutPi).GetAsync("/webapi/v3/energy/total-today");

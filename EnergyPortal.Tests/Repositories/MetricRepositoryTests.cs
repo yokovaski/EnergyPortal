@@ -97,6 +97,7 @@ public class TenSecondMetricRepositoryTests
             TestDb.Metric<TenSecondMetric>(1, now, m => { m.SolarNow = 10; m.SolarTotal = 100; }),
             TestDb.Metric<TenSecondMetric>(1, now, m => { m.SolarNow = 10; m.SolarTotal = 200; }),
             TestDb.Metric<TenSecondMetric>(1, now, m => { m.SolarNow = 0; m.SolarTotal = 50; }),
+            TestDb.Metric<TenSecondMetric>(1, now, m => { m.SolarNow = 150; m.SolarTotal = 0; }),
             TestDb.Metric<TenSecondMetric>(1, now.Date.AddDays(-1), m => { m.SolarNow = 10; m.SolarTotal = 5; }),
             TestDb.Metric<TenSecondMetric>(2, now, m => { m.SolarNow = 10; m.SolarTotal = 9999; }));
         await db.SaveChangesAsync();
