@@ -22,6 +22,8 @@ export BORG_REPO
 mkdir -p "$STAGE"
 exec 9>"$BASE/.lock"
 flock -n 9 || { echo "$(date -Is) previous run still busy, skipping"; exit 1; }
+# Marker for the offsite copy, which pulls this staging folder: present only after a fully successful run.
+rm -f "$STAGE/.complete"
 
 remote() { ssh -o BatchMode=yes "$SERVER" "$@"; }
 
@@ -66,4 +68,5 @@ borg create --compression zstd,6 '::{now:%Y-%m-%dT%H:%M}' .
 borg prune --keep-hourly 1 --keep-daily 14 --keep-weekly 8
 borg compact
 
+date -Is > "$STAGE/.complete"
 echo "$(date -Is) OK"
