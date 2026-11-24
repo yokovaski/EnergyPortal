@@ -57,3 +57,6 @@ MigrateDatabase/connectionstring.txt
 
 # KNMI Open Data API key
 knmi_api_key*.txt
+
+# Local secrets for docker compose
+.env

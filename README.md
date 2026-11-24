@@ -142,6 +142,24 @@ Now start the services:
 docker compose up -d
 ```
 
+### E-mail (password reset and address confirmation)
+
+The portal sends account mails ("Wachtwoord vergeten", confirming a (new) e-mail address) over SMTP. Copy
+`.env.example` to `.env` next to `docker-compose.yml` and fill in the `SMTP_*` values:
+
+```bash
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587            # 587 = STARTTLS, 465 = implicit TLS
+SMTP_USER=you@gmail.com
+SMTP_PASSWORD=<app password>
+SMTP_FROM=               # optional, defaults to SMTP_USER
+```
+
+For Gmail, turn on 2-step verification for the account and create an app password at
+<https://myaccount.google.com/apppasswords>. Use that, not the normal account password. Then restart with
+`docker compose up -d`. Without these settings no mail is sent, and the pages tell the user that e-mail is
+not available right now. Send failures are logged by the `energy_portal` container.
+
 ### Check logs
 
 ```bash

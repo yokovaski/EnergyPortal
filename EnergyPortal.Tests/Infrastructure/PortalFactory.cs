@@ -24,6 +24,9 @@ public class PortalFactory : WebApplicationFactory<Startup>
     public const string UserHeader = "X-Test-UserId";
     private readonly string databaseName = Guid.NewGuid().ToString();
 
+    /// <summary>Extra service registrations (applied last), e.g. a fake mail service.</summary>
+    public Action<IServiceCollection> ConfigureServices { get; init; }
+
     // Program.Main runs migrations against Postgres; build the host from Startup directly instead.
     protected override IHostBuilder CreateHostBuilder() =>
         Host.CreateDefaultBuilder()
@@ -49,6 +52,8 @@ public class PortalFactory : WebApplicationFactory<Startup>
                 o.DefaultAuthenticateScheme = HeaderAuthHandler.SchemeName;
                 o.DefaultChallengeScheme = HeaderAuthHandler.SchemeName;
             });
+
+            ConfigureServices?.Invoke(services);
         });
     }
 

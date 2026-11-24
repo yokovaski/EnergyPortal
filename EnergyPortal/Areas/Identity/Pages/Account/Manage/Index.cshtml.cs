@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using DatabaseInterface.Entities;
+using EnergyPortal.Mail;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
@@ -19,7 +18,7 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
     public class IndexModel(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IEmailSender emailSender,
+        IMailService mail,
         ILogger<IndexModel> logger) : PageModel
     {
         public string Email { get; set; }
@@ -148,15 +147,61 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
             if (input.Email == email)
                 return Done("e-mailadres", "Dit is al je e-mailadres.");
 
+            if (!mail.IsConfigured)
+                return await MailUnavailable(user);
+
             var userId = await userManager.GetUserIdAsync(user);
             var code = await userManager.GenerateChangeEmailTokenAsync(user, input.Email);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = Url.Page("/Account/ConfirmEmailChange", pageHandler: null,
                 values: new { area = "Identity", userId, email = input.Email, code }, protocol: Request.Scheme);
-            await emailSender.SendEmailAsync(input.Email, "Bevestig je nieuwe e-mailadres",
-                $"Bevestig je nieuwe e-mailadres voor EnergieZicht via <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>deze link</a>.");
+            var sent = await mail.TrySendAsync(input.Email, new MailContent(
+                Subject: "Bevestig je nieuwe e-mailadres",
+                Heading: "Bevestig je nieuwe e-mailadres",
+                Text: "Je wilt dit adres gebruiken om in te loggen bij EnergieZicht. Bevestig het met de knop hieronder; daarna log je in met dit adres.",
+                ButtonText: "E-mailadres bevestigen",
+                Link: callbackUrl));
+            if (!sent)
+                return await MailUnavailable(user);
 
             return Done("e-mailadres", $"We hebben een bevestigingsmail gestuurd naar {input.Email}.");
+        }
+
+        /// <summary>Sends a confirmation link for the current (still unconfirmed) address.</summary>
+        public async Task<IActionResult> OnPostSendConfirmationAsync()
+        {
+            var user = await userManager.GetUserAsync(User);
+            if (user == null)
+                return NotFound("Gebruiker niet gevonden.");
+
+            if (await userManager.IsEmailConfirmedAsync(user))
+                return Done("e-mailadres", "Je e-mailadres is al bevestigd.");
+
+            if (!mail.IsConfigured)
+                return await MailUnavailable(user);
+
+            var email = await userManager.GetEmailAsync(user);
+            var userId = await userManager.GetUserIdAsync(user);
+            var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = Url.Page("/Account/ConfirmEmail", pageHandler: null,
+                values: new { area = "Identity", userId, code }, protocol: Request.Scheme);
+            var sent = await mail.TrySendAsync(email, new MailContent(
+                Subject: "Bevestig je e-mailadres",
+                Heading: "Bevestig je e-mailadres",
+                Text: "Bevestig je e-mailadres voor EnergieZicht met de knop hieronder. Daarna kun je ook een nieuw wachtwoord aanvragen als je het vergeten bent.",
+                ButtonText: "E-mailadres bevestigen",
+                Link: callbackUrl));
+            if (!sent)
+                return await MailUnavailable(user);
+
+            return Done("e-mailadres", $"We hebben een bevestigingsmail gestuurd naar {email}.");
+        }
+
+        private async Task<IActionResult> MailUnavailable(ApplicationUser user)
+        {
+            ModelState.AddModelError(string.Empty, ForgotPasswordModel.MailUnavailable);
+            return await Invalid(user, "e-mailadres");
         }
 
         public async Task<IActionResult> OnPostPasswordAsync([Bind(Prefix = nameof(Password))] PasswordInput input)

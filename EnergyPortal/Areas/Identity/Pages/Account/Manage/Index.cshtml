@@ -50,6 +50,7 @@
             <h2 id="email-title" class="ez-title">E-mailadres</h2>
             <p class="mt-1 mb-0 text-ink-muted">Hiermee log je in. We sturen een bevestiging naar het nieuwe adres.</p>
             <partial name="_StatusMessage" model='MessageFor("e-mailadres")' />
+            @if (ErrorsFor("e-mailadres")) { <div asp-validation-summary="ModelOnly" class="ez-alert" role="alert"></div> }
             <p class="mt-4 mb-0 flex flex-wrap items-center gap-x-3">
                 <strong class="font-semibold">@Model.Email</strong>
                 @if (Model.EmailConfirmed)
@@ -63,6 +64,13 @@
                     <span class="ez-label text-warning">Nog niet bevestigd</span>
                 }
             </p>
+            @if (!Model.EmailConfirmed)
+            {
+                <form method="post" asp-page-handler="SendConfirmation" class="mt-2">
+                    <p class="m-0 text-ink-muted">Bevestig je adres, zodat je een nieuw wachtwoord kunt aanvragen als je het vergeten bent.</p>
+                    <button type="submit" class="ez-btn mt-3">Stuur bevestigingsmail</button>
+                </form>
+            }
             <form method="post" asp-page-handler="Email" class="max-w-[396px]" novalidate>
                 <div class="ez-field">
                     <label asp-for="NewEmail.Email">Nieuw e-mailadres</label>

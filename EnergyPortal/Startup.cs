@@ -50,6 +50,9 @@ namespace EnergyPortal
             services.AddControllersWithViews();
             services.AddRazorPages();
             
+            services.Configure<Mail.SmtpOptions>(Configuration.GetSection(Mail.SmtpOptions.Section));
+            services.AddSingleton<Mail.IMailService, Mail.SmtpMailService>();
+
             services.AddSingleton<ViteManifest>();
             services.AddScoped<DbTenSecondMetricRepository, DbTenSecondMetricRepository>();
             services.AddScoped<DbMinuteMetricRepository, DbMinuteMetricRepository>();
