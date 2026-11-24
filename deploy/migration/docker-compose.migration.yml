@@ -1,0 +1,44 @@
+services:
+  mysql-source:
+    image: mysql:8.0
+    platform: linux/amd64
+    container_name: energyportal-mysql-source
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: energycloud
+      MYSQL_USER: energycloud
+      MYSQL_PASSWORD: energycloud
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - mysql_source_data:/var/lib/mysql
+    networks:
+      - migration-net
+
+  pgloader:
+    image: dimitri/pgloader:latest
+    platform: linux/amd64
+    container_name: energyportal-pgloader
+    depends_on:
+      mysql-source:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ../../dump.sql:/work/dump.sql:ro
+      - ./pgloader.load:/work/pgloader.load:ro
+    networks:
+      - migration-net
+
+networks:
+  migration-net:
+    driver: bridge
+
+volumes:
+  mysql_source_data:

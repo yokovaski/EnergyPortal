@@ -1,7 +1,10 @@
 using System;
+using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using DatabaseInterface;
 using DatabaseInterface.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -14,12 +17,15 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<DeletePersonalDataModel> _logger;
+        private readonly ApplicationDbContext _dbContext;
 
         public DeletePersonalDataModel(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<DeletePersonalDataModel> logger)
+            ILogger<DeletePersonalDataModel> logger,
+            ApplicationDbContext dbContext)
         {
+            _dbContext = dbContext;
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
@@ -30,7 +36,7 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
-            [Required]
+            [Required(ErrorMessage = "Vul je wachtwoord in.")]
             [DataType(DataType.Password)]
             public string Password { get; set; }
         }
@@ -62,10 +68,15 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
             {
                 if (!await _userManager.CheckPasswordAsync(user, Input.Password))
                 {
-                    ModelState.AddModelError(string.Empty, "Incorrect password.");
+                    ModelState.AddModelError(string.Empty, "Dit wachtwoord klopt niet.");
                     return Page();
                 }
             }
+
+            // Settings and the Pi reference the user without cascade, so remove them in the same SaveChanges
+            // as the user (DeleteAsync saves once). The Pi's metrics cascade in the database.
+            _dbContext.Settings.RemoveRange(await _dbContext.Settings.Where(s => s.UserId == user.Id).ToListAsync());
+            _dbContext.RaspberryPis.RemoveRange(await _dbContext.RaspberryPis.Where(r => r.UserId == user.Id).ToListAsync());
 
             var result = await _userManager.DeleteAsync(user);
             var userId = await _userManager.GetUserIdAsync(user);

@@ -3,6 +3,7 @@ using DatabaseInterface.Entities;
 using DatabaseInterface.Repositories;
 using EnergyPortal.Controllers.Middleware;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -44,15 +45,22 @@ namespace EnergyPortal
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddErrorDescriber<EnergyPortal.Areas.Identity.DutchIdentityErrorDescriber>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
             
+            services.Configure<Mail.SmtpOptions>(Configuration.GetSection(Mail.SmtpOptions.Section));
+            services.AddSingleton<Mail.IMailService, Mail.SmtpMailService>();
+
+            services.AddSingleton<ViteManifest>();
             services.AddScoped<DbTenSecondMetricRepository, DbTenSecondMetricRepository>();
             services.AddScoped<DbMinuteMetricRepository, DbMinuteMetricRepository>();
             services.AddScoped<DbHourMetricRepository, DbHourMetricRepository>();
             services.AddScoped<DbSettingsRepository, DbSettingsRepository>();
             services.AddScoped<DbDeviceRepository, DbDeviceRepository>();
+            services.AddScoped<DbTemperatureRepository>();
+            services.AddHttpClient();
 
             // if (environment.IsDevelopment())
             // {
@@ -77,6 +85,10 @@ namespace EnergyPortal
                         .AllowAnyMethod();
                 });
             });
+            
+            services.AddDataProtection()
+                .SetApplicationName("EnergyPortal")
+                .PersistKeysToFileSystem(new System.IO.DirectoryInfo(@"/var/dpkeys/"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -95,6 +107,9 @@ namespace EnergyPortal
                 app.UseHsts();
             }
             
+            // Empty error responses (e.g. 404 for an unknown page) get the styled error page
+            app.UseStatusCodePagesWithReExecute("/Home/Error", "?code={0}");
+
             // app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
@@ -109,11 +124,9 @@ namespace EnergyPortal
             app.UseAuthentication();
             app.UseAuthorization();
             
-            app.MapWhen(context => context.Request.Path.StartsWithSegments("/api/v3/energy"), builder =>
-            {
-                builder.UseAuthenticateByPiKey();
-                app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-            });
+            // UseWhen rejoins the main pipeline, so the Pi key is checked before the endpoint executes.
+            app.UseWhen(context => context.Request.Path.StartsWithSegments("/api/v3/energy"),
+                builder => builder.UseAuthenticateByPiKey());
 
             app.UseEndpoints(endpoints =>
             {

@@ -47,8 +47,8 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
-            [Required]
-            [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Required(ErrorMessage = "Vul de code in.")]
+            [StringLength(7, ErrorMessage = "De code heeft 6 cijfers.", MinimumLength = 6)]
             [DataType(DataType.Text)]
             [Display(Name = "Verification Code")]
             public string Code { get; set; }
@@ -89,7 +89,7 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
 
             if (!is2faTokenValid)
             {
-                ModelState.AddModelError("Input.Code", "Verification code is invalid.");
+                ModelState.AddModelError("Input.Code", "Deze code klopt niet. Probeer de nieuwste code uit je app.");
                 await LoadSharedKeyAndQrCodeUriAsync(user);
                 return Page();
             }
@@ -98,7 +98,7 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
             var userId = await _userManager.GetUserIdAsync(user);
             _logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
 
-            StatusMessage = "Your authenticator app has been verified.";
+            StatusMessage = "Je authenticator-app is ingesteld.";
 
             if (await _userManager.CountRecoveryCodesAsync(user) == 0)
             {
@@ -108,7 +108,7 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
             }
             else
             {
-                return RedirectToPage("./TwoFactorAuthentication");
+                return RedirectToPage("./Index", null, "tweestapsverificatie");
             }
         }
 

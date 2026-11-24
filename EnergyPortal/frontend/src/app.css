@@ -1,0 +1,108 @@
+@import "@fontsource/hanken-grotesk/400.css";
+@import "@fontsource/hanken-grotesk/500.css";
+@import "@fontsource/hanken-grotesk/600.css";
+@import "@fontsource/hanken-grotesk/700.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "tailwindcss";
+@import "./design/tokens.css" layer(base);
+
+/* Razor views use the same utilities */
+@source "../../Views";
+@source "../../Areas";
+
+/* Logo: two images, the one for the current theme is shown */
+[data-theme="dark"] .ez-logo-light, :root:not([data-theme="dark"]) .ez-logo-dark { display: none; }
+
+/* Only design tokens are available as colours, so no hex values slip into components. */
+@theme {
+  --color-*: initial;
+}
+
+@theme inline {
+  --color-surface: var(--ez-surface);
+  --color-surface-raised: var(--ez-surface-raised);
+  --color-surface-sunken: var(--ez-surface-sunken);
+  --color-line: var(--ez-line);
+  --color-line-strong: var(--ez-line-strong);
+  --color-ink: var(--ez-ink);
+  --color-ink-muted: var(--ez-ink-muted);
+  --color-brand: var(--ez-brand);
+  --color-brand-soft: var(--ez-brand-soft);
+  --color-on-brand: var(--ez-on-brand);
+  --color-focus-ring: var(--ez-focus-ring);
+  --color-verbruik: var(--ez-series-verbruik);
+  --color-opname: var(--ez-series-opname);
+  --color-teruglevering: var(--ez-series-teruglevering);
+  --color-opwekking: var(--ez-series-opwekking);
+  --color-gas: var(--ez-series-gas);
+  --color-dal-bg: var(--ez-tariff-dal-bg);
+  --color-dal-ink: var(--ez-tariff-dal-ink);
+  --color-normaal-bg: var(--ez-tariff-normaal-bg);
+  --color-normaal-ink: var(--ez-tariff-normaal-ink);
+  --color-live: var(--ez-status-live);
+  --color-warning: var(--ez-status-warning);
+  --color-warning-bg: var(--ez-status-warning-bg);
+  --color-danger: var(--ez-status-danger);
+  --color-danger-bg: var(--ez-status-danger-bg);
+  --color-scrim: var(--ez-scrim);
+
+  --font-sans: var(--ez-font-sans);
+  --font-mono: var(--ez-font-mono);
+
+  --radius-sm: var(--ez-radius-sm);
+  --radius-md: var(--ez-radius-md);
+  --radius-lg: var(--ez-radius-lg);
+
+  --shadow-float: var(--ez-shadow-float);
+  /* content 1200px + 32px gutters on both sides */
+  --container-content: calc(var(--ez-content-max) + 2 * var(--ez-space-6));
+}
+
+@layer base {
+  button, a, input, select, label[for] { -webkit-tap-highlight-color: transparent; }
+  button:not(:disabled), [role="button"], [role="switch"], [role="tab"] { cursor: pointer; }
+  a { color: var(--ez-brand); }
+  h1, h2, h3 { margin: 0; }
+}
+
+@layer components {
+  .ez-card { background: var(--ez-surface-raised); border: 1px solid var(--ez-line); border-radius: var(--ez-radius-lg); padding: var(--ez-space-5); }
+  @media (max-width: 560px) { .ez-card { padding: var(--ez-space-4); } }
+
+  .ez-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--ez-space-2);
+    height: var(--ez-control-h); padding: 0 var(--ez-space-4); border-radius: var(--ez-radius-md);
+    font: inherit; font-weight: 600; white-space: nowrap; text-decoration: none;
+    border: 1px solid var(--ez-line-strong); background: var(--ez-surface-raised); color: var(--ez-ink);
+  }
+  .ez-btn-primary { background: var(--ez-brand); border-color: var(--ez-brand); color: var(--ez-on-brand); }
+  .ez-btn-danger { border-color: var(--ez-status-danger); color: var(--ez-status-danger); background: var(--ez-surface-raised); }
+  .ez-btn:hover { background: var(--ez-brand-soft); }
+  .ez-btn-primary:hover { background: var(--ez-brand); filter: brightness(1.1); }
+  .ez-btn-danger:hover { background: var(--ez-status-danger-bg); }
+  @media (pointer: coarse) { .ez-btn { height: var(--ez-control-h-touch); } }
+
+  .ez-input {
+    height: var(--ez-control-h); width: 100%; padding: 0 var(--ez-space-3); border-radius: var(--ez-radius-md);
+    border: 1px solid var(--ez-line-strong); background: var(--ez-surface-raised); color: var(--ez-ink); font: inherit;
+  }
+  .ez-input[aria-invalid="true"], .ez-input.input-validation-error { border: 2px solid var(--ez-status-danger); }
+  @media (pointer: coarse) { .ez-input { height: var(--ez-control-h-touch); } }
+
+  .ez-link { color: var(--ez-brand); text-decoration: underline; text-underline-offset: 2px; font-weight: 500; }
+
+  /* Skeleton block: shape of the content, no shimmer */
+  .ez-skel { background: var(--ez-surface-sunken); border-radius: var(--ez-radius-sm); }
+
+  .ez-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; }
+  .ez-swatch-line { display: inline-block; width: 14px; height: 3px; border-radius: 2px; flex: none; }
+
+  /* Chart tooltip (ApexCharts custom HTML) */
+  .apexcharts-tooltip.apexcharts-theme-light, .apexcharts-tooltip { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+  .ez-tip { background: var(--ez-surface-raised); color: var(--ez-ink); border: 1px solid var(--ez-line); border-radius: var(--ez-radius-md);
+    box-shadow: var(--ez-shadow-float); padding: var(--ez-space-3); font-size: var(--ez-label-size); line-height: var(--ez-label-lh); min-width: 200px; }
+  .ez-tip-head { font-weight: 500; margin-bottom: var(--ez-space-2); }
+  .ez-tip-row { display: flex; align-items: center; gap: var(--ez-space-2); padding: 2px 0; }
+  .ez-tip-val { margin-left: auto; padding-left: var(--ez-space-4); font-weight: 600; white-space: nowrap; }
+  .apexcharts-xaxistooltip, .apexcharts-yaxistooltip { display: none; }
+}

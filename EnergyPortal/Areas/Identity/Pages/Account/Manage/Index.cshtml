@@ -1,30 +1,187 @@
 @page
 @model IndexModel
 @{
-    ViewData["Title"] = "Profile";
-    ViewData["ActivePage"] = ManageNavPages.Index;
+    ViewData["Title"] = "Account";
+    var sections = new[] { ("profiel", "Profiel"), ("e-mailadres", "E-mailadres"), ("wachtwoord", "Wachtwoord"), ("tweestapsverificatie", "Tweestapsverificatie"), ("persoonlijke-gegevens", "Persoonlijke gegevens") };
+    string MessageFor(string section) => Model.StatusSection == section ? Model.StatusMessage : null;
+    bool ErrorsFor(string section) => Model.Section == section && !ViewData.ModelState.IsValid;
 }
 
-<h4>@ViewData["Title"]</h4>
-<partial name="_StatusMessage" model="Model.StatusMessage" />
-<div class="row">
-    <div class="col-md-6">
-        <form id="profile-form" method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Username"></label>
-                <input asp-for="Username" class="form-control" disabled />
+<nav aria-label="Kruimelpad" class="ez-label">
+    <a class="ez-link" href="/settings">Instellingen</a> <span aria-hidden="true">›</span> <span aria-current="page">Account</span>
+</nav>
+<h1 class="ez-title-lg mt-1">Account</h1>
+
+<div class="mt-6 flex gap-8 max-md:flex-col max-md:gap-4">
+    <nav aria-label="Onderdelen" class="w-[218px] shrink-0 max-md:-mx-4 max-md:w-auto max-md:overflow-x-auto max-md:px-4">
+        <ul class="sticky top-20 m-0 flex list-none flex-col gap-1 p-0 max-md:static max-md:flex-row">
+            @foreach (var (id, label) in sections)
+            {
+                <li><a href="#@id" class="block whitespace-nowrap rounded-md px-3 py-2 text-ink no-underline hover:bg-brand-soft max-md:rounded-full max-md:border max-md:border-line max-md:bg-surface-raised">@label</a></li>
+            }
+        </ul>
+    </nav>
+
+    <div class="flex min-w-0 max-w-[760px] flex-1 flex-col gap-5">
+        @* Profiel *@
+        <section id="profiel" class="ez-card scroll-mt-20" aria-labelledby="profiel-title">
+            <h2 id="profiel-title" class="ez-title">Profiel</h2>
+            <p class="mt-1 mb-0 text-ink-muted">Je naam zie je terug in de app. Je telefoonnummer is optioneel.</p>
+            <partial name="_StatusMessage" model='MessageFor("profiel")' />
+            @if (ErrorsFor("profiel")) { <div asp-validation-summary="ModelOnly" class="ez-alert" role="alert"></div> }
+            <form method="post" asp-page-handler="Profile" class="max-w-[396px]" novalidate>
+                <div class="ez-field">
+                    <label asp-for="Profile.Name">Naam</label>
+                    <input asp-for="Profile.Name" class="ez-input" autocomplete="name" />
+                    <span asp-validation-for="Profile.Name" class="ez-field-error"></span>
+                </div>
+                <div class="ez-field">
+                    <label asp-for="Profile.PhoneNumber">Telefoonnummer</label>
+                    <input asp-for="Profile.PhoneNumber" class="ez-input" autocomplete="tel" aria-describedby="phone-help" />
+                    <p id="phone-help" class="ez-help">Optioneel. Bijvoorbeeld 06 12345678.</p>
+                    <span asp-validation-for="Profile.PhoneNumber" class="ez-field-error"></span>
+                </div>
+                <button type="submit" class="ez-btn ez-btn-primary mt-4">Opslaan</button>
+            </form>
+        </section>
+
+        @* E-mailadres *@
+        <section id="e-mailadres" class="ez-card scroll-mt-20" aria-labelledby="email-title">
+            <h2 id="email-title" class="ez-title">E-mailadres</h2>
+            <p class="mt-1 mb-0 text-ink-muted">Hiermee log je in. We sturen een bevestiging naar het nieuwe adres.</p>
+            <partial name="_StatusMessage" model='MessageFor("e-mailadres")' />
+            @if (ErrorsFor("e-mailadres")) { <div asp-validation-summary="ModelOnly" class="ez-alert" role="alert"></div> }
+            <p class="mt-4 mb-0 flex flex-wrap items-center gap-x-3">
+                <strong class="font-semibold">@Model.Email</strong>
+                @if (Model.EmailConfirmed)
+                {
+                    <span class="ez-label inline-flex items-center gap-1 text-live">
+                        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" fill="currentColor" /></svg>Bevestigd
+                    </span>
+                }
+                else
+                {
+                    <span class="ez-label text-warning">Nog niet bevestigd</span>
+                }
+            </p>
+            @if (!Model.EmailConfirmed)
+            {
+                <form method="post" asp-page-handler="SendConfirmation" class="mt-2">
+                    <p class="m-0 text-ink-muted">Bevestig je adres, zodat je een nieuw wachtwoord kunt aanvragen als je het vergeten bent.</p>
+                    <button type="submit" class="ez-btn mt-3">Stuur bevestigingsmail</button>
+                </form>
+            }
+            <form method="post" asp-page-handler="Email" class="max-w-[396px]" novalidate>
+                <div class="ez-field">
+                    <label asp-for="NewEmail.Email">Nieuw e-mailadres</label>
+                    <input asp-for="NewEmail.Email" class="ez-input" autocomplete="email" />
+                    <span asp-validation-for="NewEmail.Email" class="ez-field-error"></span>
+                </div>
+                <button type="submit" class="ez-btn ez-btn-primary mt-4">Bevestigingsmail sturen</button>
+            </form>
+        </section>
+
+        @* Wachtwoord *@
+        <section id="wachtwoord" class="ez-card scroll-mt-20" aria-labelledby="password-title">
+            <h2 id="password-title" class="ez-title">Wachtwoord</h2>
+            <partial name="_StatusMessage" model='MessageFor("wachtwoord")' />
+            @if (ErrorsFor("wachtwoord")) { <div asp-validation-summary="ModelOnly" class="ez-alert" role="alert"></div> }
+            <form method="post" asp-page-handler="Password" class="max-w-[396px]" novalidate>
+                <input type="text" autocomplete="username" value="@Model.Email" hidden readonly />
+                <div class="ez-field">
+                    <label asp-for="Password.OldPassword">Huidig wachtwoord</label>
+                    <input asp-for="Password.OldPassword" class="ez-input" autocomplete="current-password" />
+                    <span asp-validation-for="Password.OldPassword" class="ez-field-error"></span>
+                </div>
+                <div class="ez-field">
+                    <label asp-for="Password.NewPassword">Nieuw wachtwoord</label>
+                    <input asp-for="Password.NewPassword" class="ez-input" autocomplete="new-password" aria-describedby="new-pw-help" />
+                    <p id="new-pw-help" class="ez-help">Minimaal 6 tekens, met een hoofdletter, een kleine letter, een cijfer en een leesteken.</p>
+                    <span asp-validation-for="Password.NewPassword" class="ez-field-error"></span>
+                </div>
+                <div class="ez-field">
+                    <label asp-for="Password.ConfirmPassword">Herhaal nieuw wachtwoord</label>
+                    <input asp-for="Password.ConfirmPassword" class="ez-input" autocomplete="new-password" />
+                    <span asp-validation-for="Password.ConfirmPassword" class="ez-field-error"></span>
+                </div>
+                <button type="submit" class="ez-btn ez-btn-primary mt-4">Wachtwoord wijzigen</button>
+            </form>
+        </section>
+
+        @* Tweestapsverificatie *@
+        <section id="tweestapsverificatie" class="ez-card scroll-mt-20" aria-labelledby="twofa-title">
+            <div class="flex items-start justify-between gap-3">
+                <h2 id="twofa-title" class="ez-title">Tweestapsverificatie</h2>
+                @if (Model.Is2faEnabled)
+                {
+                    <span class="ez-label inline-flex items-center gap-1 rounded-sm bg-brand-soft px-2 py-0.5 text-ink">
+                        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" fill="currentColor" /></svg>Aan
+                    </span>
+                }
+                else
+                {
+                    <span class="ez-label rounded-sm bg-surface-sunken px-2 py-0.5">Uit</span>
+                }
             </div>
-            <div class="form-group">
-                <label asp-for="Input.PhoneNumber"></label>
-                <input asp-for="Input.PhoneNumber" class="form-control" />
-                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            <p class="mt-1 mb-0 text-ink-muted">Bij het inloggen vragen we naast je wachtwoord een code uit je authenticator-app.</p>
+            <partial name="_StatusMessage" model='MessageFor("tweestapsverificatie")' />
+
+            <div class="mt-4 divide-y divide-line border-t border-line">
+                <div class="flex flex-wrap items-center justify-between gap-3 py-4">
+                    <div>
+                        <p class="ez-body-strong m-0">Authenticator-app</p>
+                        <p class="m-0 text-ink-muted">@(Model.HasAuthenticator ? "Ingesteld." : "Nog niet ingesteld.")</p>
+                    </div>
+                    <a class="ez-btn @(Model.HasAuthenticator ? "" : "ez-btn-primary")" asp-page="./EnableAuthenticator">@(Model.HasAuthenticator ? "Opnieuw instellen" : "Instellen")</a>
+                </div>
+                @if (Model.Is2faEnabled)
+                {
+                    <div class="flex flex-wrap items-center justify-between gap-3 py-4">
+                        <div>
+                            <p class="ez-body-strong m-0">Herstelcodes</p>
+                            <p class="m-0 @(Model.RecoveryCodesLeft <= 3 ? "text-warning" : "text-ink-muted")">Nog @Model.RecoveryCodesLeft van de 10 over. Gebruik er een als je je telefoon kwijt bent.</p>
+                        </div>
+                        <a class="ez-btn" asp-page="./GenerateRecoveryCodes">Nieuwe codes maken</a>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-between gap-3 py-4">
+                        <div>
+                            <p class="ez-body-strong m-0">Onthouden apparaat</p>
+                            <p class="m-0 text-ink-muted">@(Model.IsMachineRemembered ? "Dit apparaat vraagt 30 dagen geen code." : "Dit apparaat vraagt bij elke keer inloggen een code.")</p>
+                        </div>
+                        @if (Model.IsMachineRemembered)
+                        {
+                            <form method="post" asp-page-handler="ForgetBrowser"><button type="submit" class="ez-btn">Vergeten</button></form>
+                        }
+                    </div>
+                    <div class="flex flex-wrap items-center justify-between gap-3 py-4">
+                        <div>
+                            <p class="ez-body-strong m-0">Tweestapsverificatie uitzetten</p>
+                            <p class="m-0 text-ink-muted">Je account is dan alleen met je wachtwoord beveiligd.</p>
+                        </div>
+                        <a class="ez-btn ez-btn-danger" asp-page="./Disable2fa">Uitzetten</a>
+                    </div>
+                }
             </div>
-            <button id="update-profile-button" type="submit" class="btn btn-primary">Save</button>
-        </form>
+        </section>
+
+        @* Persoonlijke gegevens *@
+        <section id="persoonlijke-gegevens" class="ez-card scroll-mt-20" aria-labelledby="data-title">
+            <h2 id="data-title" class="ez-title">Persoonlijke gegevens</h2>
+            <p class="mt-1 mb-0 text-ink-muted">Je account, instellingen en alle metingen van je Raspberry Pi.</p>
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line py-4">
+                <div>
+                    <p class="ez-body-strong m-0">Gegevens downloaden</p>
+                    <p class="m-0 text-ink-muted">Een JSON-bestand met je accountgegevens.</p>
+                </div>
+                <form method="post" asp-page="./DownloadPersonalData"><button type="submit" class="ez-btn">Exporteren</button></form>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-md bg-danger-bg p-4">
+                <div class="min-w-0 flex-1">
+                    <p class="ez-body-strong m-0 text-danger">Account verwijderen</p>
+                    <p class="m-0">Dit verwijdert je account, je instellingen en alle metingen. Dit kun je niet ongedaan maken.</p>
+                </div>
+                <a class="ez-btn ez-btn-danger" asp-page="./DeletePersonalData">Account verwijderen</a>
+            </div>
+        </section>
     </div>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

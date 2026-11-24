@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
 {
@@ -44,8 +44,8 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
                 personalData.Add(p.Name, p.GetValue(user)?.ToString() ?? "null");
             }
 
-            Response.Headers.Add("Content-Disposition", "attachment; filename=PersonalData.json");
-            return new FileContentResult(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(personalData)), "text/json");
+            Response.Headers["Content-Disposition"] = "attachment; filename=PersonalData.json";
+            return new FileContentResult(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(personalData)), "text/json");
         }
     }
 }

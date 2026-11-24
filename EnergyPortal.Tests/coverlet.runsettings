@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Include>[EnergyPortal]*,[DatabaseInterface]*,[EnergyWorker]*</Include>
+          <!-- Scaffolded Identity UI, EF migrations and process entry points are not ours to unit test -->
+          <Exclude>[EnergyPortal]EnergyPortal.Areas.*,[DatabaseInterface]DatabaseInterface.Migrations.*,[EnergyPortal]EnergyPortal.Program,[EnergyWorker]EnergyWorker.Program,[EnergyPortal]AspNetCoreGeneratedDocument.*</Exclude>
+          <!-- Not CompilerGeneratedAttribute: that would also hide every async method body -->
+          <ExcludeByAttribute>GeneratedCodeAttribute</ExcludeByAttribute>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

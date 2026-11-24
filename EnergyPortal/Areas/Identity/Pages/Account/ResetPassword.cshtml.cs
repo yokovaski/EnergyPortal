@@ -28,18 +28,18 @@ namespace EnergyPortal.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Vul je e-mailadres in.")]
+            [EmailAddress(ErrorMessage = "Dit is geen geldig e-mailadres.")]
             public string Email { get; set; }
 
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Required(ErrorMessage = "Vul een nieuw wachtwoord in.")]
+            [StringLength(100, ErrorMessage = "Het wachtwoord moet minimaal {2} tekens hebben.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             public string Password { get; set; }
 
             [DataType(DataType.Password)]
             [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Compare("Password", ErrorMessage = "De wachtwoorden zijn niet gelijk.")]
             public string ConfirmPassword { get; set; }
 
             public string Code { get; set; }

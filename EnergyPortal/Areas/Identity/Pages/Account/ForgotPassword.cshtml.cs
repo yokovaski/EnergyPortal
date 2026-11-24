@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using DatabaseInterface.Entities;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using EnergyPortal.Mail;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
@@ -17,13 +16,15 @@ namespace EnergyPortal.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class ForgotPasswordModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IEmailSender _emailSender;
+        public const string MailUnavailable = "We kunnen op dit moment geen e-mail versturen. Probeer het later opnieuw.";
 
-        public ForgotPasswordModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMailService _mail;
+
+        public ForgotPasswordModel(UserManager<ApplicationUser> userManager, IMailService mail)
         {
             _userManager = userManager;
-            _emailSender = emailSender;
+            _mail = mail;
         }
 
         [BindProperty]
@@ -31,41 +32,51 @@ namespace EnergyPortal.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Vul je e-mailadres in.")]
+            [EmailAddress(ErrorMessage = "Dit is geen geldig e-mailadres.")]
             public string Email { get; set; }
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return Page();
+
+            // Checked before the user lookup, so this error says nothing about whether the account exists.
+            if (!_mail.IsConfigured)
             {
-                var user = await _userManager.FindByEmailAsync(Input.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
-                {
-                    // Don't reveal that the user does not exist or is not confirmed
-                    return RedirectToPage("./ForgotPasswordConfirmation");
-                }
+                ModelState.AddModelError(string.Empty, MailUnavailable);
+                return Page();
+            }
 
-                // For more information on how to enable account confirmation and password reset please 
-                // visit https://go.microsoft.com/fwlink/?LinkID=532713
-                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                var callbackUrl = Url.Page(
-                    "/Account/ResetPassword",
-                    pageHandler: null,
-                    values: new { area = "Identity", code },
-                    protocol: Request.Scheme);
-
-                await _emailSender.SendEmailAsync(
-                    Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
+            var user = await _userManager.FindByEmailAsync(Input.Email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                // Don't reveal that the user does not exist or is not confirmed
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }
 
-            return Page();
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = Url.Page(
+                "/Account/ResetPassword",
+                pageHandler: null,
+                values: new { area = "Identity", code },
+                protocol: Request.Scheme);
+
+            var sent = await _mail.TrySendAsync(Input.Email, new MailContent(
+                Subject: "Nieuw wachtwoord instellen",
+                Heading: "Nieuw wachtwoord instellen",
+                Text: "Je hebt gevraagd om een nieuw wachtwoord voor EnergieZicht. Met de knop hieronder stel je een nieuw wachtwoord in.",
+                ButtonText: "Nieuw wachtwoord instellen",
+                Link: callbackUrl));
+            if (!sent)
+            {
+                ModelState.AddModelError(string.Empty, MailUnavailable);
+                return Page();
+            }
+
+            return RedirectToPage("./ForgotPasswordConfirmation");
         }
     }
 }

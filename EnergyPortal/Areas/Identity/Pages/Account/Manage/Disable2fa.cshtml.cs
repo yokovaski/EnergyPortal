@@ -57,8 +57,8 @@ namespace EnergyPortal.Areas.Identity.Pages.Account.Manage
             }
 
             _logger.LogInformation("User with ID '{UserId}' has disabled 2fa.", _userManager.GetUserId(User));
-            StatusMessage = "2fa has been disabled. You can reenable 2fa when you setup an authenticator app";
-            return RedirectToPage("./TwoFactorAuthentication");
+            StatusMessage = "Tweestapsverificatie staat uit.";
+            return RedirectToPage("./Index", null, "tweestapsverificatie");
         }
     }
 }

@@ -1,25 +1,21 @@
-﻿@page
+@page
 @model ShowRecoveryCodesModel
 @{
-    ViewData["Title"] = "Recovery codes";
-    ViewData["ActivePage"] = "TwoFactorAuthentication";
+    ViewData["Title"] = "Herstelcodes";
 }
 
-<partial name="_StatusMessage" for="StatusMessage" />
-<h4>@ViewData["Title"]</h4>
-<div class="alert alert-warning" role="alert">
-    <p>
-        <strong>Put these codes in a safe place.</strong>
-    </p>
-    <p>
-        If you lose your device and don't have the recovery codes you will lose access to your account.
-    </p>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        @for (var row = 0; row < Model.RecoveryCodes.Length; row += 2)
+<nav aria-label="Kruimelpad" class="ez-label">
+    <a class="ez-link" href="/settings">Instellingen</a> <span aria-hidden="true">›</span> <a class="ez-link" asp-page="./Index">Account</a>
+</nav>
+<h1 class="ez-title-lg mt-1">Herstelcodes</h1>
+<section class="ez-card mt-6 max-w-[640px]">
+    <partial name="_StatusMessage" for="StatusMessage" />
+    <p class="m-0"><strong>Bewaar deze codes op een veilige plek.</strong> Ben je je telefoon kwijt, dan log je met een van deze codes in. Elke code werkt één keer.</p>
+    <ul class="ez-meter mt-4 mb-0 grid list-none grid-cols-2 gap-2 rounded-md bg-surface-sunken p-4 max-[400px]:grid-cols-1">
+        @foreach (var code in Model.RecoveryCodes)
         {
-            <code class="recovery-code">@Model.RecoveryCodes[row]</code><text>&nbsp;</text><code class="recovery-code">@Model.RecoveryCodes[row + 1]</code><br />
+            <li>@code</li>
         }
-    </div>
-</div>
+    </ul>
+    <a class="ez-btn ez-btn-primary mt-6" asp-page="./Index" asp-fragment="tweestapsverificatie">Klaar</a>
+</section>

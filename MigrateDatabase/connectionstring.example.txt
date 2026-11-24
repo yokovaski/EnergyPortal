@@ -1,1 +1,1 @@
-server=localhost;database=energycloud;user=energiezicht;password=energiezicht
+Host=localhost;Database=energycloud;Username=energycloud;Password=energycloud

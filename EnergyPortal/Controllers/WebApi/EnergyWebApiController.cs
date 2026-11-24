@@ -37,7 +37,13 @@ namespace EnergyPortal.Controllers.WebApi
         }
 
         [HttpGet("total-today")]
-        public async Task<IActionResult> GetTotalToday()
+        public Task<IActionResult> GetTotalToday() => GetTotalSinceMidnight(daysAgo: 0);
+
+        /// <summary>Yesterday from midnight until 24 hours ago: the comparison for today's totals.</summary>
+        [HttpGet("total-yesterday-until-now")]
+        public Task<IActionResult> GetTotalYesterdayUntilNow() => GetTotalSinceMidnight(daysAgo: 1);
+
+        private async Task<IActionResult> GetTotalSinceMidnight(int daysAgo)
         {
             var user = await userManager.GetUserAsync(User);
 
@@ -46,23 +52,26 @@ namespace EnergyPortal.Controllers.WebApi
 
             var settings = await settingsRepository.GetSettingsAsync(user.Id) ?? new Settings();
 
-            var raspberryPiId = await dbContext.Users.Where(u => u.Id.Equals(user.Id))
-                .Select(u => u.RaspberryPi.Id)
-                .FirstOrDefaultAsync();
+            var raspberryPiId = await GetRaspberryPiId(user);
 
-            var now = DateTime.UtcNow.Date;
-            var midnight = new DateTime(now.Year, now.Month, now.Day, 0, 0, 0, DateTimeKind.Unspecified);
-            var midnightUtc = midnight.ConvertToUtc(settings.TimeZoneId);
-            
+            if (!raspberryPiId.HasValue)
+                return NotFound("The user does not have a raspberry pi");
+
+            // Midnight in the user's time zone, not the UTC date (which is a day off around midnight).
+            var untilUtc = DateTime.UtcNow.AddDays(-daysAgo);
+            var localMidnight = untilUtc.ConvertToTimeZone(settings.TimeZoneId).Date;
+            var fromUtc = DateTime.SpecifyKind(localMidnight.ConvertToUtc(settings.TimeZoneId), DateTimeKind.Utc);
+
             var firstToday = await tenSecondMetricRepository
                 .FirstOrDefaultAsync(q => q
                     .Where(t => t.RaspberryPiId == raspberryPiId)
-                    .Where(t => t.Created > midnightUtc));
+                    .Where(t => t.Created > fromUtc && t.Created <= untilUtc)
+                    .OrderBy(t => t.Created));
 
             var lastToday = await tenSecondMetricRepository
                 .FirstOrDefaultAsync(q => q
                     .Where(t => t.RaspberryPiId == raspberryPiId)
-                    .Where(t => t.Created > midnightUtc)
+                    .Where(t => t.Created > fromUtc && t.Created <= untilUtc)
                     .OrderByDescending(t => t.Created));
 
             if (firstToday == null || lastToday == null)
@@ -76,28 +85,18 @@ namespace EnergyPortal.Controllers.WebApi
                     TotalGas = (double) 0
                 });
 
-            var list = new List<IMetric>
-            {
-                firstToday,
-                lastToday
-            };
-
             var (minSolar, maxSolar) = await tenSecondMetricRepository
-                .GetMinAndMaxSolarToday(raspberryPiId, settings.TimeZoneId);
+                .GetMinAndMaxSolar(raspberryPiId.Value, fromUtc, untilUtc);
 
-            var difference = list
-                .SelectWithPrevious((previous, current) => new
-                {
-                    UsageTotalHigh = DifferenceInKiloWatt(current.UsageTotalHigh, previous.UsageTotalHigh),
-                    UsageTotalLow = DifferenceInKiloWatt(current.UsageTotalLow, previous.UsageTotalLow),
-                    RedeliveryTotalHigh = DifferenceInKiloWatt(current.RedeliveryTotalHigh, previous.RedeliveryTotalHigh),
-                    RedeliveryTotalLow = DifferenceInKiloWatt(current.RedeliveryTotalLow, previous.RedeliveryTotalLow),
-                    TotalSolar = DifferenceInKiloWatt(maxSolar, minSolar),
-                    TotalGas = DifferenceInKiloWatt(current.UsageGasTotal, previous.UsageGasTotal),
-                })
-                .Last();
-
-            return Ok(difference);
+            return Ok(new
+            {
+                UsageTotalHigh = DifferenceInKiloWatt(lastToday.UsageTotalHigh, firstToday.UsageTotalHigh),
+                UsageTotalLow = DifferenceInKiloWatt(lastToday.UsageTotalLow, firstToday.UsageTotalLow),
+                RedeliveryTotalHigh = DifferenceInKiloWatt(lastToday.RedeliveryTotalHigh, firstToday.RedeliveryTotalHigh),
+                RedeliveryTotalLow = DifferenceInKiloWatt(lastToday.RedeliveryTotalLow, firstToday.RedeliveryTotalLow),
+                TotalSolar = DifferenceInKiloWatt(maxSolar, minSolar),
+                TotalGas = DifferenceInKiloWatt(lastToday.UsageGasTotal, firstToday.UsageGasTotal),
+            });
         }
 
         private double DifferenceInKiloWatt(double newer, double older)
@@ -119,7 +118,16 @@ namespace EnergyPortal.Controllers.WebApi
                 .LastOrDefaultAsync();
 
             if (lastMetric == null)
-                NotFound("Could not find metrics");
+                return NotFound("Could not find metrics");
+
+            // The inverter reports a zero total while asleep or unreachable: show its last known total instead.
+            // Limited to two days so users without solar don't scan the whole table on every poll.
+            if (lastMetric.SolarTotal == 0)
+                lastMetric.SolarTotal = await dbContext.TenSecondMetrics
+                    .Where(t => t.RaspberryPiId == raspberryPiId.Value && t.SolarTotal > 0 && t.Created > lastMetric.Created.AddDays(-2))
+                    .OrderByDescending(t => t.Created)
+                    .Select(t => t.SolarTotal)
+                    .FirstOrDefaultAsync();
 
             return Ok(lastMetric);
         }
@@ -132,7 +140,7 @@ namespace EnergyPortal.Controllers.WebApi
                 return null;
 
             return await dbContext.Users.Where(u => u.Id.Equals(user.Id))
-                .Select(u => u.RaspberryPi.Id)
+                .Select(u => (long?) u.RaspberryPi.Id)
                 .FirstOrDefaultAsync();
         }
     }

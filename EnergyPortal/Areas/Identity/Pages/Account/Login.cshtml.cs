@@ -43,15 +43,15 @@ namespace EnergyPortal.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Vul je e-mailadres in.")]
+            [EmailAddress(ErrorMessage = "Dit is geen geldig e-mailadres.")]
             public string Email { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Vul je wachtwoord in.")]
             [DataType(DataType.Password)]
             public string Password { get; set; }
 
-            [Display(Name = "Remember me?")]
+            [Display(Name = "Ingelogd blijven")]
             public bool RememberMe { get; set; }
         }
 
@@ -97,7 +97,7 @@ namespace EnergyPortal.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError(string.Empty, "E-mailadres of wachtwoord klopt niet.");
                     return Page();
                 }
             }

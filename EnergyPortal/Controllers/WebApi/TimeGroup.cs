@@ -9,6 +9,7 @@ namespace EnergyPortal.Controllers.WebApi
         Days,
         Weeks,
         Months,
-        Years
+        Years,
+        FiveMinutes
     }
 }

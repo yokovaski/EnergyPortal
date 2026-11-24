@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using DatabaseInterface;
@@ -13,38 +14,29 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace EnergyPortal.Controllers.WebApi
 {
     [Authorize]
     [Route("webapi/v3/metrics")]
-    public class MetricsWebApiController : Controller
+    public class MetricsWebApiController(
+        ApplicationDbContext dbContext,
+        UserManager<ApplicationUser> userManager,
+        DbTenSecondMetricRepository tenSecondMetricRepository,
+        DbMinuteMetricRepository minuteMetricRepository,
+        DbHourMetricRepository hourMetricRepository,
+        DbSettingsRepository dbSettingsRepository,
+        DbTemperatureRepository temperatureRepository,
+        ILogger<MetricsWebApiController> logger)
+        : Controller
     {
-        private readonly ApplicationDbContext dbContext;
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly DbTenSecondMetricRepository tenSecondMetricRepository;
-        private readonly DbMinuteMetricRepository minuteMetricRepository;
-        private readonly DbHourMetricRepository hourMetricRepository;
-        private readonly DbSettingsRepository dbSettingsRepository;
-        private readonly ILogger<MetricsWebApiController> logger;
+        private readonly ILogger<MetricsWebApiController> logger = logger;
 
-        public MetricsWebApiController(
-            ApplicationDbContext dbContext, 
-            UserManager<ApplicationUser> userManager,
-            DbTenSecondMetricRepository tenSecondMetricRepository,
-            DbMinuteMetricRepository minuteMetricRepository, 
-            DbHourMetricRepository hourMetricRepository,
-            DbSettingsRepository dbSettingsRepository,
-            ILogger<MetricsWebApiController> logger)
+        [HttpGet("last-reading")]
+        public async Task<IActionResult> GetLastReading()
         {
-            this.dbContext = dbContext;
-            this.userManager = userManager;
-            this.tenSecondMetricRepository = tenSecondMetricRepository;
-            this.minuteMetricRepository = minuteMetricRepository;
-            this.hourMetricRepository = hourMetricRepository;
-            this.dbSettingsRepository = dbSettingsRepository;
-            this.logger = logger;
+            var oneMinuteAgo = DateTime.UtcNow.AddMinutes(-1);
+            return await this.GetMetrics(oneMinuteAgo, timeGroup: TimeGroup.TenSeconds);
         }
         
         [HttpGet("{timeGroup}")]
@@ -64,6 +56,7 @@ namespace EnergyPortal.Controllers.WebApi
                 case TimeGroup.TenSeconds:
                     return GetMetrics(tenSecondMetricRepository, from, to, timeGroup, showRealLast, skipTimeSpanCheck);
                 case TimeGroup.Minutes:
+                case TimeGroup.FiveMinutes:
                     return GetMetrics(minuteMetricRepository, from, to, timeGroup, showRealLast, skipTimeSpanCheck);
                 case TimeGroup.Hours:
                 case TimeGroup.Days:
@@ -87,6 +80,8 @@ namespace EnergyPortal.Controllers.WebApi
                     return timeSpan > TimeSpan.FromHours(3);
                 case TimeGroup.Minutes:
                     return timeSpan > TimeSpan.FromHours(12);
+                case TimeGroup.FiveMinutes:
+                    return timeSpan > TimeSpan.FromDays(3);
                 case TimeGroup.Hours:
                     return timeSpan > TimeSpan.FromDays(30);
                 case TimeGroup.Days:
@@ -136,6 +131,30 @@ namespace EnergyPortal.Controllers.WebApi
             //         Intake = Array.Empty<int>(),
             //     });
 
+            // One output point per period: the delta from its first reading to the first reading of the next period.
+            List<OutMetricModel> GroupTotals(Func<IMetric, DateTime> period) => dbMetrics
+                .GroupBy(period)
+                .Select(m => new
+                {
+                    Period = m.Key,
+                    First = m.First(),
+                    Last = m.Last(),
+                    SolarTotalMin = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Min(a => a.SolarTotal) : 0,
+                    SolarTotalMax = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Max(a => a.SolarTotal) : 0
+                })
+                .SelectWithNextOrDefault((c, n) =>
+                {
+                    var current = c.First;
+                    var next = n?.First ?? c.Last;
+                    current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
+                    next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
+
+                    var model = current.ToOutMetricModel(next, settings);
+                    model.DateTime = c.Period;
+                    return model;
+                })
+                .ToList();
+
             var format = "";
             List<OutMetricModel> metrics;
 
@@ -157,6 +176,23 @@ namespace EnergyPortal.Controllers.WebApi
                         })
                         .ToList();
                     break;
+                case TimeGroup.FiveMinutes:
+                    format = "HH:mm";
+
+                    // Mean power of the minute rows in each 5-minute bucket
+                    metrics = dbMetrics
+                        .GroupBy(d => new DateTime(d.Created.Year, d.Created.Month, d.Created.Day, d.Created.Hour, d.Created.Minute / 5 * 5, 0, d.Created.Kind))
+                        .Select(g => new OutMetricModel
+                        {
+                            DateTime = g.Key,
+                            Gas = (long)Math.Round(g.Average(d => d.UsageGasNow)),
+                            Intake = (long)Math.Round(g.Average(d => d.UsageNow)),
+                            Redelivery = (long)Math.Round(g.Average(d => d.RedeliveryNow)),
+                            Solar = (long)Math.Round(g.Average(d => d.SolarNow)),
+                            Usage = (long)Math.Round(g.Average(d => d.UsageNow + d.SolarNow - d.RedeliveryNow))
+                        })
+                        .ToList();
+                    break;
                 case TimeGroup.Hours:
                     format = "MM-dd HH:mm";
                     
@@ -173,81 +209,21 @@ namespace EnergyPortal.Controllers.WebApi
                         .ToList();
                     break;
                 case TimeGroup.Days:
-                    metrics = dbMetrics
-                        .GroupBy(m => m.Created.Date)
-                        .Select(m => new
-                        {
-                            First = m.First(),
-                            Last = m.Last(),
-                            SolarTotalMin = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Min(a => a.SolarTotal) : 0,
-                            SolarTotalMax = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Max(a => a.SolarTotal) : 0
-                        })
-                        .SelectWithNextOrDefault((c, n) =>
-                        {
-                            var current = c.First;
-                            var next = n?.First ?? c.Last;
-                            current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
-                            next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
-                            
-                            return current.ToOutMetricModel(next, settings);
-                        })
-                        .ToList();
-                    
-                    format = user.Settings.ShowDayName ? "yyyy-MM-dd (dddd)" : "yyyy-MM-dd";
+                    metrics = GroupTotals(m => m.Created.Date);
+                    format = settings.ShowDayName ? "yyyy-MM-dd (dddd)" : "yyyy-MM-dd";
                     break;
-                // case TimeGroup.Weeks:
-                    // break;
+                case TimeGroup.Weeks:
+                    // 7-day buckets anchored on the start day, matching the slots FillMissing generates
+                    var weekStart = start.ConvertToTimeZone(settings.TimeZoneId).Date;
+                    metrics = GroupTotals(m => weekStart.AddDays(Math.Floor((m.Created.Date - weekStart).TotalDays / 7) * 7));
+                    format = settings.ShowDayName ? "yyyy-MM-dd (dddd)" : "yyyy-MM-dd";
+                    break;
                 case TimeGroup.Months:
-                    metrics = dbMetrics
-                        .GroupBy(m => new
-                        {
-                            m.Created.Date.Year,
-                            m.Created.Month
-                        })
-                        .Select(m => new
-                        {
-                            First = m.First(),
-                            Last = m.Last(),
-                            SolarTotalMin = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Min(a => a.SolarTotal) : 0,
-                            SolarTotalMax = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Max(a => a.SolarTotal) : 0
-                        })
-                        .SelectWithNextOrDefault((c, n) =>
-                        {
-                            var current = c.First;
-                            var next = n?.First ?? c.Last;
-                            current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
-                            next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
-                            
-                            return current.ToOutMetricModel(next, settings);
-                        })
-                        .ToList();
-
+                    metrics = GroupTotals(m => new DateTime(m.Created.Year, m.Created.Month, 1));
                     format = "yyyy-MM";
                     break;
                 case TimeGroup.Years:
-                    metrics = dbMetrics
-                        .GroupBy(m => new
-                        {
-                            m.Created.Date.Year
-                        })
-                        .Select(m => new
-                        {
-                            First = m.First(),
-                            Last = m.Last(),
-                            SolarTotalMin = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Min(a => a.SolarTotal) : 0,
-                            SolarTotalMax = m.Any(a => a.SolarTotal > 0) ? m.Where(a => a.SolarTotal > 0).Max(a => a.SolarTotal) : 0
-                        })
-                        .SelectWithNextOrDefault((c, n) =>
-                        {
-                            var current = c.First;
-                            var next = n?.First ?? c.Last;
-                            current.SolarTotal = c.SolarTotalMin > 0 ? c.SolarTotalMin : n?.SolarTotalMin ?? 0;
-                            next.SolarTotal = n?.SolarTotalMin > 0 ? n.SolarTotalMin : c.SolarTotalMax;
-                            
-                            return current.ToOutMetricModel(next, settings);
-                        })
-                        .ToList();
-
+                    metrics = GroupTotals(m => new DateTime(m.Created.Year, 1, 1));
                     format = "yyyy";
                     break;
                 default:
@@ -255,18 +231,21 @@ namespace EnergyPortal.Controllers.WebApi
             }
 
             metrics = metrics.FillMissing(timeGroup, start.ConvertToTimeZone(settings.TimeZoneId),
-                end?.ConvertToTimeZone(settings.TimeZoneId) ?? DateTime.UtcNow.ConvertToTimeZone(settings.TimeZoneId), showRealLast);
-            var cultureInfo = new System.Globalization.CultureInfo("nl-NL");
-            var timestamps = metrics.Select(m => m.DateTime.ToString(format, cultureInfo)).ToList();
-            var usageList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Usage.DivideByThousand() }).ToList();
-            var intakeList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Intake.DivideByThousand() }).ToList();
-            var solarList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Solar.DivideByThousand() }).ToList();
-            var redeliveryList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Redelivery.DivideByThousand() }).ToList();
-            var gasList = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.Gas.DivideByThousand() }).ToList();
-            var usageCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000,  m.UsageCost }).ToList();
-            var intakeCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.IntakeCost }).ToList();
-            var redeliveryCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.RedeliveryCost }).ToList();
-            var gasCosts = metrics.Select(m => new object[] { EpochTime.GetIntDate(m.DateTime) * 1000, m.GasCost }).ToList();
+                end?.ConvertToTimeZone(settings.TimeZoneId) ?? DateTime.UtcNow.ConvertToTimeZone(settings.TimeZoneId), showRealLast,
+                settings.TimeZoneId.GetTimeZoneInfo());
+            var timestamps = metrics.Select(m => m.DateTime.ToString("o", CultureInfo.InvariantCulture)).ToList();
+            var epochs = metrics.Select(m => ToEpochMilliseconds(m.DateTime, settings.TimeZoneId)).ToList();
+            var usageList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Usage.DivideByThousand() }).ToList();
+            var intakeList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Intake.DivideByThousand() }).ToList();
+            var solarList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Solar.DivideByThousand() }).ToList();
+            var redeliveryList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Redelivery.DivideByThousand() }).ToList();
+            var gasList = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.Gas.DivideByThousand() }).ToList();
+            var usageCosts = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId),  m.UsageCost }).ToList();
+            var intakeCosts = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.IntakeCost }).ToList();
+            var redeliveryCosts = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.RedeliveryCost }).ToList();
+            var gasCosts = metrics.Select(m => new object[] { ToEpochMilliseconds(m.DateTime, settings.TimeZoneId), m.GasCost }).ToList();
+
+            var (temperature, degreeDays) = await GetTemperatures(settings, metrics, timeGroup);
 
             var lastDateTime = metrics
                 .OrderBy(m => m.DateTime)
@@ -278,6 +257,7 @@ namespace EnergyPortal.Controllers.WebApi
             return Ok(new
             {
                 QueryTimestamp = lastDateTime.AddSeconds(1).ToString("o"),
+                Epochs = epochs,
                 Timestamps = timestamps,
                 Usage = usageList,
                 Solar = solarList,
@@ -288,9 +268,69 @@ namespace EnergyPortal.Controllers.WebApi
                 IntakeCosts = intakeCosts,
                 RedeliveryCosts = redeliveryCosts,
                 GasCosts = gasCosts,
+                Temperature = temperature,
+                DegreeDays = degreeDays,
                 Format = format,
                 UserTimeZone = settings.TimeZoneId
             });
+        }
+
+        /// <summary>
+        /// Per bucket: mean outdoor temperature (°C) of the nearest KNMI station and heating degree days (base 18 °C).
+        /// Empty without a location; null for buckets without measurements.
+        /// </summary>
+        private async Task<(List<object[]> Temperature, List<object[]> DegreeDays)> GetTemperatures(
+            Settings settings, List<OutMetricModel> metrics, TimeGroup timeGroup)
+        {
+            var temperature = new List<object[]>();
+            var degreeDays = new List<object[]>();
+            if (settings.Latitude == null || settings.Longitude == null || metrics.Count == 0 ||
+                timeGroup is TimeGroup.None or TimeGroup.TenSeconds or TimeGroup.Minutes or TimeGroup.FiveMinutes)
+                return (temperature, degreeDays);
+
+            var station = await temperatureRepository.NearestStationAsync(settings.Latitude.Value, settings.Longitude.Value);
+            if (station == null)
+                return (temperature, degreeDays);
+
+            var tz = settings.TimeZoneId;
+            var last = metrics[^1].DateTime;
+            var end = timeGroup switch
+            {
+                TimeGroup.Hours => last.AddHours(1),
+                TimeGroup.Days => last.AddDays(1),
+                TimeGroup.Weeks => last.AddDays(7),
+                TimeGroup.Months => last.AddMonths(1),
+                _ => last.AddYears(1)
+            };
+            var bounds = metrics.Select(m => ToEpochMilliseconds(m.DateTime, tz)).Append(ToEpochMilliseconds(end, tz)).ToList();
+
+            var temperatures = (await temperatureRepository.GetAsync(station.Id,
+                    DateTimeOffset.FromUnixTimeMilliseconds(bounds[0]).UtcDateTime,
+                    DateTimeOffset.FromUnixTimeMilliseconds(bounds[^1]).UtcDateTime))
+                .Select(t => (Epoch: new DateTimeOffset(DateTime.SpecifyKind(t.Created, DateTimeKind.Utc)).ToUnixTimeMilliseconds(), t.Value))
+                .ToList();
+
+            for (var i = 0; i < metrics.Count; i++)
+            {
+                var values = temperatures.Where(t => t.Epoch >= bounds[i] && t.Epoch < bounds[i + 1]).Select(t => t.Value).ToList();
+                // shortcut: degree hours / 24 instead of the KNMI daily-mean method; slightly higher on days that swing around 18 °C
+                temperature.Add([bounds[i], values.Count > 0 ? Math.Round(values.Average(), 1) : null]);
+                degreeDays.Add([bounds[i], values.Count > 0 ? Math.Round(values.Sum(v => Math.Max(0, 18 - v)) / 24, 2) : null]);
+            }
+
+            return (temperature, degreeDays);
+        }
+
+        private static long ToEpochMilliseconds(DateTime dateTime, string timeZoneId)
+        {
+            var utcDateTime = dateTime.Kind switch
+            {
+                DateTimeKind.Utc => dateTime,
+                DateTimeKind.Local => dateTime.ToUniversalTime(),
+                _ => TimeZoneInfo.ConvertTimeToUtc(dateTime, timeZoneId.GetTimeZoneInfo())
+            };
+
+            return new DateTimeOffset(DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc)).ToUnixTimeSeconds() * 1000;
         }
         
         private async Task<long?> GetRaspberryPiId(ApplicationUser user = null)
@@ -301,7 +341,7 @@ namespace EnergyPortal.Controllers.WebApi
                 return null;
 
             return await dbContext.Users.Where(u => u.Id.Equals(user.Id))
-                .Select(u => u.RaspberryPi.Id)
+                .Select(u => (long?) u.RaspberryPi.Id)
                 .FirstOrDefaultAsync();
         }
     }

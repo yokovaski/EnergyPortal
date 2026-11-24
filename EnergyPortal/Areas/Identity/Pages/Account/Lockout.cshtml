@@ -1,10 +1,9 @@
-﻿@page
+@page
 @model LockoutModel
 @{
-    ViewData["Title"] = "Locked out";
+    ViewData["Title"] = "Account tijdelijk geblokkeerd";
 }
 
-<header>
-    <h1 class="text-danger">@ViewData["Title"]</h1>
-    <p class="text-danger">This account has been locked out, please try again later.</p>
-</header>
+<h1 class="ez-title-lg">Account tijdelijk geblokkeerd</h1>
+<p class="mt-2 mb-0 text-ink-muted">Te veel pogingen. Probeer het over 5 minuten opnieuw.</p>
+<a class="ez-btn mt-6 h-11 w-full" asp-page="./Login">Terug naar inloggen</a>

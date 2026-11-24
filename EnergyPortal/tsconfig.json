@@ -1,29 +1,19 @@
-﻿{
+{
   "compilerOptions": {
-    "composite": true,
+    "target": "ES2022",
     "module": "ESNext",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "./portal-vue/types",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "strict": true,
+    "noEmit": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "Node",
     "isolatedModules": true,
+    "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
-    "useDefineForClassFields": false,
     "skipLibCheck": true,
-    "types": [
-      "vite/client"
-    ]
+    "types": ["vite/client", "node"]
   },
-  "include": [
-    "vite.config.ts",
-    "frontend"
-  ]
+  "include": ["vite.config.ts", "vitest.config.ts", "frontend/**/*.ts", "frontend/**/*.vue"]
 }

@@ -31,7 +31,7 @@ namespace EnergyPortal.Areas.Identity.Pages.Account
         {
             if (userId == null || email == null || code == null)
             {
-                return RedirectToPage("/Index");
+                return Redirect("~/");
             }
 
             var user = await _userManager.FindByIdAsync(userId);
@@ -44,7 +44,7 @@ namespace EnergyPortal.Areas.Identity.Pages.Account
             var result = await _userManager.ChangeEmailAsync(user, email, code);
             if (!result.Succeeded)
             {
-                StatusMessage = "Error changing email.";
+                StatusMessage = "Je e-mailadres kon niet worden gewijzigd. De link is misschien verlopen.";
                 return Page();
             }
 
@@ -53,12 +53,12 @@ namespace EnergyPortal.Areas.Identity.Pages.Account
             var setUserNameResult = await _userManager.SetUserNameAsync(user, email);
             if (!setUserNameResult.Succeeded)
             {
-                StatusMessage = "Error changing user name.";
+                StatusMessage = "Je e-mailadres kon niet worden gewijzigd.";
                 return Page();
             }
 
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Thank you for confirming your email change.";
+            StatusMessage = "Je nieuwe e-mailadres is bevestigd.";
             return Page();
         }
     }

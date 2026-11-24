@@ -1,0 +1,28 @@
+@model string
+@inject EnergyPortal.ViteManifest Manifest
+@* Shared <head> content. Model = Vite entry: "app" (Vue app) or "auth" (Razor pages). *@
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<link rel="icon" href="/favicon.ico" sizes="48x48" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta name="theme-color" content="#0f5257" />
+<title>@(ViewData["Title"] is string title ? $"{title} - EnergieZicht" : "EnergieZicht")</title>
+<script>
+    // Theme before first paint (per device, see frontend/src/lib/theme.ts)
+    (function () {
+        var t = 'licht';
+        try { t = localStorage.getItem('ez-theme') || 'licht'; } catch (e) { }
+        var dark = t === 'donker' || (t === 'systeem' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    })();
+</script>
+<environment exclude="Development">
+    <link rel="stylesheet" href="~/css/bundle.css" asp-append-version="true" />
+    <script type="module" src="/@Manifest.File($"{Model}.ts")"></script>
+</environment>
+<environment include="Development">
+    <script type="module" src="https://localhost:5173/@@vite/client"></script>
+    <script type="module" src="https://localhost:5173/@(Model).ts"></script>
+</environment>
