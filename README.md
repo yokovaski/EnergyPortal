@@ -2,26 +2,40 @@
 
 To be used together with EnergyReader
 
-## Docker EnergyPortal
+## Docker images
 
-To build and push the Docker image for EnergyPortal, use the following commands (replace `<version>` with the desired 
-version tag):
+GitHub Actions (`.github/workflows/docker-images.yml`) builds both images on every push to `master`, and on demand
+via *Actions → Docker images → Run workflow*. It pushes them to the GitHub Container Registry:
+
+| Image | Tags |
+|---|---|
+| `ghcr.io/yokovaski/energyportal-portal` | `latest` (newest `master` build), `sha-<short commit>` |
+| `ghcr.io/yokovaski/energyportal-worker` | `latest` (newest `master` build), `sha-<short commit>` |
+
+The server never builds images: a build needs far more memory than the server has to spare next to the running
+apps. `docker-compose.yml` therefore only references the images.
+
+### Deploy
+
+On the server, in the checkout:
 
 ```bash
-docker build -t energyportal -f EnergyPortal/Dockerfile .
-docker tag energyportal:latest yokovaski/energycloud_portal:<version>-arm64
-docker push yokovaski/energycloud_portal:<version>-arm64
+git pull
+docker compose pull energy_portal energy_worker
+docker compose up -d energy_portal energy_worker
 ```
 
-## Docker EnergyWorker
+### Roll back or pin a version
 
-To build and push the Docker image for EnergyWorker, use the following commands (replace `<version>` with the desired
-version tag):
+Set `IMAGE_TAG` in `.env` to an earlier build, e.g. `IMAGE_TAG=sha-2c5cdd9`, and run the `pull` and `up -d` commands
+above again. Remove the line to follow `latest` again. `deploy/docker-cleanup.sh` keeps the three newest pulled
+`sha-*` tags on the server.
+
+### Build locally
 
 ```bash
-docker build -t energyworker -f EnergyWorker/Dockerfile .
-docker tag energyworker:latest yokovaski/energycloud_worker:<version>-arm64
-docker push yokovaski/energycloud_worker:<version>-arm64
+docker compose -f docker-compose.yml -f docker-compose.build.yml build
+docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
 ```
 
 ## Run with Docker Compose

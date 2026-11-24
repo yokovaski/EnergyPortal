@@ -1,0 +1,15 @@
+# Local builds only. The server pulls the images from ghcr.io and never builds them.
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml build
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d
+# Not named docker-compose.override.yml on purpose: that name is loaded automatically,
+# also on the server.
+services:
+  energy_portal:
+    build:
+      context: .
+      dockerfile: EnergyPortal/Dockerfile
+
+  energy_worker:
+    build:
+      context: .
+      dockerfile: EnergyWorker/Dockerfile

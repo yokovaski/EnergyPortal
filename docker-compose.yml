@@ -1,11 +1,12 @@
 ﻿services:
   
+  # The images are built by GitHub Actions (.github/workflows/docker-images.yml) and pulled from ghcr.io.
+  # Set IMAGE_TAG in .env to a sha-<commit> tag to pin or roll back; default is the latest master build.
+  # Local builds: see docker-compose.build.yml.
   energy_portal:
-    image: energy_portal
+    image: ghcr.io/yokovaski/energyportal-portal:${IMAGE_TAG:-latest}
     platform: linux/amd64
-    build:
-      context: .
-      dockerfile: EnergyPortal/Dockerfile
+    restart: unless-stopped
     environment:
       ConnectionStrings__DefaultConnection: "Host=postgres;Database=energycloud;Username=energycloud;Password=energycloud"
       # Account mails (password reset, e-mail confirmation); set SMTP_* in .env next to this file. Empty = no mail.
@@ -26,11 +27,9 @@
       - portal_volume:/var/dpkeys:rw
   
   energy_worker:
-    image: energy_worker
+    image: ghcr.io/yokovaski/energyportal-worker:${IMAGE_TAG:-latest}
     platform: linux/amd64
-    build:
-      context: .
-      dockerfile: EnergyWorker/Dockerfile
+    restart: unless-stopped
     environment:
       # KNMI Open Data API key for outdoor temperature; set in .env next to this file. Without it the worker skips temperatures.
       Knmi__ApiKey: ${KNMI_API_KEY:-}
